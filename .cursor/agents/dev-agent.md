@@ -7,14 +7,15 @@ Você implementa **uma** feature (001–020) do Agendamento Odontológico. As re
 
 ## Consumo de contexto
 
-Não abrir: `AGENTS.md`, `context/*`, `specs/README.md`, `.cursor/rules/*.mdc`.
+Não abrir: `AGENTS.md`, `context/*`, `specs/README.md`.
 
 Abrir somente:
 
 1. `specs/FEATURES/FEATURE_NNN_*.md` da feature pedida.
-2. `src/modules/<modulo>/` dessa feature.
-3. Assinaturas públicas (`services` / `types` exportados) dos módulos dos quais ela depende, se já existirem no código. Não leia o código interno desses módulos.
-4. Migrations só das tabelas que essa feature cria ou altera.
+2. `.cursor/rules/modulos-src.mdc`, `.cursor/rules/testes-harness.mdc` e `.cursor/rules/migrations-supabase.mdc`. Código, testes, exemplos e migrations seguem esses arquivos.
+3. `src/modules/<modulo>/` dessa feature.
+4. Assinaturas públicas (`services` / `types` exportados) dos módulos dos quais ela depende, se já existirem no código. Não leia o código interno desses módulos.
+5. Migrations só das tabelas que essa feature cria ou altera.
 
 Se uma dependência não estiver no código, pare e avise. Não leia a spec dela.
 
@@ -50,13 +51,7 @@ Dependência de fase posterior: no MVP, o Cenário testa só a parte da feature 
 ## Regras de desenvolvimento
 
 - A spec da feature manda. Item `⚠️ PENDENTE` é reportado, não decidido. Não altere specs.
-- Ciclo, sem pular etapa: Migration → Exemplo → Teste → Código → Rota/UI.
-- Migration em `supabase/migrations/`: PK `uuid`, constraints só da feature atual. Schema só muda por migration. Dado clínico não se apaga: desative.
-- Exemplo executável em `tests/examples/modules/<modulo>/`, adaptado da seção "Exemplos de Código" da spec.
-- Teste `FEATURE_NNN.test.ts`: um `it` por Cenário, com o mesmo nome. Pendência e dependência futura viram `it.todo`. Roda no Supabase CLI local, nunca em produção.
-- Código em `src/modules/<modulo>/{services,types,components}`. Rotas em `src/app/` só chamam services. Outro módulo só via função pública exportada.
-- Stack fixa: Next.js 15, TypeScript, pnpm, Supabase sem ORM, Zod (`z.infer`), Vitest.
-- Papéis: `admin` > `dentista` > `recepcionista`. Autorização centralizada. Toda query de domínio filtra `clinica_id`.
-- Domínio em português; termos técnicos em inglês.
+- Ciclo, sem pular etapa: Migration → Exemplo → Teste → Código → Rota/UI. O formato de cada etapa está nas rules.
+- Stack fixa, além do que as rules já fixam: Next.js 15, TypeScript, pnpm.
 
 Ao terminar, informe: arquivos criados/alterados, Cenários (passando / falhando / `it.todo`) e pendências encontradas.

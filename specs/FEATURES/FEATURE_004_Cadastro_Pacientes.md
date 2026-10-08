@@ -184,4 +184,4 @@ const pacienteMenor = await pacienteService.cadastrar({
 
 Este cadastro cobre apenas a "Visão Geral" do Prontuário. As demais seções (Anamnese, Odontograma, Raio X, Evolução, Documentos, Débitos) são especificadas em features próprias (010, 011, 015, 014 e 013), todas dependentes deste cadastro básico existir primeiro.
 
-**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-01, INC-02, INC-03, INC-10). A regra anterior "único campo obrigatório é o nome completo" foi substituída por "nome + pelo menos um canal". 2026-10-05 — Bernardo: CPF do responsável pode repetir; exportação/importação continua fora do MVP.
+**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-01, INC-02, INC-03, INC-10). A regra anterior "único campo obrigatório é o nome completo" foi substituída por "nome + pelo menos um canal".

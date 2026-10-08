@@ -144,6 +144,7 @@ await authService.solicitarRecuperacaoSenha({ email: 'dra.ana@clinica.com' });
 - [stated] 2026-10-05 — o primeiro Admin nasce pela tela `/cadastro-clinica`; `pnpm admin:criar` é atalho técnico, não o caminho oficial
 
 ### ⚠️ PENDENTE (não definido ainda pelo usuário)
+- ⚠️ Um usuário pode acumular mais de um papel simultaneamente (ex: dono que também atua como dentista e precisa aparecer na agenda com CRO), ou os papéis são sempre exclusivos?
 - ⚠️ Provedor de email (SMTP) para produção — o envio padrão do Supabase Auth tem limites (relacionado ao gap de provedor da Feature 020)
 
 ---

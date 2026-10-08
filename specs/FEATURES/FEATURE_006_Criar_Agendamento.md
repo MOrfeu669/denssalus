@@ -17,22 +17,21 @@
 
 - [ ] Admin, Dentista e Recepcionista podem criar agendamento
 - [ ] Agendamento requer: paciente, dentista, cadeira, data/hora de início e hora de término
-- [ ] Agendamento pode ter, opcionalmente, **um procedimento avulso** (Feature 005) **ou** **itens de um Plano de Tratamento** do paciente (Feature 012), nunca os dois; também pode não ter nenhum
+- [ ] Agendamento pode ter, opcionalmente, **um procedimento avulso** (Feature 005) **ou** **itens de um Plano de Tratamento** do paciente (Feature 012); também pode não ter nenhum
 - [ ] Sistema valida se a cadeira está livre naquele horário
 - [ ] Sistema valida se a cadeira está **ativa** (Feature 002)
 - [ ] Sistema valida se o dentista está **ativo** (Feature 003) e disponível (sem outra consulta nem bloqueio de agenda no mesmo horário)
 - [ ] Sistema valida se o paciente já não possui outro agendamento no mesmo horário (em qualquer dentista/cadeira)
 - [ ] Sistema valida se o horário está dentro do funcionamento da clínica e se o **dia** está entre os `dias_atendimento` (Feature 002)
 - [ ] Sistema garante que duas solicitações simultâneas não reservem a mesma cadeira/horário (controle de concorrência/transação na criação)
-- [ ] Sistema permite registrar um atendimento de emergência/extraordinário já ocorrido, sem passar por nenhuma das validações acima, para fins de registro histórico na agenda — **qualquer papel** (Admin, Dentista, Recepcionista)
+- [ ] Sistema permite registrar um atendimento de emergência/extraordinário já ocorrido, sem passar por nenhuma das validações acima, para fins de registro histórico na agenda
 - [ ] Duração da consulta é definida pelo intervalo início/fim informado; quando há procedimento vinculado, o tempo médio dele pode ser usado como sugestão, ajustável manualmente
 - [ ] Ciclo de vida do agendamento: nasce `agendado` → `em_espera` (opcional, marcação de chegada, Feature 018) → `iniciado` → `concluido`; `cancelado` é estado terminal (Feature 008), possível apenas antes de `concluido`
 - [ ] A transição para `iniciado` é feita pelo **Dentista responsável** ou pelo **Admin**
 - [ ] A transição para `concluido` acontece **automaticamente ao salvar a Evolução** do atendimento (Feature 010) — não existe ação separada de "concluir"
 - [ ] Agendamento **não reserva material**; a baixa de materiais ocorre na conclusão (Feature 010/017)
-- [ ] Não há antecedência mínima nem **máxima** exigida para criar um agendamento
-- [ ] Dentista ou Admin podem criar **bloqueios de agenda** do dentista. No MVP o bloqueio é **só pontual**; recorrência fica fora (Cenário 13 = `it.todo`)
-- [ ] Procedimento avulso e itens do plano **não combinam** no mesmo agendamento: um, outro, ou nenhum
+- [ ] Não há antecedência mínima exigida para criar um agendamento
+- [ ] Dentista ou Admin podem criar **bloqueios de agenda** do dentista (pontuais ou recorrentes), que impedem novos agendamentos naquele intervalo
 
 ---
 
@@ -99,7 +98,7 @@ Então o sistema salva o agendamento normalmente, sem exigir procedimento
 ### Cenário 8b: Registrar atendimento de emergência já ocorrido
 ```
 Dado um paciente atendido em caráter de emergência, fora do fluxo normal de agendamento
-Quando um usuário (Admin, Dentista ou Recepcionista) registra esse atendimento retroativamente na agenda
+Quando um usuário registra esse atendimento retroativamente na agenda
 Então o sistema salva o registro sem aplicar as validações normais (conflito, cadeira/dentista inativos, horário e dia de funcionamento)
 E o atendimento passa a constar no histórico da agenda, para fins de registro
 ```
@@ -140,7 +139,7 @@ Dado o dentista "Dr. Carlos" com um bloqueio de agenda recorrente
 Quando um usuário tenta agendar uma consulta com ele em uma das ocorrências desse bloqueio
 Então o sistema bloqueia e retorna erro "Dentista indisponível nesse horário"
 ```
-> Recorrência está fora do MVP (só bloqueio pontual). O formato continua PENDENTE; este cenário vira `it.todo`.
+> O formato da recorrência está PENDENTE; até a definição, este cenário vira `it.todo`.
 
 ### Cenário 14: Iniciar atendimento
 ```
