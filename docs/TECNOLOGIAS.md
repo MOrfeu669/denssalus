@@ -18,7 +18,16 @@ A API local do Supabase (PostgREST) sobe na porta `54321`, e o app fala com ela 
 
 ## Fora desta decisão
 
-Runner de teste, biblioteca de UI, storage e envio. O formato de erro das Server Actions também não está decidido: não traduzir 400, 401 ou 403 para outro contrato. Policies não entram; a clínica é isolada pelo filtro na Server Action.
+Storage e envio. O formato de erro das Server Actions também não está decidido: não traduzir 400, 401 ou 403 para outro contrato. Policies não entram; a clínica é isolada pelo filtro na Server Action.
+
+Decisão [stated] em 24/10/2026, para o scaffold da Feature 001:
+
+| Item | Decisão |
+|---|---|
+| Runner de teste | Vitest. Arquivos em `tests/`, comando `npm test` |
+| Biblioteca de UI | Nenhuma. Telas em HTML e React |
+
+A criação de usuário pelo Admin e a leitura de `usuarios` usam a chave secreta só no servidor (`SUPABASE_SECRET_KEY`). Ela não leva o prefixo `NEXT_PUBLIC_`.
 
 ## Árvore prevista de `supabase/`
 

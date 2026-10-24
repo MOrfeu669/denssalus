@@ -169,6 +169,7 @@ await comunicacaoService.reenviarMensagensFalhas();
 
 ### ⚠️ PENDENTE (não definido ainda pelo usuário)
 - ⚠️ Provedor de envio (Twilio, outro serviço de SMS/WhatsApp, serviço de Email) — ainda não definido
+- ⚠️ Provedor de e-mail de produção da recuperação de senha (Feature 001). O ambiente local dessa feature usa o e-mail do Supabase Auth e não escolhe SMTP
 
 ---
 

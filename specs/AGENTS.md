@@ -31,7 +31,7 @@ Não reescreva estas specs no formato de pasta `spec.md` com `FR-001` e `SC-001`
 
 ## Como escrever
 
-1. Partir do pedido do usuário. Onde faltar decisão, marcar `PENDENTE` com a pergunta objetiva e seguir. A spec só fecha quando esses marcadores saem, com resposta explícita.
+1. Partir do pedido do usuário. Onde faltar decisão, marcar `PENDENTE` com a pergunta objetiva e seguir. A spec deve retornar uma pergunta sobre sempre que esse marcador for verdade
 2. Cada cenário declara a ação e o valor observável. Aceite em **Dado / Quando / Então**.
 3. Requisito testável e sem ambiguidade. Caso de borda vira cenário ou regra. Premissa não vira requisito escondido.
 4. Critério de sucesso mede resultado de negócio: tempo, taxa, estado observável. Stack, endpoint, tabela e estrutura de código ficam fora da spec e entram na fase de plano.
@@ -48,7 +48,7 @@ A spec está pronta quando:
 - Cenários cobrem o fluxo principal e os casos de borda
 - Cada requisito tem aceite observável
 - Escopo, dependências e premissas estão explícitos
-- Nenhum `PENDENTE` restante
+- `PENDENTE` foi respondido ou decidido
 - Nenhum detalhe de stack, API ou estrutura de código no requisito
 
 Status **Em Definição** não é spec fechada. Não marque como pronta e não comece o código dessa feature enquanto houver pendência.
