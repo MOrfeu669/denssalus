@@ -1,9 +1,8 @@
-import { health } from "../backend/src/health";
+import { describe, expect, it } from "vitest";
+import { health } from "../src/domain/health";
 
-/** Representativo. Critério da spec 001. */
-export function testHealth(): void {
-  const result = health();
-  if (result.status !== "ok") {
-    throw new Error("health deveria responder ok");
-  }
-}
+describe("health", () => {
+  it("responde ok", () => {
+    expect(health()).toEqual({ status: "ok" });
+  });
+});

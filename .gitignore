@@ -1,3 +1,14 @@
 .codebase.mcp/
 node_modules/
-.codebase-memory
+.codebase-memory/
+.next/
+coverage/
+.env
+.env.local
+.env*.local
+supabase/.branches
+supabase/.temp
+supabase/.env
+*.tsbuildinfo
+.next-build.log
+.next-dev.log

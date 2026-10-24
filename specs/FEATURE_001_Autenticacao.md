@@ -1,6 +1,6 @@
 # Feature 001: Autenticação & Roles
 
-**Status:** 🟡 Em Definição
+**Status:** Pronta
 **Fase:** MVP
 **Complexidade:** 🔴 Alta
 **Dependências:** Nenhuma (feature base)
@@ -138,15 +138,13 @@ await authService.solicitarRecuperacaoSenha({ email: 'dra.ana@clinica.com' });
 - [correção] MVP não possui expiração de sessão
 - [correção] Dados clínicos (agendamentos, prontuários, etc) são vinculados à clínica, não ao usuário; remover um usuário não afeta esses dados, apenas o vínculo de permissões
 - [correção] MVP não possui "Super Admin" acima do Admin da clínica
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Um usuário pode acumular mais de um papel simultaneamente (ex: dono que também atua como dentista e precisa aparecer na agenda com CRO), ou os papéis são sempre exclusivos?
-- ⚠️ Provedor de email (SMTP) para produção — o envio padrão do Supabase Auth tem limites (relacionado ao gap de provedor da Feature 020)
+- [stated] O papel é exclusivo: um usuário tem exatamente um entre `admin`, `dentista` e `recepcionista`. Dono que também atende não ganha um segundo papel no login
+- [stated] O provedor de e-mail de produção fica fora desta feature, na Feature 020. No ambiente local, a recuperação de senha usa o e-mail do Supabase Auth
 
 ---
 
 ## Notas
 
-Este spec deve ser validado com o usuário antes de prosseguir para a Feature 002 (Criar/Configurar Clínica), já que Feature 002 depende do conceito de Admin definido aqui.
+O Admin desta feature é o que a Feature 002 exige para criar a clínica. Esta spec não abre a Feature 002.
 
-**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, ESC-02, ESC-05).
+**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, ESC-02, ESC-05). 2026-10-24 — papel exclusivo e e-mail de produção fora do critério; status Pronta.

@@ -1,0 +1,98 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  background: #f4f7f6;
+  color: #1c2421;
+}
+
+main {
+  max-width: 36rem;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #d5deda;
+  border-radius: 8px;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  padding: 0.5rem;
+  border: 1px solid #8aa399;
+  border-radius: 4px;
+}
+
+button,
+.acao {
+  width: fit-content;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: #1f6b4a;
+  color: #fff;
+  text-decoration: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex="-1"]:focus {
+  outline: 3px solid #0b3d2e;
+  outline-offset: 2px;
+}
+
+.erro {
+  color: #8d1d1d;
+  font-weight: 600;
+}
+
+.sucesso {
+  color: #0b3d2e;
+  font-weight: 600;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+}
+
+.lista li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #d5deda;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
