@@ -7,6 +7,6 @@ alwaysApply: true
 
 - Metodologia padrão: spec antes do código (SDD). A spec fica em `specs/`.
 - Cada tarefa tem um fim. Ao cumprir o critério da spec, pare. Não abra a próxima tarefa.
-- Trabalhe só na área pedida. Regra de front não entra em tarefa de back-end, e o inverso também.
+- Trabalhe só na área pedida. Regra de domínio fica em `src/domain/` e não entra no componente. Tela e Server Action ficam em `src/app/`. A action chama o domínio. O componente não acessa o banco.
 - Arquivos de regra e de skill ficam curtos. Detalhe extra vai em arquivo separado, lido só quando preciso.
 - Código novo nasce com teste. Sem teste verde, a tarefa não terminou.

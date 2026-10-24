@@ -1,80 +1,58 @@
 # Specs
 
-Cole em `specs/AGENTS.md`. Vale para esta pasta. O `AGENTS.md` da raiz continua valendo para o resto do repositório.
+Vale para `specs/`. O `AGENTS.md` da raiz continua valendo para o resto do repositório.
 
-Aqui a metodologia é SDD (Spec-Driven Development), na fase **Spec**. O agente escreve e fecha a especificação. Plano, tarefas e código vêm depois, em outro passo.
+A metodologia é SDD. Esta pasta fecha o que o usuário precisa e por quê. Plano, tarefas e código vêm depois, em outro passo.
+
 
 ## Escopo
 
-Uma pasta por funcionalidade:
+Uma spec por funcionalidade, em arquivo plano:
 
 ```text
-specs/<funcionalidade>/
-  spec.md
-  checklists/requirements.md
+specs/FEATURE_NNN_Nome.md
 ```
 
-`spec.md` é a fonte do que o usuário precisa e por quê. Stakeholder não técnico consegue ler o arquivo inteiro.
+`NNN` é a ordem da feature. Stakeholder não técnico consegue ler o arquivo inteiro. As vinte specs atuais estão com status **Em Definição**.
 
 ## Mapa da spec
 
-Seções obrigatórias de `spec.md`:
+Seções de `FEATURE_NNN_Nome.md`:
 
-1. **Contexto** — problema, quem usa, resultado esperado.
-2. **Cenários** — histórias independentes, em ordem de valor.
-3. **Casos de borda** — limite, vazio, falha visível, concorrência.
-4. **Requisitos funcionais** — `FR-001`, `FR-002`, … com MUST.
-5. **Entidades** — substantivos do domínio e o que o usuário reconhece neles.
-6. **Critérios de sucesso** — `SC-001`, … métrica observável, sem tecnologia.
-7. **Escopo e premissas** — o que entra, o que fica para outra spec, o que se assume.
+1. **Cabeçalho** — status, fase (MVP, V1 ou V1.5), complexidade e dependências.
+2. **Contexto** — problema, quem usa, resultado esperado.
+3. **Requisitos** — caixas verificáveis, sem tecnologia no texto do requisito.
+4. **Cenários** — `Dado` / `Quando` / `Então`. Um comportamento por cenário.
+5. **Regras de Negócio** — `[stated]` ou `[correção]` para o que já foi decidido. `PENDENTE` para o que o usuário ainda não fechou.
+6. **Dependências** — features que precisam existir antes.
+7. **Notas** — histórico da decisão. Não vira requisito.
+
+Não reescreva estas specs no formato de pasta `spec.md` com `FR-001` e `SC-001`.
 
 ## Como escrever
 
-1. Partir do pedido do usuário. Onde faltar decisão, marcar `[NEEDS CLARIFICATION: pergunta objetiva]` e seguir. A spec só fecha quando esses marcadores saem, com resposta explícita.
-2. Cada história leva prioridade `P1`, `P2`, `P3`. `P1` sozinha já entrega um fluxo útil.
-3. Cada história declara o teste independente: ação única e valor que ela entrega.
-4. Aceite em **Given / When / Then**. Um comportamento por cenário.
-5. Requisito testável e sem ambiguidade. Um `FR` corresponde a pelo menos um cenário.
-6. Critério de sucesso mede resultado de negócio: tempo, taxa, estado observável. Stack, endpoint, tabela e estrutura de código ficam fora da spec e entram na fase de plano.
-7. Caso de borda vira cenário ou requisito. Premissa não vira requisito escondido.
-8. Manter `spec.md` até ~200 linhas. Acima de ~300, dividir em outra funcionalidade.
-
-### História
-
-```markdown
-### História 1 — <título> (Prioridade: P1)
-
-<jornada em linguagem simples>
-
-**Por que esta prioridade**: <valor>
-**Teste independente**: <ação> entrega <valor> sem as outras histórias.
-
-**Cenários de aceite**:
-
-1. **Given** <estado>, **When** <ação>, **Then** <resultado observável>
-```
-
-### Requisito e sucesso
-
-```markdown
-- **FR-001**: O sistema MUST <capacidade verificável>
-- **SC-001**: <métrica> atinge <limite> em <condição>
-```
+1. Partir do pedido do usuário. Onde faltar decisão, marcar `PENDENTE` com a pergunta objetiva e seguir. A spec só fecha quando esses marcadores saem, com resposta explícita.
+2. Cada cenário declara a ação e o valor observável. Aceite em **Dado / Quando / Então**.
+3. Requisito testável e sem ambiguidade. Caso de borda vira cenário ou regra. Premissa não vira requisito escondido.
+4. Critério de sucesso mede resultado de negócio: tempo, taxa, estado observável. Stack, endpoint, tabela e estrutura de código ficam fora da spec e entram na fase de plano.
+5. Regra pendente não é decidida pelo agente. Não copie uma pendência para o `AGENTS.md` como se fosse invariante.
+6. Manter o arquivo até ~200 linhas. Acima de ~300, dividir em outra funcionalidade.
+7. Feature de fase posterior não entra no critério da feature atual. Onde o cenário depender dela, o teste futuro fica marcado, sem implementar essa feature.
 
 ## Verificar
 
-Gerar `checklists/requirements.md` e marcar item por item:
+A spec está pronta quando:
 
-- Seções obrigatórias preenchidas
-- Foco em valor de negócio, legível por quem não implementa
+- As seções obrigatórias estão preenchidas
+- O texto é legível por quem não implementa
 - Cenários cobrem o fluxo principal e os casos de borda
-- Cada `FR` tem aceite; cada `SC` é mensurável
-- Escopo, dependências e premissas explícitos
-- Nenhum `[NEEDS CLARIFICATION]` restante
-- Nenhum detalhe de stack, API ou estrutura de código
+- Cada requisito tem aceite observável
+- Escopo, dependências e premissas estão explícitos
+- Nenhum `PENDENTE` restante
+- Nenhum detalhe de stack, API ou estrutura de código no requisito
 
-Pronto quando o checklist fecha e a pessoa no chat confirma a spec. A fase seguinte é o plano, fora deste arquivo.
+Status **Em Definição** não é spec fechada. Não marque como pronta e não comece o código dessa feature enquanto houver pendência.
 
 ## Antes de agir
 
-Confirmar no chat antes de marcar a spec como pronta com marcador aberto, ou antes de alterar escopo de uma spec já confirmada.
+Confirmar no chat antes de marcar a spec como pronta com pendência aberta, ou antes de alterar o escopo de uma spec já confirmada.

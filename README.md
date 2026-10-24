@@ -149,8 +149,8 @@ codebase-memory-mcp daemon start --open --port=9749
 | `.cursor/agents`   | `code-review` e `release-notes`, cada um com ponto de parada. |
 | `.cursor/mcp.json` | Context7, GitHub e Codebase Memory.                           |
 | `specs`            | Uma spec por funcionalidade.                                  |
-| `backend`          | API.                                                          |
-| `frontend`         | Interface.                                                    |
+| `src/domain`       | Regras de negócio. A action chama o domínio.                  |
+| `src/app`          | Telas e Server Actions.                                       |
 | `tests`            | Testes do fluxo.                                              |
 | `.seeds`           | Manual e os dez passos da aula.                               |
 
@@ -161,8 +161,8 @@ Regras injetadas pelo caminho do arquivo:
 | Arquivo                       | Quando entra                                            |
 | ----------------------------- | ------------------------------------------------------- |
 | `.cursor/rules/guardrail.mdc` | Sempre                                                  |
-| `.cursor/rules/backend.mdc`   | `backend/**/*`                                          |
-| `.cursor/rules/frontend.mdc`  | `frontend/**/*`                                         |
+| `.cursor/rules/backend.mdc`   | `src/domain/**/*` e `src/lib/**/*`                      |
+| `.cursor/rules/frontend.mdc`  | `src/app/**/*`                                          |
 | `.cursor/rules/prompt.mdc`    | `specs/**/*.md`                                         |
 | `.cursor/rules/tests.mdc`     | arquivos `*.test.ts`, `*.spec.ts` e equivalentes em TSX |
 
@@ -193,9 +193,9 @@ Trabalhe no modo orquestrado: um chat por tarefa, com a instrução completa. Re
 
 ## Validar
 
-- Peça um endpoint e confira se entrou a regra de back-end e a skill `api`.
-- Peça uma tela e confira se entrou a regra de front, sem regra de endpoint.
-- Pergunte "como funciona o health check?" e veja se a resposta cita o arquivo indexado.
+- Peça uma action de domínio e confira se entrou a regra de `src/domain/`, sem regra de tela.
+- Peça uma tela em `src/app/` e confira se entrou a regra de front. O callback de autenticação é o único caso da skill `api`.
+- Pergunte "como funciona o health check?" e veja se a resposta cita `src/domain/health.ts`.
 - Rode uma spec pequena até o critério de pronto, sem o agente abrir a tarefa seguinte.
 
 
@@ -208,4 +208,4 @@ Trabalhe no modo orquestrado: um chat por tarefa, com a instrução completa. Re
 - [ ] Context7, GitHub e Codebase Memory conectados no Cursor
 - [ ] `index_repository` concluído para este repositório
 - [ ] RTK e Caveman instalados, se for usar as CLIs
-- [ ] Uma pergunta de back-end e uma de front injetaram só a regra da área
+- [ ] Uma pergunta de domínio e uma de tela injetaram só a regra da área

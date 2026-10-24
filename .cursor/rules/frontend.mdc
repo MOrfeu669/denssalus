@@ -1,6 +1,6 @@
 ---
 description: Convenções de interface
-globs: frontend/**/*
+globs: src/app/**/*
 alwaysApply: false
 ---
 
@@ -8,4 +8,4 @@ alwaysApply: false
 
 - Componente funcional, um arquivo por tela ou bloco.
 - Estado de vazio, erro e carregamento existem na mesma tela.
-- Sem regra de endpoint nesta área. A interface consome o contrato já definido na API.
+- Sem regra de endpoint nesta área. A tela chama Server Actions.

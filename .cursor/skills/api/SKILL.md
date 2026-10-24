@@ -1,13 +1,15 @@
 ---
 name: api
-description: Cria ou altera endpoint HTTP com contrato, erro e teste. Use quando o pedido for rota, endpoint, API ou handler no back-end.
+description: Cria ou altera o Route Handler de callback da autenticação. Não use para mutação de domínio; mutação é Server Action.
 ---
 
 # API
 
-1. Confirme método, caminho, entrada, saída e erro na spec.
-2. Se a implementação usar Lever, consulte a doc atual no Context7 antes de escrever a chamada.
-3. Coloque o handler em `backend/api/`.
+Vale só para o Route Handler `GET` em `src/app/auth/callback/route.ts`, que troca o código do e-mail de recuperação pela sessão. Mutação de domínio é Server Action e fica fora desta skill.
+
+1. Confirme método, caminho, entrada, saída e erro com a decisão em `docs/TECNOLOGIAS.md`.
+2. Consulte a doc atual do Supabase no Context7 antes de escrever a chamada.
+3. O handler fica em `src/app/auth/callback/route.ts`.
 4. Cubra o contrato com teste em `tests/`.
 5. Pare quando o teste do contrato passar.
 
@@ -15,8 +17,8 @@ description: Cria ou altera endpoint HTTP com contrato, erro e teste. Use quando
 
 ```ts
 type Endpoint = {
-  method: "GET" | "POST" | "PUT" | "DELETE";
-  path: string;
+  method: "GET";
+  path: "/auth/callback";
   response: unknown;
   error: { code: string; message: string };
 };

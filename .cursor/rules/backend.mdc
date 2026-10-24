@@ -1,14 +1,13 @@
 ---
-description: Convenções de back-end e API
-globs: backend/**/*
+description: Convenções de domínio e clientes Supabase
+globs: "{src/domain,src/lib}/**/*"
 alwaysApply: false
 ---
 
-# Back-end
+# Domínio
 
-- Endpoint novo segue a skill `api` e o `AGENTS.md` da pasta em que o arquivo está.
-- Contrato explícito: método, caminho, entrada, saída e erro.
-- Sem regra de interface nesta área.
+- Regra de negócio fica em `src/domain/` e segue o `AGENTS.md` dessa pasta.
+- O cliente Supabase fica em `src/lib/supabase/`. Sem regra de tela nesta área.
 - Exemplo de health check:
 
 ```ts
