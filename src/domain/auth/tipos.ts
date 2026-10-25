@@ -22,4 +22,8 @@ export type Resultado<T> =
 export const MENSAGEM_CREDENCIAIS = "Credenciais inválidas";
 export const MENSAGEM_PAPEL = "Ação não permitida para seu papel";
 
-export type Acao = "odontograma:preencher" | "usuario:cadastrar" | "usuario:remover";
+export type Acao =
+  | "clinica:configurar"
+  | "odontograma:preencher"
+  | "usuario:cadastrar"
+  | "usuario:remover";

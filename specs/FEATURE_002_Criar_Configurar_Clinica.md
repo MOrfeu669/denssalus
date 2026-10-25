@@ -130,9 +130,6 @@ const clinica = await clinicaService.criar({
 - [correção] Cadeiras não têm restrição de quais procedimentos podem ser realizados nelas
 - [stated] Cadeira desativada e dia fora de `dias_atendimento` bloqueiam novos agendamentos (validação aplicada na Feature 006; emergência retroativa ignora)
 
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Existe algum feriado nacional pré-configurado automaticamente, ou a clínica marca manualmente os dias que não atende?
-
 ---
 
 ## Notas
