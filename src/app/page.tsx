@@ -33,6 +33,8 @@ export default async function Page() {
       {sessao.usuario.papel === "admin" ? (
         <p className="nav">
           <Link href="/usuarios">Usuários</Link>
+          {" · "}
+          <Link href="/clinica">Clínica</Link>
         </p>
       ) : null}
     </main>
