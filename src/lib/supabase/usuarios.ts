@@ -59,6 +59,11 @@ export function criarUsuarios(): Usuarios {
       if (error) throw new ErroAplicacao("Não foi possível salvar o usuário", error);
     },
 
+    async apagar(id) {
+      const { error } = await admin.from("usuarios").delete().eq("id", id);
+      if (error) throw new ErroAplicacao("Não foi possível apagar o usuário", error);
+    },
+
     async listarDaClinica(clinicaId) {
       const { data, error } = await admin
         .from("usuarios")

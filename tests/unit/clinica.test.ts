@@ -82,6 +82,9 @@ class Memoria {
         salvar: async (usuario) => {
           this.usuarios.set(usuario.id, usuario);
         },
+        apagar: async (id) => {
+          this.usuarios.delete(id);
+        },
         listarDaClinica: async (clinicaId) =>
           [...this.usuarios.values()].filter((item) => item.clinicaId === clinicaId),
       },
