@@ -26,6 +26,7 @@ export type Usuarios = {
   buscarPorId(id: string): Promise<Usuario | null>;
   buscarPorEmail(email: string): Promise<Usuario | null>;
   salvar(usuario: Usuario): Promise<void>;
+  apagar(id: string): Promise<void>;
   listarDaClinica(clinicaId: string): Promise<Usuario[]>;
 };
 

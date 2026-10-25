@@ -35,6 +35,8 @@ export default async function Page() {
           <Link href="/usuarios">Usuários</Link>
           {" · "}
           <Link href="/clinica">Clínica</Link>
+          {" · "}
+          <Link href="/dentistas">Dentistas</Link>
         </p>
       ) : null}
     </main>

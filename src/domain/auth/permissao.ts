@@ -8,6 +8,7 @@ const NIVEL: Record<Papel, number> = {
 
 const MINIMO: Record<Acao, Papel> = {
   "clinica:configurar": "admin",
+  "dentista:cadastrar": "admin",
   "odontograma:preencher": "dentista",
   "usuario:cadastrar": "admin",
   "usuario:remover": "admin",

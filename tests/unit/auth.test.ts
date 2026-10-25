@@ -65,6 +65,9 @@ class Memoria {
     salvar: async (usuario: Usuario) => {
       this.usuarios.set(usuario.id, usuario);
     },
+    apagar: async (id: string) => {
+      this.usuarios.delete(id);
+    },
     listarDaClinica: async (clinicaId: string) =>
       [...this.usuarios.values()].filter((item) => item.clinicaId === clinicaId),
   };

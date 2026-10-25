@@ -24,6 +24,7 @@ export const MENSAGEM_PAPEL = "Ação não permitida para seu papel";
 
 export type Acao =
   | "clinica:configurar"
+  | "dentista:cadastrar"
   | "odontograma:preencher"
   | "usuario:cadastrar"
   | "usuario:remover";
