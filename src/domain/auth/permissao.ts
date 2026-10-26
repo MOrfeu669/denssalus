@@ -15,6 +15,8 @@ const MINIMO: Record<Acao, Papel> = {
   "procedimento:excluir": "admin",
   "usuario:cadastrar": "admin",
   "usuario:remover": "admin",
+  "agendamento:criar": "recepcionista",
+  "agendamento:bloquear": "dentista",
 };
 
 export function permite(papel: Papel, acao: Acao): boolean {
