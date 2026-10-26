@@ -30,15 +30,19 @@ export default async function Page() {
       <form action={sair}>
         <button type="submit">Sair</button>
       </form>
-      {sessao.usuario.papel === "admin" ? (
-        <p className="nav">
-          <Link href="/usuarios">Usuários</Link>
-          {" · "}
-          <Link href="/clinica">Clínica</Link>
-          {" · "}
-          <Link href="/dentistas">Dentistas</Link>
-        </p>
-      ) : null}
+      <p className="nav">
+        {sessao.usuario.papel === "admin" ? (
+          <>
+            <Link href="/usuarios">Usuários</Link>
+            {" · "}
+            <Link href="/clinica">Clínica</Link>
+            {" · "}
+            <Link href="/dentistas">Dentistas</Link>
+            {" · "}
+          </>
+        ) : null}
+        <Link href="/pacientes">Pacientes</Link>
+      </p>
     </main>
   );
 }

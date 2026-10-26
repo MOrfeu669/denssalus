@@ -3,6 +3,7 @@ import type { AgendamentoFuturo, Cadeira, Clinica } from "./tipos";
 
 export type Clinicas = {
   buscarPorAdmin(adminId: string): Promise<Clinica | null>;
+  buscarPorId(id: string): Promise<Clinica | null>;
   salvar(clinica: Clinica): Promise<void>;
   remover(id: string): Promise<void>;
 };

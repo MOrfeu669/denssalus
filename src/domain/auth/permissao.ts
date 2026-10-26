@@ -10,6 +10,7 @@ const MINIMO: Record<Acao, Papel> = {
   "clinica:configurar": "admin",
   "dentista:cadastrar": "admin",
   "odontograma:preencher": "dentista",
+  "paciente:cadastrar": "recepcionista",
   "usuario:cadastrar": "admin",
   "usuario:remover": "admin",
 };

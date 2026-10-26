@@ -81,6 +81,16 @@ export function criarClinicas(): Clinicas {
       return data ? paraClinica(data as LinhaClinica) : null;
     },
 
+    async buscarPorId(id) {
+      const { data, error } = await admin
+        .from("clinicas")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw new ErroAplicacao("Não foi possível ler a clínica", error);
+      return data ? paraClinica(data as LinhaClinica) : null;
+    },
+
     async salvar(clinica) {
       const { error } = await admin.from("clinicas").upsert(paraLinhaClinica(clinica));
       if (error) throw new ErroAplicacao("Não foi possível salvar a clínica", error);
