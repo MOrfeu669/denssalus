@@ -30,4 +30,6 @@ export type Acao =
   | "procedimento:cadastrar"
   | "procedimento:excluir"
   | "usuario:cadastrar"
-  | "usuario:remover";
+  | "usuario:remover"
+  | "agendamento:criar"
+  | "agendamento:bloquear";
