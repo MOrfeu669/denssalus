@@ -73,7 +73,6 @@ codebase-memory-mcp daemon status
 ```
 
 2. Abrir no navegador: [http://127.0.0.1:9749](http://127.0.0.1:9749)
-
 3. Selecionar o projeto indexado (ex.: `C-Users-user-Desktop-AI-architeture-DEV`).
 
 Se a UI não estiver no ar:

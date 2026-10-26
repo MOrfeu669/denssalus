@@ -37,6 +37,7 @@ class Memoria {
       clinicas: {
         buscarPorAdmin: async (adminId) =>
           [...this.clinicas.values()].find((item) => item.adminId === adminId) ?? null,
+        buscarPorId: async (id) => this.clinicas.get(id) ?? null,
         salvar: async (clinica) => {
           this.clinicas.set(clinica.id, clinica);
         },
