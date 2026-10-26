@@ -4,11 +4,13 @@ import { agendaDentistaSemTabela } from "../lib/supabase/agenda-dentistas";
 import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarPacientes } from "../lib/supabase/pacientes";
+import { criarProcedimentos } from "../lib/supabase/procedimentos";
 import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias } from "../domain/auth/portas";
 import type { Dependencias as DependenciasClinica } from "../domain/clinica/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
+import type { Dependencias as DependenciasProcedimento } from "../domain/procedimento/portas";
 
 export function dependencias(): Dependencias {
   return {
@@ -41,6 +43,14 @@ export function dependenciasDentista(): DependenciasDentista {
 export function dependenciasPaciente(): DependenciasPaciente {
   return {
     pacientes: criarPacientes(),
+    clinicas: criarClinicas(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasProcedimento(): DependenciasProcedimento {
+  return {
+    procedimentos: criarProcedimentos(),
     clinicas: criarClinicas(),
     ids: { novo: () => crypto.randomUUID() },
   };
