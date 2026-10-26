@@ -27,5 +27,7 @@ export type Acao =
   | "dentista:cadastrar"
   | "odontograma:preencher"
   | "paciente:cadastrar"
+  | "procedimento:cadastrar"
+  | "procedimento:excluir"
   | "usuario:cadastrar"
   | "usuario:remover";

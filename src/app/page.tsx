@@ -41,6 +41,12 @@ export default async function Page() {
             {" · "}
           </>
         ) : null}
+        {sessao.usuario.papel === "admin" || sessao.usuario.papel === "dentista" ? (
+          <>
+            <Link href="/procedimentos">Procedimentos</Link>
+            {" · "}
+          </>
+        ) : null}
         <Link href="/pacientes">Pacientes</Link>
       </p>
     </main>
