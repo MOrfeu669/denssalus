@@ -11,6 +11,8 @@ import { horarioValido, mensagemDeConflito, mensagemDosSetePassos } from "./regr
 import {
   MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO,
   MENSAGEM_HORARIO_INVALIDO,
+  MENSAGEM_JA_CONCLUIDO,
+  MENSAGEM_MOTIVO_OBRIGATORIO,
   type Agendamento,
   type BloqueioAgenda,
   type EntradaAgendamento,
@@ -96,6 +98,9 @@ async function gravar(
     alertaCadeira: false,
     alertaHorario: false,
     alertaDentista: false,
+    motivoCancelamento: null,
+    canceladoPor: null,
+    canceladoEm: null,
   };
   const conflito = await deps.agendamentos.salvar(agendamento);
   if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };
@@ -171,6 +176,44 @@ export async function iniciarAtendimento(
   const conflito = await deps.agendamentos.salvar(iniciado);
   if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };
   return { ok: true, valor: iniciado };
+}
+
+export async function cancelarAgendamento(
+  deps: Dependencias,
+  ator: Sessao,
+  agendamentoId: string,
+  motivo: string,
+  agora: Date,
+): Promise<Resultado<Agendamento>> {
+  const contexto = await clinicaAutorizada(deps, ator, "agendamento:cancelar");
+  if (!contexto.ok) return contexto;
+
+  const motivoLimpo = motivo.trim();
+  if (motivoLimpo === "") return { ok: false, mensagem: MENSAGEM_MOTIVO_OBRIGATORIO };
+
+  const atual = await deps.agendamentos.buscarPorId(agendamentoId);
+  if (!atual || atual.clinicaId !== contexto.clinica.id || atual.status === "cancelado") {
+    return { ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO };
+  }
+  if (atual.status === "concluido") return { ok: false, mensagem: MENSAGEM_JA_CONCLUIDO };
+
+  const cancelado: Agendamento = {
+    ...atual,
+    status: "cancelado",
+    motivoCancelamento: motivoLimpo,
+    canceladoPor: ator.usuario.id,
+    canceladoEm: agora.toISOString(),
+  };
+  const conflito = await deps.agendamentos.salvar(cancelado);
+  if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };
+
+  await deps.avisos.avisarRecepcionista({
+    clinicaId: cancelado.clinicaId,
+    agendamentoId: cancelado.id,
+    pacienteId: cancelado.pacienteId,
+    motivo: motivoLimpo,
+  });
+  return { ok: true, valor: cancelado };
 }
 
 export async function criarBloqueio(

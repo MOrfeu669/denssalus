@@ -22,8 +22,20 @@ export type BloqueiosAgenda = {
   salvar(bloqueio: BloqueioAgenda): Promise<void>;
 };
 
+export type AvisoRecepcionista = {
+  clinicaId: string;
+  agendamentoId: string;
+  pacienteId: string;
+  motivo: string;
+};
+
+export type Avisos = {
+  avisarRecepcionista(aviso: AvisoRecepcionista): Promise<void>;
+};
+
 export type Dependencias = {
   agendamentos: Agendamentos;
+  avisos: Avisos;
   bloqueios: BloqueiosAgenda;
   clinicas: Pick<Clinicas, "buscarPorId">;
   cadeiras: Pick<Cadeiras, "listar">;

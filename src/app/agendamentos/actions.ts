@@ -2,13 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { obterSessao } from "../../domain/auth/casos";
-import { criarAgendamento, criarBloqueio, iniciarAtendimento } from "../../domain/agendamento/casos";
+import {
+  cancelarAgendamento,
+  criarAgendamento,
+  criarBloqueio,
+  iniciarAtendimento,
+} from "../../domain/agendamento/casos";
 import { dependencias, dependenciasAgendamento } from "../dependencias";
 import { falha } from "../falha";
 import { estado, type EstadoFormulario } from "../formulario";
 import {
   validarAgendamento,
   validarBloqueio,
+  validarCancelamento,
   type CamposAgendamento,
   type CamposBloqueio,
 } from "./validar";
@@ -92,6 +98,31 @@ export async function bloquear(
     if (!resultado.ok) return estado("erro", resultado.mensagem);
     revalidatePath("/agendamentos");
     return estado("sucesso", "Agenda bloqueada");
+  } catch (causa) {
+    return estado("erro", falha(causa).mensagem);
+  }
+}
+
+export async function cancelar(
+  _estado: EstadoFormulario,
+  formData: FormData,
+): Promise<EstadoFormulario> {
+  const validado = validarCancelamento(texto(formData, "motivo"));
+  if (!validado.ok) return estado("erro", validado.mensagem);
+
+  try {
+    const sessao = await obterSessao(dependencias());
+    if (!sessao) return estado("erro", SEM_SESSAO);
+    const resultado = await cancelarAgendamento(
+      dependenciasAgendamento(),
+      sessao,
+      texto(formData, "id"),
+      validado.valor,
+      new Date(),
+    );
+    if (!resultado.ok) return estado("erro", resultado.mensagem);
+    revalidatePath("/agendamentos");
+    return estado("sucesso", "Deseja reagendar?", resultado.valor.id);
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
   }

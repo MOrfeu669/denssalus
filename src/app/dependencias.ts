@@ -2,6 +2,7 @@ import { criarGateway } from "../lib/supabase/gateway";
 import { criarAgendaAlertas } from "../lib/supabase/agenda-alertas";
 import { criarAgendaDentistas } from "../lib/supabase/agenda-dentistas";
 import { criarAgendamentos } from "../lib/supabase/agendamentos";
+import { criarAvisos } from "../lib/supabase/avisos";
 import { criarBloqueios } from "../lib/supabase/bloqueios";
 import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDentistas } from "../lib/supabase/dentistas";
@@ -62,6 +63,7 @@ export function dependenciasProcedimento(): DependenciasProcedimento {
 export function dependenciasAgendamento(): DependenciasAgendamento {
   return {
     agendamentos: criarAgendamentos(),
+    avisos: criarAvisos(),
     bloqueios: criarBloqueios(),
     clinicas: criarClinicas(),
     cadeiras: criarCadeiras(),

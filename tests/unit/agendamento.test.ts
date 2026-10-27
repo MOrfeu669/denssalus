@@ -74,6 +74,7 @@ class Memoria {
 
   deps(): Dependencias {
     return {
+      avisos: { avisarRecepcionista: async () => {} },
       agendamentos: {
         listar: async (clinicaId) => this.daClinica(this.agendamentos, clinicaId),
         listarEntre: async (clinicaId, inicio, fim) =>
@@ -134,6 +135,9 @@ class Memoria {
       alertaCadeira: false,
       alertaHorario: false,
       alertaDentista: false,
+      motivoCancelamento: null,
+      canceladoPor: null,
+      canceladoEm: null,
       ...parcial,
     };
     this.agendamentos.set(agendamento.id, agendamento);

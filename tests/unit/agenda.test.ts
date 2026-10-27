@@ -43,6 +43,9 @@ function agendamento(parcial: Partial<Agendamento> & Pick<Agendamento, "id">): A
     alertaCadeira: false,
     alertaHorario: false,
     alertaDentista: false,
+    motivoCancelamento: null,
+    canceladoPor: null,
+    canceladoEm: null,
     ...parcial,
   };
 }

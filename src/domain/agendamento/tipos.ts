@@ -21,6 +21,9 @@ export type Agendamento = {
   alertaCadeira: boolean;
   alertaHorario: boolean;
   alertaDentista: boolean;
+  motivoCancelamento: string | null;
+  canceladoPor: string | null;
+  canceladoEm: string | null;
 };
 
 export type BloqueioAgenda = {
@@ -87,3 +90,5 @@ export const MENSAGEM_CADEIRA_OCUPADA = "Cadeira indisponível nesse horário";
 export const MENSAGEM_DENTISTA_OCUPADO = "Dentista indisponível nesse horário";
 export const MENSAGEM_PACIENTE_OCUPADO = "Paciente já possui agendamento nesse horário";
 export const MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO = "Agendamento não encontrado";
+export const MENSAGEM_MOTIVO_OBRIGATORIO = "Informe o motivo";
+export const MENSAGEM_JA_CONCLUIDO = "Agendamento já concluído não pode ser cancelado";
