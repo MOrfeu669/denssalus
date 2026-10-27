@@ -12,3 +12,4 @@ supabase/.env
 *.tsbuildinfo
 .next-build.log
 .next-dev.log
+copia-gitignore

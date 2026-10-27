@@ -22,9 +22,14 @@ O débito nasce quando o atendimento é concluído (salvar a Evolução, Feature
 - [ ] Procedimento avulso concluído gera um débito pelo valor médio do procedimento (Feature 005)
 - [ ] Não há lançamento manual de débito
 - [ ] O Admin registra um pagamento que quita o débito, com forma de pagamento, data e o usuário que registrou
+- [ ] Formas de pagamento no V1: dinheiro, PIX, cartão de débito, cartão de crédito, boleto, cheque
 - [ ] Não há pagamento parcial nem parcelamento
+- [ ] Dentista ou Admin pode aplicar desconto sobre o débito; a Recepcionista não aplica desconto
+- [ ] O pagamento quita à vista o valor restante (valor do débito menos o desconto)
 - [ ] Dentista e Recepcionista veem os débitos e os pagamentos do paciente; não registram pagamento
 - [ ] Débito e pagamento ficam no prontuário do paciente (Feature 004 / 010) e não são apagados
+- [ ] O Dashboard (Feature 019) exibe faturamento (competência) e valores recebidos (caixa)
+- [ ] No V1 não há vencimento nem alerta de débito em atraso; débito `em_aberto` aparece no prontuário
 
 ---
 
@@ -60,6 +65,22 @@ Então o sistema bloqueia com "Ação não permitida para seu papel"
 E os dois continuam vendo o débito
 ```
 
+### Cenário 5: Dentista aplica desconto; Admin quita o restante
+```
+Dado um débito em aberto de R$ 150
+Quando o Dentista aplica desconto de R$ 30
+E o Admin registra o pagamento de R$ 120, com forma e data
+Então o débito fica quitado
+E o registro guarda valor original, desconto, quem descontou, forma, data e quem quitou
+```
+
+### Cenário 6: Recepcionista não aplica desconto
+```
+Dado um débito em aberto
+Quando a Recepcionista tenta aplicar desconto
+Então o sistema bloqueia com "Ação não permitida para seu papel"
+```
+
 ---
 
 ## Exemplos de Código
@@ -72,7 +93,9 @@ interface Debito {
   origem: 'item_plano' | 'procedimento_avulso';
   item_plano_id?: string;
   agendamento_id?: string;
-  valor: number;
+  valor: number; // valor de origem (item do plano ou valor médio do avulso)
+  desconto?: number;
+  desconto_por?: string; // usuario_id — Dentista ou Admin
   status: 'em_aberto' | 'quitado';
   pagamento?: Pagamento;
 }
@@ -80,7 +103,7 @@ interface Debito {
 interface Pagamento {
   id: string;
   debito_id: string;
-  forma: string; // lista fechada de formas: ⚠️ PENDENTE
+  forma: 'dinheiro' | 'pix' | 'cartao_debito' | 'cartao_credito' | 'boleto' | 'cheque';
   data: string;
   registrado_por: string; // usuario_id do Admin
 }
@@ -110,15 +133,13 @@ const debito = await debitoService.registrarPagamento(debitoId, {
 - [stated] 2026-10-03 — procedimento avulso concluído gera débito pelo valor médio do procedimento
 - [stated] 2026-10-03 — um pagamento, registrado pelo Admin, quita o débito. O registro tem forma, data e quem registrou. Não há pagamento parcial nem parcelamento
 - [stated] 2026-10-03 — Dentista e Recepcionista só veem; só o Admin registra pagamento
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Lista fechada de formas de pagamento (dinheiro, PIX, cartão, convênio, …)
-- ⚠️ Existe desconto sobre o débito?
-- ⚠️ Pagamentos aparecem no Dashboard (Feature 019) além do faturamento?
-- ⚠️ Existe alerta de débito em atraso (Feature 018)?
+- [stated] 2026-10-27 — Formas de pagamento no V1: dinheiro, PIX, cartão de débito, cartão de crédito, boleto, cheque
+- [stated] 2026-10-27 — Desconto sobre o débito só por decisão do Dentista ou do Admin; a Recepcionista não aplica. O desconto não pode ser maior que o valor. O pagamento quita à vista o restante; se o restante for zero, o débito fica quitado sem pagamento
+- [stated] 2026-10-27 — Dashboard (Feature 019) mostra faturamento (competência) e recebido (caixa)
+- [stated] 2026-10-27 — Sem vencimento e sem alerta de atraso no V1 (Feature 018); débito em aberto fica no prontuário
 
 ---
 
 ## Notas
 
-**Histórico:** 2026-10-02 — spec criada como esqueleto (`context/ANALISE_SPECS.md`, ESC-10). 2026-10-03 — Bernardo definiu origem do débito, quitação à vista pelo Admin e visibilidade dos demais papéis. A implementação continua bloqueada pelos pendentes acima e pelas features 010 e 012.
+**Histórico:** 2026-10-02 — spec criada como esqueleto (`context/ANALISE_SPECS.md`, ESC-10). 2026-10-03 — Bernardo definiu origem do débito, quitação à vista pelo Admin e visibilidade dos demais papéis. 2026-10-27 — Bernardo: formas de pagamento do V1; desconto só Dentista/Admin; Dashboard com faturado e recebido; sem alerta de atraso no V1. A implementação continua dependente das features 010 e 012.
