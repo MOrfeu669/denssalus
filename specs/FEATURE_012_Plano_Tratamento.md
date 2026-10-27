@@ -17,12 +17,14 @@ A cadeia do modelo é: **Plano de Tratamento → itens (procedimento + dentes) �
 
 ## Requisitos
 
-- [ ] Dentista cria um Plano de Tratamento para um paciente, com um ou mais itens
+- [ ] Apenas o Dentista (ou o Admin, pela hierarquia da Feature 001) cria e edita um Plano de Tratamento; a Recepcionista não cria nem edita
 - [ ] Cada item do plano tem: um procedimento (Feature 005), **um ou mais dentes (obrigatório, numeração FDI, Feature 011)** e o valor que será cobrado (pode partir do valor médio do procedimento, mas é ajustável)
 - [ ] Item do plano pode ser vinculado a um agendamento (Feature 006) em que será executado
 - [ ] Ao concluir o agendamento (salvar a Evolução, Feature 010), os itens executados nele passam a `concluido`, registrando o dentista que os executou
+- [ ] Item `concluido` não pode ter procedimento, dentes ou valor alterados; itens `pendente` e novos itens continuam editáveis
 - [ ] Plano de Tratamento fica vinculado ao prontuário do paciente (Feature 010)
-- [ ] Plano de Tratamento tem um status que acompanha sua execução (ex: proposto, em andamento, concluído)
+- [ ] Plano de Tratamento tem um status que acompanha sua execução (`proposto`, `em_andamento`, `concluido`)
+- [ ] Quando todos os itens passam a `concluido`, o status do plano passa a `concluido` automaticamente
 - [ ] Valor total do Plano de Tratamento é a soma dos valores definidos para cada item
 - [ ] O faturamento do Dashboard (Feature 019) é contabilizado **por item concluído**, na data da conclusão, e atribuído ao **dentista que executou** o item
 
@@ -64,6 +66,28 @@ Então o Dentista pode atualizar o status do plano para "em andamento"
 Dado um Dentista criando um Plano de Tratamento
 Quando ele adiciona um item sem informar nenhum dente
 Então o sistema bloqueia e exige pelo menos um dente para o item
+```
+
+### Cenário 6: Recepcionista não cria plano
+```
+Dado uma Recepcionista autenticada
+Quando ela tenta criar ou editar um Plano de Tratamento
+Então o sistema bloqueia a ação, pois é exclusiva do Dentista (ou Admin)
+```
+
+### Cenário 7: Item concluído não se edita
+```
+Dado um plano com um item já concluído (R$ 150, dente 26) e um item pendente
+Quando o Dentista tenta alterar o valor do item concluído
+Então o sistema bloqueia essa alteração
+E o item pendente continua editável
+```
+
+### Cenário 8: Plano conclui quando o último item conclui
+```
+Dado um Plano de Tratamento "em andamento" com o último item ainda pendente
+Quando esse último item passa a concluído (Evolução salva, Feature 010)
+Então o status do plano passa a "concluido" automaticamente
 ```
 
 ---
@@ -119,16 +143,14 @@ const plano = await planoTratamentoService.criar({
 ## Regras de Negócio
 
 - [stated] Dentista seleciona quais procedimentos serão realizados e quanto cada um vai custar
+- [stated] 2026-10-27 — Só o Dentista ou o Admin cria e edita o Plano de Tratamento
+- [stated] 2026-10-27 — Item concluído congela procedimento, dentes e valor (já gerou débito e faturamento); itens pendentes e novos itens seguem editáveis
+- [stated] 2026-10-27 — Status do plano passa a `concluido` automaticamente quando todos os itens estão concluídos; `proposto` → `em_andamento` permanece manual (Cenário 4)
 - [stated] Esses dados alimentam o Financeiro do Dashboard (Feature 019)
 - [stated] O plano é vinculado aos dentes: cada item tem procedimento + um ou mais dentes (obrigatório); cada procedimento tem N materiais (Feature 005)
 - [stated] O faturamento é contabilizado por item concluído (agendamento concluído), na data da conclusão
 - [stated] O faturamento por dentista é atribuído a quem executou o item
 - [stated] Débitos e pagamentos são tratados na Feature 013 (Débitos)
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Quem pode criar/editar um Plano de Tratamento — apenas o Dentista (e o Admin, pela hierarquia), ou também a Recepcionista?
-- ⚠️ Um plano pode ser editado depois de já ter itens concluídos, ou fica congelado a partir desse ponto?
-- ⚠️ O status do plano passa a "concluido" automaticamente quando todos os itens são concluídos, ou é sempre manual?
 
 ---
 
@@ -136,4 +158,4 @@ const plano = await planoTratamentoService.criar({
 
 Esta feature preenche o gap estrutural identificado na Feature 019: sem ela, o Dashboard não teria uma fonte de dados financeiros consistente. O registro de pagamentos efetivos fica com a Feature 013 (Débitos).
 
-**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-03, INC-05, INC-12, ESC-10). Adicionado o Cenário 5. A pendência "quando o faturamento é contabilizado" foi resolvida.
+**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-03, INC-05, INC-12, ESC-10). Adicionado o Cenário 5. A pendência "quando o faturamento é contabilizado" foi resolvida. 2026-10-27 — Bernardo: papel Dentista/Admin; item concluído congelado; status `concluido` automático.

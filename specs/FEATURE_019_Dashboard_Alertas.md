@@ -164,6 +164,7 @@ await dashboardService.exportar({
 - [stated] Principais informações: Financeiro e Estoque
 - [stated] Alerta de estoque mínimo em vermelho, com quantidade e nome do material
 - [stated] Faturamento contabilizado por procedimento concluído: itens do Plano de Tratamento (valor do item) e procedimentos avulsos (valor médio do procedimento), na data da conclusão (substitui a regra anterior "financeiro vem só do Plano de Tratamento, não de valor solto")
+- [stated] 2026-10-27 — Dashboard exibe faturamento (competência, Feature 012) e valores recebidos (caixa, Feature 013)
 - [stated] Faturamento por dentista é atribuído a quem executou o procedimento
 - [stated] Capacidade de ocupação = dentistas ativos × horas de funcionamento × dias de atendimento, menos bloqueios de agenda
 - [stated] Alertas podem ser ocultados no Dashboard; o sino (Feature 018) sempre mostra os críticos
@@ -178,10 +179,9 @@ await dashboardService.exportar({
 ### ⚠️ PENDENTE (não definido ainda pelo usuário)
 - ⚠️ Comissões de prótese (Feature 016) entram no financeiro (como despesa, por exemplo)?
 - ⚠️ Atendimentos de emergência retroativos contam na ocupação e no faturamento?
-- ⚠️ Pagamentos recebidos (Feature 013, Débitos) aparecem no Dashboard além do faturamento?
 
 ---
 
 ## Notas
 
-**Histórico:** 2026-10-02 — renumerada de 018 para 019; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-03, INC-05, INC-11, INC-12, ESC-15, ESC-08).
+**Histórico:** 2026-10-02 — renumerada de 018 para 019; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-03, INC-05, INC-11, INC-12, ESC-15, ESC-08). 2026-10-27 — Bernardo: Dashboard mostra faturamento e recebido (fecha o pendente gêmeo da Feature 013).

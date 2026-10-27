@@ -21,6 +21,8 @@ O Prontuário é o registro central de tudo relacionado a um paciente. Esta feat
 - [ ] Histórico de Consultas é populado automaticamente a partir dos agendamentos do paciente, incluindo consultas canceladas (com a respectiva data)
 - [ ] Evolução é um relatório de texto livre, registrado pelo Dentista (ou Admin), e é OBRIGATÓRIA para concluir um atendimento
 - [ ] **Salvar a Evolução conclui o atendimento automaticamente** (status `concluido`, Feature 006) — não existe ação separada de "concluir"
+- [ ] Evolução já salva pode ser editada pelo Dentista (ou Admin); o agendamento permanece `concluido`; a edição entra na trilha de auditoria
+- [ ] Estoque insuficiente **não bloqueia** salvar a Evolução; o que ocorre com a baixa nesse caso fica na Feature 017
 - [ ] Ao concluir, o sistema:
   - dá baixa dos materiais dos procedimentos executados no atendimento — procedimento avulso ou itens do Plano de Tratamento (Feature 017; no V1, via interface temporária);
   - marca como concluídos os itens do Plano de Tratamento executados naquele agendamento (Feature 012)
@@ -74,6 +76,15 @@ Dado uma anamnese já registrada para um paciente
 Quando o Dentista atualiza o conteúdo da anamnese
 Então o sistema mantém o registro anterior no histórico de auditoria, com autor, data/hora e conteúdo alterado
 E o prontuário passa a exibir a versão mais recente
+```
+
+### Cenário 6: Editar Evolução depois de concluir
+```
+Dado um agendamento com status "concluido" e Evolução já salva
+Quando o Dentista altera o texto da Evolução e salva
+Então o sistema grava a nova versão
+E o agendamento permanece "concluido"
+E a trilha de auditoria registra autor, data/hora e conteúdo anterior (`entidade: 'evolucao'`)
 ```
 
 ---
@@ -139,6 +150,8 @@ await prontuarioService.registrarEvolucao({
 - [stated] Pela hierarquia piramidal (Feature 001), o Admin pode tudo que o Dentista pode — inclusive Anamnese e Evolução
 - [stated] Evolução: relatório de texto, registrado pelo Dentista
 - [stated] Salvar a Evolução é o gatilho que conclui o atendimento (status `concluido`, Feature 006); não há ação separada de concluir
+- [stated] 2026-10-27 — Evolução já salva pode ser editada pelo Dentista ou Admin; o atendimento permanece `concluido`; a edição entra na auditoria (`entidade: 'evolucao'`)
+- [stated] 2026-10-27 — Estoque insuficiente não bloqueia salvar a Evolução. A regra da baixa insuficiente fica na Feature 017
 - [stated] A conclusão dispara a baixa de materiais (Feature 017) dos procedimentos executados — avulso ou itens do plano
 - [correção] Alterações em Anamnese, Evolução e Documentos (Feature 014) geram registro de auditoria (usuário, data/hora, ação, conteúdo alterado)
 - [stated] Edições em registros do Odontograma (Feature 011) também geram registro de auditoria
@@ -147,12 +160,8 @@ await prontuarioService.registrarEvolucao({
 - [correção] Evolução é obrigatória para concluir um atendimento
 - [correção] Trilha de auditoria é acessível apenas pelo Admin
 
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ A Evolução pode ser editada depois de salva (o atendimento já estará concluído)? Se sim, a edição já entra na auditoria (`entidade: 'evolucao'`)
-- ⚠️ O que acontece se a baixa na conclusão encontrar estoque insuficiente (bloqueia a conclusão, permite saldo negativo ou só alerta)? Ver Feature 017
-
 ---
 
 ## Notas
 
-**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, INC-04, INC-05, INC-08, ESC-06). O Cenário 4b passou de "concluir sem evolução" para "salvar evolução vazia", já que não existe mais ação separada de concluir.
+**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, INC-04, INC-05, INC-08, ESC-06). O Cenário 4b passou de "concluir sem evolução" para "salvar evolução vazia", já que não existe mais ação separada de concluir. 2026-10-27 — Bernardo: Evolução editável após concluir, com auditoria; conclusão clínica não bloqueia por estoque (detalhe na 017).

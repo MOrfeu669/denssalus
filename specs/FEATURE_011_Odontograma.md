@@ -20,6 +20,8 @@ O Odontograma é um mapa bucal: uma representação visual da boca do paciente, 
 - [ ] Numeração de dentes segue o padrão FDI
 - [ ] Dentista (ou Admin, pela hierarquia da Feature 001) vincula procedimentos específicos a dentes (ex: Restauração, Endodontia, Extração, Implante, Coroa)
 - [ ] Cada dente mantém histórico de operações realizadas nele, visualizável a qualquer momento
+- [ ] Ao concluir itens do Plano de Tratamento (Feature 012), o sistema cria automaticamente o registro no odontograma para cada dente do item
+- [ ] É possível registrar procedimento pré-existente (realizado fora da clínica) sem agendamento; esse registro não gera débito nem baixa estoque
 - [ ] Registrar um procedimento no dente **não altera o estoque**: a baixa de materiais acontece na conclusão do atendimento (Feature 010/017)
 - [ ] Registros no odontograma podem ser editados diretamente pelo Dentista; **toda edição gera registro na trilha de auditoria** (Feature 010)
 - [ ] Registro no odontograma possui status próprio (`confirmado` / `revertido`); quando um agendamento é cancelado com confirmação explícita (Feature 008), o sistema marca seus registros como `revertido` automaticamente
@@ -83,6 +85,23 @@ Então o sistema salva a alteração no registro existente
 E grava na trilha de auditoria (Feature 010) o autor, a data/hora e o conteúdo anterior
 ```
 
+### Cenário 8: Item do plano concluído gera registro no odontograma
+```
+Dado um item do plano "Restauração" nos dentes 26 e 16, vinculado a um agendamento "iniciado"
+Quando o Dentista salva a Evolução e o item passa a concluído (Feature 010 / 012)
+Então o sistema cria um registro confirmado no odontograma para o dente 26 e outro para o dente 16
+E cada registro fica vinculado a esse agendamento
+```
+
+### Cenário 9: Procedimento pré-existente sem agendamento
+```
+Dado o odontograma de um paciente
+Quando o Dentista registra uma restauração pré-existente no dente 11, sem agendamento
+Então o sistema salva o registro com origem "pre_existente" e status "confirmado"
+E não cria débito (Feature 013)
+E não altera estoque
+```
+
 ---
 
 ## Exemplos de Código
@@ -94,7 +113,8 @@ interface RegistroOdontograma {
   dente: number; // numeração FDI
   quadrante: 'superior_direito' | 'superior_esquerdo' | 'inferior_esquerdo' | 'inferior_direito';
   procedimento_id: string; // referência à Feature 005
-  agendamento_id: string; // referência ao agendamento de origem (Feature 006)
+  origem: 'atendimento' | 'pre_existente';
+  agendamento_id?: string; // obrigatório quando origem é atendimento (Feature 006)
   protese_id?: string; // referência à Feature 016, se aplicável
   status: 'confirmado' | 'revertido';
   registrado_por: string; // usuario_id — Dentista ou Admin
@@ -139,18 +159,16 @@ await odontogramaService.historicoPorDente({
 - [stated] Registrar procedimento no dente NÃO reduz estoque — a baixa acontece na conclusão do atendimento (substitui a regra anterior "Ao vincular procedimento ao dente, reduz estoque")
 - [stated] Próteses aparecem no odontograma com todas as informações
 - [stated] Edição de registro confirmado é permitida, mas gera registro na trilha de auditoria (Feature 010)
+- [stated] 2026-10-27 — Item do plano concluído gera automaticamente o registro no odontograma em cada dente do item; o Dentista corrige depois se precisar (com auditoria)
+- [stated] 2026-10-27 — Procedimento pré-existente (outra clínica) pode ser registrado sem agendamento, origem `pre_existente`; não gera débito nem baixa estoque
 - [stated] Com a confirmação explícita no cancelamento (Feature 008), o registro é marcado como `revertido` automaticamente
 - [correção] Registro no odontograma nunca é apagado; quando um cancelamento confirmado exige reversão (Feature 008), o registro é marcado como "revertido" e permanece no histórico
 - [correção] Numeração de dentes segue o padrão FDI
 - [correção] Cada dente mantém histórico completo de operações já realizadas nele
 - [correção] Imagens (Feature 015) podem ser vinculadas diretamente a um dente, com descrição detalhada
 
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Quando um item do Plano de Tratamento (Feature 012), que já tem dente(s), é concluído, o registro no odontograma é criado automaticamente ou o Dentista registra manualmente?
-- ⚠️ É possível registrar no odontograma um procedimento pré-existente (ex: restauração feita em outra clínica) sem agendamento de origem? Hoje `agendamento_id` é obrigatório
-
 ---
 
 ## Notas
 
-**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-02, INC-02, INC-05, INC-08, ESC-06, ESC-07). O antigo Cenário 2 ("dedução de estoque ao confirmar procedimento no dente") foi substituído.
+**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-02, INC-02, INC-05, INC-08, ESC-06, ESC-07). O antigo Cenário 2 ("dedução de estoque ao confirmar procedimento no dente") foi substituído. 2026-10-27 — Bernardo: registro automático ao concluir item do plano; procedimento pré-existente sem agendamento, sem débito e sem baixa.
