@@ -96,3 +96,78 @@ select:focus-visible,
   gap: 1rem;
   margin-top: 1rem;
 }
+
+main.largura {
+  max-width: 72rem;
+}
+
+.visao,
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.visao button[aria-pressed="false"] {
+  background: #fff;
+  color: #1f6b4a;
+  border: 1px solid #1f6b4a;
+}
+
+.grade-rolagem {
+  overflow-x: auto;
+}
+
+.grade {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grade th,
+.grade td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #d5deda;
+  vertical-align: top;
+  text-align: left;
+}
+
+.grade .coluna {
+  min-width: 11rem;
+}
+
+.grade-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.agendamento {
+  padding: 0.25rem 0.4rem;
+  background: #e8f3ee;
+  border-radius: 4px;
+}
+
+.riscado {
+  text-decoration: line-through;
+  color: #5b6b64;
+}
+
+.com-alerta {
+  background: #fff1d6;
+  border: 1px solid #b26a00;
+}
+
+.alerta {
+  color: #8d1d1d;
+  font-weight: 700;
+}
+
+.bloqueio {
+  padding: 0.25rem 0.4rem;
+  background: #eceff1;
+  border-left: 4px solid #5b6b64;
+  border-radius: 4px;
+}

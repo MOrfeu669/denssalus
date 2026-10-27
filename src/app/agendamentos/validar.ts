@@ -36,6 +36,7 @@ const MENSAGEM_PACIENTE = "Informe o paciente";
 const MENSAGEM_DENTISTA = "Informe o dentista";
 const MENSAGEM_CADEIRA = "Informe a cadeira";
 const MENSAGEM_HORARIO = "Informe um horário válido";
+const MENSAGEM_MOTIVO = "Informe o motivo";
 
 function vazioParaNulo(valor: string): string | null {
   const limpo = valor.trim();
@@ -100,6 +101,12 @@ export function validarAgendamento(campos: CamposAgendamento): Resultado<Agendam
       fim: horario.valor.fim,
     },
   };
+}
+
+export function validarCancelamento(motivo: string): Resultado<string> {
+  const limpo = vazioParaNulo(motivo);
+  if (!limpo) return { ok: false, mensagem: MENSAGEM_MOTIVO };
+  return { ok: true, valor: limpo };
 }
 
 export function validarBloqueio(campos: CamposBloqueio): Resultado<BloqueioValidado> {

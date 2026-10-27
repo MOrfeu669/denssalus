@@ -74,8 +74,13 @@ class Memoria {
 
   deps(): Dependencias {
     return {
+      avisos: { avisarRecepcionista: async () => {} },
       agendamentos: {
         listar: async (clinicaId) => this.daClinica(this.agendamentos, clinicaId),
+        listarEntre: async (clinicaId, inicio, fim) =>
+          this.daClinica(this.agendamentos, clinicaId).filter(
+            (item) => item.inicio < fim && item.fim > inicio,
+          ),
         buscarPorId: async (id) => this.agendamentos.get(id) ?? null,
         salvar: async (agendamento) => {
           if (ocupaAgenda(agendamento)) {
@@ -88,6 +93,10 @@ class Memoria {
       },
       bloqueios: {
         listar: async (clinicaId) => this.daClinica(this.bloqueios, clinicaId),
+        listarEntre: async (clinicaId, inicio, fim) =>
+          this.daClinica(this.bloqueios, clinicaId).filter(
+            (item) => item.inicio < fim && item.fim > inicio,
+          ),
         salvar: async (bloqueio) => {
           this.bloqueios.set(bloqueio.id, bloqueio);
         },
@@ -126,6 +135,9 @@ class Memoria {
       alertaCadeira: false,
       alertaHorario: false,
       alertaDentista: false,
+      motivoCancelamento: null,
+      canceladoPor: null,
+      canceladoEm: null,
       ...parcial,
     };
     this.agendamentos.set(agendamento.id, agendamento);

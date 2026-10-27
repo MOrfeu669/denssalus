@@ -7,33 +7,51 @@ import { sugerirFim } from "../../domain/agendamento/regras";
 import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/tipos";
 import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
-import { bloquear, criar, iniciar } from "./actions";
+import { bloquear, cancelar, criar, iniciar } from "./actions";
+import { FormularioCancelar, PerguntaReagendar, podeCancelar } from "./cancelar";
+
+export type ValoresIniciais = {
+  pacienteId: string;
+  dentistaId: string;
+  procedimentoId: string;
+};
 
 export function Agendamentos({
   agendamentos,
   opcoes,
   papel,
   usuarioId,
+  inicial,
 }: {
   agendamentos: Agendamento[];
   opcoes: OpcoesAgendamento;
   papel: Papel;
   usuarioId: string;
+  inicial: ValoresIniciais;
 }) {
   const roteador = useRouter();
   const [criacao, acaoCriar, pendenteCriar] = useActionState(criar, estadoVazio);
   const [atendimento, acaoIniciar, pendenteIniciar] = useActionState(iniciar, estadoVazio);
   const [bloqueio, acaoBloquear, pendenteBloquear] = useActionState(bloquear, estadoVazio);
-  const aviso = avisoVisivel(criacao, atendimento, bloqueio);
+  const [cancelamento, acaoCancelar, pendenteCancelar] = useActionState(cancelar, estadoVazio);
+  const aviso = avisoVisivel(
+    criacao,
+    atendimento,
+    bloqueio,
+    ...(cancelamento.status === "erro" ? [cancelamento] : []),
+  );
   const podeBloquear = papel === "admin" || papel === "dentista";
 
   useEffect(() => {
-    if ([criacao, atendimento, bloqueio].some((item) => item.status === "sucesso")) roteador.refresh();
-  }, [criacao, atendimento, bloqueio, roteador]);
+    if ([criacao, atendimento, bloqueio, cancelamento].some((item) => item.status === "sucesso")) {
+      roteador.refresh();
+    }
+  }, [criacao, atendimento, bloqueio, cancelamento, roteador]);
 
   return (
     <>
       <Aviso tipo={aviso.status} mensagem={aviso.mensagem} />
+      <PerguntaReagendar estado={cancelamento} agendamentos={agendamentos} />
       {agendamentos.length === 0 ? (
         <p>Nenhum agendamento nesta clínica.</p>
       ) : (
@@ -49,16 +67,23 @@ export function Agendamentos({
                   </button>
                 </form>
               ) : null}
+              {podeCancelar(agendamento) ? (
+                <FormularioCancelar
+                  id={agendamento.id}
+                  acao={acaoCancelar}
+                  pendente={pendenteCancelar}
+                />
+              ) : null}
             </li>
           ))}
         </ul>
       )}
       <form
-        key={criacao.status === "sucesso" ? criacao.quando : 0}
+        key={`${criacao.status === "sucesso" ? criacao.quando : 0}|${inicial.pacienteId}|${inicial.dentistaId}|${inicial.procedimentoId}`}
         action={acaoCriar}
         aria-busy={pendenteCriar}
       >
-        <CamposCriar opcoes={opcoes} />
+        <CamposCriar opcoes={opcoes} inicial={inicial} />
         <button type="submit" disabled={pendenteCriar}>
           Criar agendamento
         </button>
@@ -91,10 +116,16 @@ export function Agendamentos({
   );
 }
 
-function CamposCriar({ opcoes }: { opcoes: OpcoesAgendamento }) {
+function CamposCriar({
+  opcoes,
+  inicial,
+}: {
+  opcoes: OpcoesAgendamento;
+  inicial: ValoresIniciais;
+}) {
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
-  const [procedimentoId, setProcedimentoId] = useState("");
+  const [procedimentoId, setProcedimentoId] = useState(inicial.procedimentoId);
 
   function aoEscolherProcedimento(valor: string) {
     setProcedimentoId(valor);
@@ -109,7 +140,7 @@ function CamposCriar({ opcoes }: { opcoes: OpcoesAgendamento }) {
     <>
       <label>
         Paciente
-        <select name="pacienteId" defaultValue="" required>
+        <select name="pacienteId" defaultValue={inicial.pacienteId} required>
           <option value="">Selecione</option>
           {opcoes.pacientes.map((paciente) => (
             <option key={paciente.id} value={paciente.id}>
@@ -120,7 +151,7 @@ function CamposCriar({ opcoes }: { opcoes: OpcoesAgendamento }) {
       </label>
       <label>
         Dentista
-        <select name="dentistaId" defaultValue="" required>
+        <select name="dentistaId" defaultValue={inicial.dentistaId} required>
           <option value="">Selecione</option>
           {opcoes.dentistas.map((dentista) => (
             <option key={dentista.id} value={dentista.id}>

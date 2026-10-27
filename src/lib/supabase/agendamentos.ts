@@ -25,6 +25,9 @@ type LinhaAgendamento = {
   alerta_cadeira: boolean;
   alerta_horario: boolean;
   alerta_dentista: boolean;
+  motivo_cancelamento: string | null;
+  cancelado_por: string | null;
+  cancelado_em: string | null;
 };
 
 type ErroPostgres = {
@@ -51,6 +54,9 @@ function paraAgendamento(linha: LinhaAgendamento): Agendamento {
     alertaCadeira: linha.alerta_cadeira,
     alertaHorario: linha.alerta_horario,
     alertaDentista: linha.alerta_dentista,
+    motivoCancelamento: linha.motivo_cancelamento,
+    canceladoPor: linha.cancelado_por,
+    canceladoEm: linha.cancelado_em,
   };
 }
 
@@ -71,6 +77,9 @@ function paraLinha(agendamento: Agendamento): LinhaAgendamento {
     alerta_cadeira: agendamento.alertaCadeira,
     alerta_horario: agendamento.alertaHorario,
     alerta_dentista: agendamento.alertaDentista,
+    motivo_cancelamento: agendamento.motivoCancelamento,
+    cancelado_por: agendamento.canceladoPor,
+    cancelado_em: agendamento.canceladoEm,
   };
 }
 
@@ -92,6 +101,18 @@ export function criarAgendamentos(): Agendamentos {
         .from("agendamentos")
         .select("*")
         .eq("clinica_id", clinicaId)
+        .order("inicio", { ascending: true });
+      if (error) throw new ErroAplicacao("Não foi possível listar os agendamentos", error);
+      return (data as LinhaAgendamento[]).map(paraAgendamento);
+    },
+
+    async listarEntre(clinicaId: string, inicio: string, fim: string) {
+      const { data, error } = await admin
+        .from("agendamentos")
+        .select("*")
+        .eq("clinica_id", clinicaId)
+        .lt("inicio", fim)
+        .gt("fim", inicio)
         .order("inicio", { ascending: true });
       if (error) throw new ErroAplicacao("Não foi possível listar os agendamentos", error);
       return (data as LinhaAgendamento[]).map(paraAgendamento);

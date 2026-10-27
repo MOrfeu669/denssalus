@@ -32,4 +32,6 @@ export type Acao =
   | "usuario:cadastrar"
   | "usuario:remover"
   | "agendamento:criar"
-  | "agendamento:bloquear";
+  | "agendamento:bloquear"
+  | "agendamento:cancelar"
+  | "agenda:ver";

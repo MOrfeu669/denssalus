@@ -7,7 +7,17 @@ import { Agendamentos } from "./form";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+type Query = Record<string, string | string[] | undefined>;
+
+const primeiro = (valor: string | string[] | undefined) => (Array.isArray(valor) ? valor[0] : valor);
+
+// Só pré-preenche com id que existe nas opções; id desconhecido cai no valor vazio.
+function idConhecido(valor: string | undefined, ids: string[]): string {
+  return valor && ids.includes(valor) ? valor : "";
+}
+
+export default async function Page({ searchParams }: { searchParams: Promise<Query> }) {
+  const query = await searchParams;
   const sessao = await sessaoAtual();
   if (!sessao) {
     return (
@@ -25,6 +35,21 @@ export default async function Page() {
     const opcoes = await listarOpcoesAgendamento(deps, sessao);
     if (!opcoes.ok) return erroDeCarregamento(opcoes.mensagem);
 
+    const inicial = {
+      pacienteId: idConhecido(
+        primeiro(query.paciente),
+        opcoes.valor.pacientes.map((item) => item.id),
+      ),
+      dentistaId: idConhecido(
+        primeiro(query.dentista),
+        opcoes.valor.dentistas.map((item) => item.id),
+      ),
+      procedimentoId: idConhecido(
+        primeiro(query.procedimento),
+        opcoes.valor.procedimentos.map((item) => item.id),
+      ),
+    };
+
     return (
       <main>
         <h1>Agendamentos</h1>
@@ -33,6 +58,7 @@ export default async function Page() {
           opcoes={opcoes.valor}
           papel={sessao.usuario.papel}
           usuarioId={sessao.usuario.id}
+          inicial={inicial}
         />
         <p className="nav">
           <Link href="/">Voltar</Link>
