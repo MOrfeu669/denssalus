@@ -76,6 +76,10 @@ class Memoria {
     return {
       agendamentos: {
         listar: async (clinicaId) => this.daClinica(this.agendamentos, clinicaId),
+        listarEntre: async (clinicaId, inicio, fim) =>
+          this.daClinica(this.agendamentos, clinicaId).filter(
+            (item) => item.inicio < fim && item.fim > inicio,
+          ),
         buscarPorId: async (id) => this.agendamentos.get(id) ?? null,
         salvar: async (agendamento) => {
           if (ocupaAgenda(agendamento)) {
@@ -88,6 +92,10 @@ class Memoria {
       },
       bloqueios: {
         listar: async (clinicaId) => this.daClinica(this.bloqueios, clinicaId),
+        listarEntre: async (clinicaId, inicio, fim) =>
+          this.daClinica(this.bloqueios, clinicaId).filter(
+            (item) => item.inicio < fim && item.fim > inicio,
+          ),
         salvar: async (bloqueio) => {
           this.bloqueios.set(bloqueio.id, bloqueio);
         },

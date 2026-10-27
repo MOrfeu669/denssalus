@@ -18,6 +18,8 @@ import {
   type OpcoesAgendamento,
 } from "./tipos";
 
+export { verAgenda } from "./agenda";
+
 type Falha = { ok: false; mensagem: string };
 type ClinicaOk = { ok: true; clinica: Clinica };
 type Entidades = { ok: true; cadeira: Cadeira; dentista: Dentista };

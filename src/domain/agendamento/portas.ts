@@ -6,6 +6,7 @@ import type { Agendamento, BloqueioAgenda, ConflitoAgenda } from "./tipos";
 
 export type Agendamentos = {
   listar(clinicaId: string): Promise<Agendamento[]>;
+  listarEntre(clinicaId: string, inicio: string, fim: string): Promise<Agendamento[]>;
   buscarPorId(id: string): Promise<Agendamento | null>;
   // null se gravou. Se a nova linha (emergencia false e status ativo) sobrepõe
   // outra linha ativa não-emergência no intervalo [inicio, fim), devolve o
@@ -17,6 +18,7 @@ export type Agendamentos = {
 
 export type BloqueiosAgenda = {
   listar(clinicaId: string): Promise<BloqueioAgenda[]>;
+  listarEntre(clinicaId: string, inicio: string, fim: string): Promise<BloqueioAgenda[]>;
   salvar(bloqueio: BloqueioAgenda): Promise<void>;
 };
 

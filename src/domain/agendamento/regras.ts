@@ -10,16 +10,89 @@ import {
   MENSAGEM_DIA_SEM_ATENDIMENTO,
   MENSAGEM_FORA_DO_HORARIO,
   MENSAGEM_PACIENTE_OCUPADO,
+  TEXTO_ALERTA_HORARIO,
   type Agendamento,
+  type AgendamentoNaGrade,
   type BloqueioAgenda,
   type ConflitoAgenda,
   type EntradaAgendamento,
+  type FiltroAgenda,
+  type Grade,
   type StatusAgendamento,
 } from "./tipos";
 
 const DIA_POR_INDICE: Dia[] = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 const FORMATO_HORARIO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
 const STATUS_ATIVO: readonly StatusAgendamento[] = ["agendado", "em_espera", "iniciado"];
+const FORMATO_DATA = /^(\d{4})-(\d{2})-(\d{2})/;
+
+type OrigemGrade = {
+  agendamentos: Agendamento[];
+  bloqueios: BloqueioAgenda[];
+  cadeiras: { id: string; ativa: boolean }[];
+  dentistas: { id: string; ativo: boolean }[];
+};
+
+export function somarDias(data: string, dias: number): string | null {
+  const partes = FORMATO_DATA.exec(data);
+  if (!partes || data.length !== 10) return null;
+  const ano = Number(partes[1]);
+  const mes = Number(partes[2]);
+  const dia = Number(partes[3]);
+  const base = new Date(ano, mes - 1, dia);
+  if (base.getFullYear() !== ano || base.getMonth() !== mes - 1 || base.getDate() !== dia) {
+    return null;
+  }
+  const alvo = new Date(ano, mes - 1, dia + dias);
+  const mesAlvo = String(alvo.getMonth() + 1).padStart(2, "0");
+  const diaAlvo = String(alvo.getDate()).padStart(2, "0");
+  return `${alvo.getFullYear()}-${mesAlvo}-${diaAlvo}`;
+}
+
+export function semanaDe(data: string): string[] {
+  if (somarDias(data, 0) === null) return [];
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const desdeSegunda = (new Date(ano, mes - 1, dia).getDay() + 6) % 7;
+  return Array.from({ length: 7 }, (_, indice) => somarDias(data, indice - desdeSegunda) as string);
+}
+
+export function filtrarGrade(
+  filtro: FiltroAgenda & { modo: "dia" | "semana" },
+  origem: OrigemGrade,
+  expediente: { horarioAbertura: string; horarioFechamento: string },
+): Grade {
+  const dias = semanaDe(filtro.data);
+  const visiveis = filtro.modo === "dia" ? [filtro.data] : dias;
+  const noPeriodo = (item: { inicio: string }) =>
+    FORMATO_DATA.test(item.inicio) && visiveis.includes(item.inicio.slice(0, 10));
+  const doDentista = (item: { dentistaId: string }) =>
+    filtro.dentistaId === null || item.dentistaId === filtro.dentistaId;
+  const cadeiraInativa = (id: string) => !origem.cadeiras.find((item) => item.id === id)?.ativa;
+  const dentistaInativo = (id: string) => !origem.dentistas.find((item) => item.id === id)?.ativo;
+
+  const agendamentos: AgendamentoNaGrade[] = origem.agendamentos
+    .filter((item) => noPeriodo(item) && doDentista(item))
+    .filter((item) => filtro.cadeiraId === null || item.cadeiraId === filtro.cadeiraId)
+    .map((item) => ({
+      ...item,
+      alerta:
+        item.alertaCadeira ||
+        item.alertaHorario ||
+        item.alertaDentista ||
+        cadeiraInativa(item.cadeiraId) ||
+        dentistaInativo(item.dentistaId),
+      textoAlerta: item.alertaHorario ? TEXTO_ALERTA_HORARIO : null,
+    }));
+  const bloqueios = origem.bloqueios.filter((item) => noPeriodo(item) && doDentista(item));
+
+  return {
+    dias,
+    horarioAbertura: expediente.horarioAbertura,
+    horarioFechamento: expediente.horarioFechamento,
+    agendamentos,
+    bloqueios,
+  };
+}
 
 export function sugerirFim(inicio: string, tempoMedioMinutos: number): string {
   const data = new Date(inicio);

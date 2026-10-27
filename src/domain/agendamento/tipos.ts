@@ -58,6 +58,26 @@ export type OpcoesAgendamento = {
   procedimentos: { id: string; nome: string; tempoMedioMinutos: number }[];
 };
 
+export type FiltroAgenda = {
+  data: string;
+  dentistaId: string | null;
+  cadeiraId: string | null;
+};
+
+export type AgendamentoNaGrade = Agendamento & {
+  alerta: boolean;
+  textoAlerta: string | null;
+};
+
+export type Grade = {
+  dias: string[];
+  horarioAbertura: string;
+  horarioFechamento: string;
+  agendamentos: AgendamentoNaGrade[];
+  bloqueios: BloqueioAgenda[];
+};
+
+export const TEXTO_ALERTA_HORARIO = "fora de horário";
 export const MENSAGEM_HORARIO_INVALIDO = "Informe um horário válido";
 export const MENSAGEM_CADEIRA_INDISPONIVEL = "Cadeira indisponível";
 export const MENSAGEM_DENTISTA_INDISPONIVEL = "Dentista indisponível";

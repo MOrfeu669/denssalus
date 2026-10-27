@@ -53,6 +53,18 @@ export function criarBloqueios(): BloqueiosAgenda {
       return (data as LinhaBloqueio[]).map(paraBloqueio);
     },
 
+    async listarEntre(clinicaId: string, inicio: string, fim: string) {
+      const { data, error } = await admin
+        .from("bloqueios_agenda")
+        .select("*")
+        .eq("clinica_id", clinicaId)
+        .lt("inicio", fim)
+        .gt("fim", inicio)
+        .order("inicio", { ascending: true });
+      if (error) throw new ErroAplicacao("Não foi possível listar os bloqueios", error);
+      return (data as LinhaBloqueio[]).map(paraBloqueio);
+    },
+
     async salvar(bloqueio) {
       const { error } = await admin
         .from("bloqueios_agenda")

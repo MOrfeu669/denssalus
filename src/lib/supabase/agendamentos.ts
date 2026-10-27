@@ -97,6 +97,18 @@ export function criarAgendamentos(): Agendamentos {
       return (data as LinhaAgendamento[]).map(paraAgendamento);
     },
 
+    async listarEntre(clinicaId: string, inicio: string, fim: string) {
+      const { data, error } = await admin
+        .from("agendamentos")
+        .select("*")
+        .eq("clinica_id", clinicaId)
+        .lt("inicio", fim)
+        .gt("fim", inicio)
+        .order("inicio", { ascending: true });
+      if (error) throw new ErroAplicacao("Não foi possível listar os agendamentos", error);
+      return (data as LinhaAgendamento[]).map(paraAgendamento);
+    },
+
     async buscarPorId(id) {
       const { data, error } = await admin
         .from("agendamentos")
