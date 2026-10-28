@@ -4,6 +4,8 @@ import { listarOdontograma } from "../../../domain/odontograma/casos";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
 import { listarDebitos } from "../../../domain/debito/casos";
 import type { DebitoComPagamento } from "../../../domain/debito/tipos";
+import { listarDocumentos, listarModelos } from "../../../domain/documento/casos";
+import type { ModeloDocumento } from "../../../domain/documento/tipos";
 import { listarPlanos } from "../../../domain/plano/casos";
 import type { PlanoComItens } from "../../../domain/plano/tipos";
 import { listarProcedimentos } from "../../../domain/procedimento/casos";
@@ -11,6 +13,7 @@ import { abrirProntuario, listarAuditoria } from "../../../domain/prontuario/cas
 import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
 import {
   dependenciasDebito,
+  dependenciasDocumento,
   dependenciasOdontograma,
   dependenciasPlano,
   dependenciasProcedimento,
@@ -20,6 +23,7 @@ import { falha } from "../../falha";
 import { sessaoAtual } from "../../sessao";
 import { FormularioAnamnese, FormularioEvolucao } from "./form";
 import { SecaoDebitos } from "./debitos";
+import { SecaoDocumentos, type DocumentoItem } from "./documentos";
 import { dataAgendamento } from "./formato";
 import { Odontograma } from "./odontograma";
 import { SecaoPlano } from "./plano";
@@ -66,6 +70,36 @@ async function carregarDebitos(
 ): Promise<ResultadoDebitos> {
   try {
     return await listarDebitos(dependenciasDebito(), sessao, pacienteId);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+type ResultadoDocumentos =
+  | { ok: true; documentos: DocumentoItem[]; modelos: ModeloDocumento[]; importados: string[] }
+  | { ok: false; mensagem: string };
+
+async function carregarDocumentos(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  pacienteId: string,
+): Promise<ResultadoDocumentos> {
+  try {
+    const deps = dependenciasDocumento();
+    const lista = await listarDocumentos(deps, sessao, pacienteId);
+    if (!lista.ok) return lista;
+    const modelos = await listarModelos(deps, sessao);
+    if (!modelos.ok) return modelos;
+    return {
+      ok: true,
+      documentos: lista.valor.map(({ id, modeloId, geradoEm, conteudoFinal }) => ({
+        id,
+        modeloId,
+        geradoEm,
+        conteudoFinal,
+      })),
+      modelos: modelos.valor.modelos,
+      importados: modelos.valor.importados,
+    };
   } catch (erro) {
     return falha(erro);
   }
@@ -132,6 +166,7 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const procedimentos = await carregarProcedimentos(sessao);
   const planos = await carregarPlanos(sessao, pacienteId);
   const debitos = await carregarDebitos(sessao, pacienteId);
+  const documentos = await carregarDocumentos(sessao, pacienteId);
   const agendamentosAbertos = historico
     .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
     .map(({ id, inicio, status }) => ({ id, inicio, status }));
@@ -224,6 +259,24 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
         ) : (
           <p role="alert" tabIndex={-1}>
             {debitos.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="documentos">
+        <h2 id="documentos">Documentos</h2>
+        {documentos.ok ? (
+          <SecaoDocumentos
+            pacienteId={pacienteId}
+            papel={papel}
+            usuarioId={sessao.usuario.id}
+            documentos={documentos.documentos}
+            modelos={documentos.modelos}
+            importados={documentos.importados}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {documentos.mensagem}
           </p>
         )}
       </section>

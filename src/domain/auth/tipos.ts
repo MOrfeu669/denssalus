@@ -42,4 +42,6 @@ export type Acao =
   | "plano:editar"
   | "debito:ver"
   | "debito:descontar"
-  | "debito:quitar";
+  | "debito:quitar"
+  | "documento:modelar"
+  | "documento:gerar";

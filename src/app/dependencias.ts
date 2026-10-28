@@ -7,6 +7,7 @@ import { criarBloqueios } from "../lib/supabase/bloqueios";
 import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDebitos } from "../lib/supabase/debitos";
 import { criarDentistas } from "../lib/supabase/dentistas";
+import { criarDocumentos } from "../lib/supabase/documentos";
 import { criarOdontograma } from "../lib/supabase/odontograma";
 import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarPlanos } from "../lib/supabase/plano";
@@ -21,6 +22,7 @@ import type { Dependencias as DependenciasClinica } from "../domain/clinica/port
 import { gerarDebitosDoAtendimento as gerarDebitosDoAtendimentoCaso } from "../domain/debito/casos";
 import type { Dependencias as DependenciasDebito } from "../domain/debito/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
+import type { Dependencias as DependenciasDocumento } from "../domain/documento/portas";
 import { reverterDoAgendamento as reverterDoAgendamentoCaso } from "../domain/odontograma/casos";
 import type { Dependencias as DependenciasOdontograma } from "../domain/odontograma/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
@@ -135,6 +137,19 @@ export function dependenciasDebito(): DependenciasDebito {
     agendamentos: criarAgendamentos(),
     procedimentos: criarProcedimentos(),
     pacientes: criarPacientes(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasDocumento(): DependenciasDocumento {
+  const documentos = criarDocumentos();
+  return {
+    modelos: documentos.modelos,
+    documentos: documentos.documentos,
+    importacoes: documentos.importacoes,
+    pacientes: criarPacientes(),
+    dentistas: criarDentistas(),
+    auditoria: criarProntuario().auditoria,
     ids: { novo: () => crypto.randomUUID() },
   };
 }
