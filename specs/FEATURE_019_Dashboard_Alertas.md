@@ -3,7 +3,7 @@
 **Status:** 🟡 Em Definição
 **Fase:** V1.5
 **Complexidade:** 🔴 Alta
-**Dependências:** Feature 005, Feature 006, Feature 012 (Plano de Tratamento), Feature 017, Feature 018 — Feature 016 ⚠️ PENDENTE
+**Dependências:** Feature 005, Feature 006, Feature 012 (Plano de Tratamento), Feature 013, Feature 016, Feature 017, Feature 018
 
 ---
 
@@ -22,6 +22,9 @@ Os dados financeiros do Dashboard têm origem principal no **Plano de Tratamento
 - [ ] Usuário pode ocultar informações específicas do próprio Dashboard, para melhor visualização
 - [ ] Alertas também podem ser ocultados no Dashboard, mas as notificações críticas continuam sempre visíveis no sino (Feature 018)
 - [ ] Faturamento = itens do Plano de Tratamento concluídos (valor do item) + procedimentos avulsos concluídos (valor médio do procedimento), contabilizados na data de conclusão do atendimento
+- [ ] Valores recebidos (Feature 013) aparecem no Dashboard além do faturamento
+- [ ] Comissão de prótese (Feature 016) aparece como **despesa**, fora do faturamento e do recebido
+- [ ] Atendimento de emergência retroativo (Feature 006) **conta** no faturamento e na ocupação
 - [ ] Faturamento por dentista é atribuído ao dentista que **executou** o procedimento
 - [ ] Exibir alerta vermelho para materiais abaixo da quantidade mínima (Feature 017), com nome do material e quantidade atual
 - [ ] Exibir relatórios de ocupação da agenda, calculados com base nos agendamentos `concluido` (Feature 006) em relação à capacidade
@@ -51,10 +54,19 @@ Então vê o total faturado no período: soma dos valores dos itens do plano con
 
 ### Cenário 3: Ver ocupação da agenda
 ```
-Dado os agendamentos de todos os dentistas no mês, alguns com status "concluido", outros "cancelado"
+Dado os agendamentos de todos os dentistas no mês, alguns com status "concluido", outros "cancelado", e um atendimento de emergência retroativo "concluido"
 Quando o usuário abre o Dashboard
 Então vê a taxa de ocupação calculada com base nos agendamentos "concluido" em relação à capacidade (dentistas ativos × horas × dias de atendimento, menos bloqueios de agenda)
 E agendamentos "cancelado" não contam como ocupação
+E a emergência retroativa concluída conta na ocupação e no faturamento
+```
+
+### Cenário 3b: Comissão de prótese como despesa
+```
+Dado comissões de laboratório registradas no período (Feature 016) somando R$ 800
+Quando o Admin abre o Dashboard
+Então vê R$ 800 em despesa de prótese
+E esse valor não entra no faturamento nem no recebido
 ```
 
 ### Cenário 4: Faturamento discriminado por dentista e procedimento
@@ -102,6 +114,8 @@ interface DashboardResumo {
   periodo: { inicio: string; fim: string }; // configurável pelo usuário
   financeiro: {
     total_faturado: number; // itens do plano concluídos (Feature 012) + avulsos concluídos (valor médio)
+    total_recebido: number; // pagamentos da Feature 013
+    custos_comissao_protese: number; // despesa, Feature 016
     faturamento_por_dentista: Record<string, number>; // dentista que executou
     faturamento_por_procedimento: Record<string, number>;
   };
@@ -154,7 +168,8 @@ await dashboardService.exportar({
 - Feature 012 (Plano de Tratamento) — origem principal dos dados financeiros
 - Feature 017 (Controle de Estoque) — alertas de estoque abaixo do mínimo
 - Feature 018 (Notificações Internas) — alertas críticos exibidos também aqui
-- Feature 016 (Controle de Prótese) — ⚠️ PENDENTE: só se as comissões entrarem no financeiro
+- Feature 013 (Débitos) — valores recebidos (caixa)
+- Feature 016 (Controle de Prótese) — comissão como despesa
 
 ---
 
@@ -165,6 +180,8 @@ await dashboardService.exportar({
 - [stated] Alerta de estoque mínimo em vermelho, com quantidade e nome do material
 - [stated] Faturamento contabilizado por procedimento concluído: itens do Plano de Tratamento (valor do item) e procedimentos avulsos (valor médio do procedimento), na data da conclusão (substitui a regra anterior "financeiro vem só do Plano de Tratamento, não de valor solto")
 - [stated] 2026-10-27 — Dashboard exibe faturamento (competência, Feature 012) e valores recebidos (caixa, Feature 013)
+- [stated] 2026-10-28 — Comissão de prótese entra como despesa, fora do faturamento e do recebido
+- [stated] 2026-10-28 — Emergência retroativa concluída conta no faturamento e na ocupação
 - [stated] Faturamento por dentista é atribuído a quem executou o procedimento
 - [stated] Capacidade de ocupação = dentistas ativos × horas de funcionamento × dias de atendimento, menos bloqueios de agenda
 - [stated] Alertas podem ser ocultados no Dashboard; o sino (Feature 018) sempre mostra os críticos
@@ -176,12 +193,8 @@ await dashboardService.exportar({
 - [correção] Faturamento é exibido tanto no total geral quanto discriminado por dentista e por procedimento
 - [correção] Layout em scrollview, dinâmico e responsivo a mudanças de dados
 
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Comissões de prótese (Feature 016) entram no financeiro (como despesa, por exemplo)?
-- ⚠️ Atendimentos de emergência retroativos contam na ocupação e no faturamento?
-
 ---
 
 ## Notas
 
-**Histórico:** 2026-10-02 — renumerada de 018 para 019; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-03, INC-05, INC-11, INC-12, ESC-15, ESC-08). 2026-10-27 — Bernardo: Dashboard mostra faturamento e recebido (fecha o pendente gêmeo da Feature 013).
+**Histórico:** 2026-10-02 — renumerada de 018 para 019; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: PEN-03, INC-05, INC-11, INC-12, ESC-15, ESC-08). 2026-10-27 — Bernardo: Dashboard mostra faturamento e recebido (fecha o pendente gêmeo da Feature 013). 2026-10-28 — Bernardo: comissão como despesa; emergência retroativa conta em faturamento e ocupação.

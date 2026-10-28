@@ -17,7 +17,8 @@ O Dentista precisa anexar imagens (principalmente raio X) ao prontuário do paci
 
 - [ ] Apenas o Dentista (ou o Admin, pela hierarquia da Feature 001) pode adicionar imagens ao prontuário
 - [ ] Não há restrição de formato de arquivo aceito
-- [ ] Não há tamanho máximo por imagem definido pela aplicação; para isso, o upload é feito **direto do navegador para o storage** (URL assinada), sem passar pelo servidor da aplicação (Vercel)
+- [ ] Cada arquivo tem teto de **20 MB**; acima disso o sistema bloqueia o envio
+- [ ] O upload é feito **direto do navegador para o storage** (URL assinada), sem passar pelo servidor da aplicação (Vercel)
 - [ ] Cada imagem possui descrição detalhada: paciente, dente relacionado (quando aplicável) e tipo de caso
 - [ ] Cada imagem fica vinculada ao paciente e, idealmente, à data/consulta em que foi tirada
 - [ ] Sistema permite visualizar galeria de imagens do paciente em ordem cronológica
@@ -54,6 +55,14 @@ Dado uma imagem de raio X registrada no prontuário
 Quando o Dentista exclui essa imagem
 Então o sistema move a imagem para exclusão pendente, mantendo-a recuperável por 3 meses
 E após os 3 meses, a imagem é removida definitivamente
+```
+
+### Cenário 5: Arquivo acima de 20 MB é recusado
+```
+Dado o Dentista anexando uma imagem ao prontuário
+Quando o arquivo tem mais de 20 MB
+Então o sistema bloqueia o envio e informa o teto de 20 MB
+E nenhuma imagem é salva
 ```
 
 ---
@@ -101,14 +110,12 @@ await imagemService.adicionar({
 - [stated] Raio X faz parte do prontuário (seção "Raio X e imagens")
 - [stated] Apenas o Dentista preenche essa seção
 - [correção] Sem restrição de formato de arquivo
-- [correção] Sem tamanho máximo de imagem
+- [stated] 2026-10-28 — Teto de 20 MB por arquivo, recusado na aplicação
 - [correção] Imagem é vinculada ao dente relacionado (quando aplicável), com descrição detalhada (paciente, dente, tipo de caso)
 - [correção] Exclusão de imagem tem prazo de segurança de 3 meses antes da remoção definitiva
 - [stated] Upload direto do navegador para o storage, sem passar pelo servidor da aplicação (evita o limite de tamanho de requisição do Vercel)
 - [stated] Pela hierarquia piramidal (Feature 001), o Admin também pode adicionar e excluir imagens
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Provedor de storage (Supabase Storage ou outro) e o limite de tamanho por arquivo desse provedor
+- [stated] 2026-10-28 — Storage fica em `docs/TECNOLOGIAS.md` (Supabase Storage); esta spec não escolhe provedor no requisito
 
 ---
 
@@ -116,4 +123,4 @@ await imagemService.adicionar({
 
 Existe integração direta com a Feature 011 (Odontograma), já que a imagem é vinculada ao dente relacionado quando aplicável.
 
-**Histórico:** 2026-10-02 — renumerada de 014 para 015; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, ESC-12).
+**Histórico:** 2026-10-02 — renumerada de 014 para 015; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, ESC-12). 2026-10-28 — Bernardo: teto de 20 MB na aplicação; Supabase Storage em TECNOLOGIAS.md.

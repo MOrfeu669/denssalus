@@ -18,7 +18,15 @@ A API local do Supabase (PostgREST) sobe na porta `54321`, e o app fala com ela 
 
 ## Fora desta decisão
 
-Storage e envio. O formato de erro das Server Actions também não está decidido: não traduzir 400, 401 ou 403 para outro contrato. Policies não entram; a clínica é isolada pelo filtro na Server Action.
+O formato de erro das Server Actions também não está decidido: não traduzir 400, 401 ou 403 para outro contrato. Policies não entram; a clínica é isolada pelo filtro na Server Action. A marca do provedor de WhatsApp/SMS fica para a implementação da Feature 020.
+
+Decisão [stated] em 28/10/2026, Features 015 e 020:
+
+| Item | Decisão |
+|---|---|
+| Arquivos de imagem (Feature 015) | **Supabase Storage**. Upload do navegador com URL assinada. A aplicação recusa arquivo acima de **20 MB** |
+| E-mail de produção (Features 001 e 020) | **Um SMTP** configurado no Supabase Auth (ex.: Resend) para recuperação de senha e mensagem ao paciente por e-mail. No ambiente local, a recuperação continua no e-mail do Auth |
+| WhatsApp / SMS (Feature 020) | WhatsApp é o canal externo principal a suportar, junto de SMS e e-mail conforme o cadastro do paciente. A marca do provedor de WhatsApp/SMS **não** fica travada na spec |
 
 Decisão [stated] em 24/10/2026, para o scaffold da Feature 001:
 

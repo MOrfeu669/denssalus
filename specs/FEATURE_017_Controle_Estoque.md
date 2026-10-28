@@ -24,6 +24,8 @@ A clínica precisa controlar materiais/insumos usados nos procedimentos (Feature
 - [ ] Baixa automática por vencimento: lote removido automaticamente ao passar da validade
 - [ ] Baixa por uso: ocorre na **conclusão do atendimento** (Dentista ou Admin salva a Evolução, Feature 010), para os materiais dos procedimentos executados — procedimento avulso ou itens do Plano de Tratamento (Feature 012)
 - [ ] A baixa por uso consome primeiro o lote válido que **vence antes** (FEFO)
+- [ ] Na conclusão, Dentista ou Admin pode ajustar a quantidade efetivamente usada; o padrão é a quantidade cadastrada no procedimento (Feature 005); o log da movimentação guarda o valor baixado
+- [ ] Se o estoque válido for menor que a quantidade a baixar: o atendimento **conclui**, a baixa vai até zero, **não** fica saldo negativo, e o sino gera alerta crítico (Feature 018) com material e quantidade que faltou
 - [ ] Alerta de estoque abaixo do mínimo: exibido em vermelho no Dashboard (Feature 019), mostrando quantidade e nome do material, e como notificação crítica no sino (Feature 018)
 
 ---
@@ -88,6 +90,25 @@ Então vê cada movimentação registrada: tipo (entrada/baixa/vencimento), quan
 Dado o material "Luvas Descartáveis" abaixo da quantidade mínima
 Quando qualquer usuário (Admin, Dentista ou Recepcionista) abre o sino de notificações (Feature 018)
 Então todos veem o mesmo alerta crítico, sem distinção de papel, mesmo que o widget esteja oculto no seu Dashboard
+```
+
+### Cenário 9: Estoque insuficiente não bloqueia a conclusão
+```
+Dado o material "Resina Composta" com 1 unidade válida
+E a conclusão pedindo baixa de 2 unidades
+Quando o Dentista salva a Evolução
+Então o atendimento fica "concluido"
+E o estoque desse material vai a zero
+E não fica saldo negativo
+E o sino gera alerta crítico informando o material e que faltou 1 unidade (Feature 018)
+```
+
+### Cenário 10: Ajustar quantidade na conclusão
+```
+Dado o procedimento "Restauração" cadastrado com 2 unidades de "Resina Composta"
+Quando o Dentista, ao salvar a Evolução, informa que usou 3 unidades
+Então o sistema dá baixa de 3 unidades (FEFO)
+E o log da movimentação registra a quantidade 3
 ```
 
 ---
@@ -171,13 +192,11 @@ await estoqueService.baixarPorAtendimentoConcluido({
 - [correção] Material existente pode ser reabastecido; cada reabastecimento cria um novo lote (com sua própria validade), agrupado sob o mesmo material
 - [correção] Toda movimentação de estoque é registrada em um histórico de logs (entrada, baixa, vencimento)
 - [correção] Alerta de estoque abaixo do mínimo é visível a todos os papéis, sem distinção
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Se, na conclusão do atendimento, o estoque válido for menor que a quantidade a baixar: bloqueia a conclusão, permite saldo negativo, ou conclui e gera alerta?
-- ⚠️ O Dentista pode ajustar a quantidade efetivamente usada no momento da conclusão (ex: usou 3 em vez de 2)?
+- [stated] 2026-10-28 — Estoque insuficiente não bloqueia a conclusão: baixa até zero, sem saldo negativo, alerta crítico no sino (Feature 018)
+- [stated] 2026-10-28 — Quantidade da baixa parte do cadastro do procedimento; Dentista ou Admin pode ajustar na conclusão; o log registra o valor efetivo
 
 ---
 
 ## Notas
 
-**Histórico:** 2026-10-02 — renumerada de 016 para 017; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-05, INC-11, INC-15, ESC-13, PEN-04). O conceito de reserva (total/reservado/disponível) foi removido. Os antigos Cenários 5 ("reserva reduz disponível") e 6 ("vencido com reserva futura") foram substituídos pelo Cenário 5 (FEFO), e os demais foram renumerados. A pendência "quem age no alerta de vencido com reserva" ficou obsoleta.
+**Histórico:** 2026-10-02 — renumerada de 016 para 017; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-05, INC-11, INC-15, ESC-13, PEN-04). O conceito de reserva (total/reservado/disponível) foi removido. Os antigos Cenários 5 ("reserva reduz disponível") e 6 ("vencido com reserva futura") foram substituídos pelo Cenário 5 (FEFO), e os demais foram renumerados. A pendência "quem age no alerta de vencido com reserva" ficou obsoleta. 2026-10-28 — Bernardo: baixa insuficiente até zero com alerta; quantidade ajustável na conclusão.

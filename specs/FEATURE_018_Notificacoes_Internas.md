@@ -24,7 +24,9 @@ As Features 008 e 009 (V1) usam uma interface temporária de notificação até 
 - [ ] Notificar quando um dentista é removido com agendamentos futuros (Feature 003)
 - [ ] Notificar a Recepcionista quando o envio de uma mensagem ao paciente falha definitivamente (Feature 020)
 - [ ] Notificar atraso de prótese no laboratório (Feature 016)
-- [ ] Notificações possuem diferentes níveis de urgência: as críticas (estoque abaixo do mínimo, atendimento fora de horário, atendimento em cadeira indisponível, retorno a reagendar) permanecem sempre visíveis até serem tratadas
+- [ ] Notificar baixa insuficiente na conclusão do atendimento (Feature 017): material e quantidade que faltou
+- [ ] Notificações possuem diferentes níveis de urgência. São críticas (permanecem visíveis até a situação ser resolvida): estoque abaixo do mínimo, baixa insuficiente, atendimento fora de horário, atendimento em cadeira indisponível, retorno a reagendar, dentista removido, falha de envio ao paciente, atraso de prótese
+- [ ] Destinatários: `paciente_aguardando` vai ao Dentista do agendamento. Tipos “para a Recepcionista” (`retorno_reagendar`, `cancelamento_comunicar`, `falha_envio_mensagem`) vão a **todas as Recepcionistas** da clínica; se não houver nenhuma, vão ao Admin. Alertas operacionais (`estoque_abaixo_minimo`, `estoque_baixa_insuficiente`, `cadeira_indisponivel`, `fora_de_horario`, `dentista_removido`, `atraso_protese`) vão a **todos os usuários da clínica**
 - [ ] Notificações são internas ao sistema (não enviadas por email/SMS)
 - [ ] Notificações aparecem em um ícone de sino no canto superior da tela e também no Dashboard (Feature 019); o sino **sempre** mostra as críticas, mesmo que estejam ocultas no Dashboard
 - [ ] Usuário consegue visualizar suas notificações pendentes
@@ -78,6 +80,21 @@ Então ela permanece visível no sino e no Dashboard até que a situação seja 
 E continua visível no sino mesmo que o usuário tenha ocultado o widget no Dashboard
 ```
 
+### Cenário 6: Destinatário quando há várias Recepcionistas ou nenhuma
+```
+Dado um agendamento cancelado e duas Recepcionistas na clínica
+Quando a notificação `cancelamento_comunicar` é gerada
+Então as duas Recepcionistas recebem a notificação
+E o Admin não é o destinatário principal
+```
+
+### Cenário 6b: Sem Recepcionista, o Admin recebe
+```
+Dado um agendamento cancelado e nenhuma Recepcionista na clínica
+Quando a notificação `cancelamento_comunicar` é gerada
+Então o Admin recebe a notificação
+```
+
 ---
 
 ## Exemplos de Código
@@ -91,6 +108,7 @@ interface NotificacaoInterna {
     | 'retorno_reagendar'
     | 'cancelamento_comunicar'
     | 'estoque_abaixo_minimo'
+    | 'estoque_baixa_insuficiente'
     | 'cadeira_indisponivel'
     | 'fora_de_horario'
     | 'dentista_removido'
@@ -135,16 +153,13 @@ await notificacaoService.criar({
 - [stated] Recepcionista recebe notificação interna: "paciente agendado com retorno precisa ser reagendado"
 - [stated] Recepcionista recebe notificação de cancelamento para comunicar o paciente
 - [stated] A notificação de retorno é crítica: persiste até o novo agendamento ser marcado
-- [stated] Novos tipos: dentista removido, falha final de envio de mensagem ao paciente, atraso de prótese; o termo padronizado é "estoque abaixo do mínimo"
+- [stated] Novos tipos: dentista removido, falha final de envio de mensagem ao paciente, atraso de prótese, baixa insuficiente de estoque; o termo padronizado é "estoque abaixo do mínimo"
 - [stated] Alertas podem ser ocultados no Dashboard (Feature 019), mas o sino sempre mostra os críticos
 - [correção] Marcação de chegada do paciente ("em espera") é manual e opcional; não bloqueia o início do atendimento
-- [correção] Notificações têm dois níveis de urgência: normal e crítica. Críticas (estoque abaixo do mínimo, cadeira indisponível, fora de horário, retorno a reagendar) permanecem visíveis até a situação ser resolvida, não apenas até serem lidas
+- [correção] Notificações têm dois níveis de urgência: normal e crítica. Críticas permanecem visíveis até a situação ser resolvida, não apenas até serem lidas
+- [stated] 2026-10-28 — São críticas: estoque abaixo do mínimo, baixa insuficiente, cadeira indisponível, fora de horário, retorno a reagendar, dentista removido, falha de envio, atraso de prótese. `paciente_aguardando` e `cancelamento_comunicar` são normais
+- [stated] 2026-10-28 — `paciente_aguardando` vai ao Dentista do agendamento. Tipos para a Recepcionista: todas as Recepcionistas; se não houver nenhuma, o Admin. Alertas operacionais: todos os usuários da clínica
 - [correção] Notificações aparecem em um sino no canto superior da tela e também no Dashboard (Feature 019)
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Urgência (normal ou crítica) dos tipos `dentista_removido`, `falha_envio_mensagem` e `atraso_protese`
-- ⚠️ Quando a notificação é "para a Recepcionista" e a clínica tem várias (ou nenhuma), quem recebe: todas as Recepcionistas, o Admin como fallback, ou outro critério?
-- ⚠️ Destinatário das notificações de estoque, cadeira indisponível, fora de horário e dentista removido
 
 ---
 
@@ -152,4 +167,4 @@ await notificacaoService.criar({
 
 Esta feature cobre **apenas** notificações internas (dentro do sistema, entre a equipe). O contato direto com o paciente (SMS/Email/WhatsApp) é responsabilidade da Feature 020 (Comunicação Externa ao Paciente), que cobre os eventos de confirmação de agendamento e lembrete de consulta.
 
-**Histórico:** 2026-10-02 — renumerada de 017 para 018; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-01, INC-07, INC-11, INC-15, ESC-06, ESC-08). O Cenário 1 passou a partir de "agendado" (antes partia de "confirmado").
+**Histórico:** 2026-10-02 — renumerada de 017 para 018; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-01, INC-07, INC-11, INC-15, ESC-06, ESC-08). O Cenário 1 passou a partir de "agendado" (antes partia de "confirmado"). 2026-10-28 — Bernardo: três tipos novos críticos; destinatário Recepcionista com fallback Admin; alertas operacionais para toda a clínica.

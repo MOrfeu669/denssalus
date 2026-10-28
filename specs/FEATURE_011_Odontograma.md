@@ -56,9 +56,9 @@ Então o sistema exibe esse quadrante do lado esquerdo da tela (visão espelhada
 
 ### Cenário 4: Prótese aparece no odontograma
 ```
-Dado uma prótese registrada para o dente 16 (Feature 016)
+Dado uma prótese registrada para os dentes 14, 15 e 16 (Feature 016)
 Quando o Dentista abre o odontograma do paciente
-Então vê a prótese indicada visualmente no dente 16, com suas informações
+Então vê a prótese indicada visualmente em cada um desses dentes, com suas informações
 ```
 > Depende da Feature 016 (V1.5). No V1 vira `it.todo`.
 

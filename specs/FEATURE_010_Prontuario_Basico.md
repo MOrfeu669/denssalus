@@ -151,7 +151,8 @@ await prontuarioService.registrarEvolucao({
 - [stated] Evolução: relatório de texto, registrado pelo Dentista
 - [stated] Salvar a Evolução é o gatilho que conclui o atendimento (status `concluido`, Feature 006); não há ação separada de concluir
 - [stated] 2026-10-27 — Evolução já salva pode ser editada pelo Dentista ou Admin; o atendimento permanece `concluido`; a edição entra na auditoria (`entidade: 'evolucao'`)
-- [stated] 2026-10-27 — Estoque insuficiente não bloqueia salvar a Evolução. A regra da baixa insuficiente fica na Feature 017
+- [stated] 2026-10-27 — Estoque insuficiente não bloqueia salvar a Evolução
+- [stated] 2026-10-28 — Na Feature 017 a baixa insuficiente vai até zero, sem saldo negativo, com alerta crítico; a quantidade pode ser ajustada na conclusão
 - [stated] A conclusão dispara a baixa de materiais (Feature 017) dos procedimentos executados — avulso ou itens do plano
 - [correção] Alterações em Anamnese, Evolução e Documentos (Feature 014) geram registro de auditoria (usuário, data/hora, ação, conteúdo alterado)
 - [stated] Edições em registros do Odontograma (Feature 011) também geram registro de auditoria

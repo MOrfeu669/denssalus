@@ -139,7 +139,7 @@ await authService.solicitarRecuperacaoSenha({ email: 'dra.ana@clinica.com' });
 - [correção] Dados clínicos (agendamentos, prontuários, etc) são vinculados à clínica, não ao usuário; remover um usuário não afeta esses dados, apenas o vínculo de permissões
 - [correção] MVP não possui "Super Admin" acima do Admin da clínica
 - [stated] O papel é exclusivo: um usuário tem exatamente um entre `admin`, `dentista` e `recepcionista`. Dono que também atende não ganha um segundo papel no login
-- [stated] O provedor de e-mail de produção fica fora desta feature, na Feature 020. No ambiente local, a recuperação de senha usa o e-mail do Supabase Auth
+- [stated] O e-mail de produção é o SMTP único da Feature 020 / `docs/TECNOLOGIAS.md` (recuperação de senha e mensagem ao paciente). No ambiente local, a recuperação usa o e-mail do Supabase Auth
 
 ---
 
@@ -147,4 +147,4 @@ await authService.solicitarRecuperacaoSenha({ email: 'dra.ana@clinica.com' });
 
 O Admin desta feature é o que a Feature 002 exige para criar a clínica. Esta spec não abre a Feature 002.
 
-**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, ESC-02, ESC-05). 2026-10-24 — papel exclusivo e e-mail de produção fora do critério; status Pronta.
+**Histórico:** 2026-10-02 — aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-02, ESC-02, ESC-05). 2026-10-24 — papel exclusivo e e-mail de produção fora do critério; status Pronta. 2026-10-28 — Bernardo fechou o e-mail de produção na Feature 020 (SMTP único); o critério desta spec não muda.
