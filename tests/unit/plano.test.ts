@@ -23,7 +23,7 @@ import {
   type ItemPlano,
   type PlanoTratamento,
 } from "../../src/domain/plano/tipos";
-import type { Procedimento } from "../../src/domain/procedimento/tipos";
+import { MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO, type Procedimento } from "../../src/domain/procedimento/tipos";
 import { salvarEvolucao } from "../../src/domain/prontuario/casos";
 import type { Dependencias as DependenciasProntuario } from "../../src/domain/prontuario/portas";
 import type { Evolucao, RegistroAuditoria } from "../../src/domain/prontuario/tipos";
@@ -231,6 +231,63 @@ describe("plano de tratamento", () => {
     expect(memoria.itens.size).toBe(0);
   });
 
+  it("dado um plano, quando o dentista adiciona item com valor 0, então aceita", async () => {
+    const plano = await novoPlano();
+
+    const resultado = await adicionarItem(memoria.deps(), dentista, { planoId: plano.id, ...entrada({ valor: 0 }) }, AGORA);
+
+    expect(resultado.ok && resultado.valor.valor).toBe(0);
+  });
+
+  it.each([
+    ["inexistente", undefined],
+    ["de outra clínica", OUTRA_CLINICA],
+  ])("dado um procedimento %s, quando o dentista adiciona ou edita item, então devolve Procedimento não encontrado e nada muda", async (_nome, clinicaId) => {
+    const plano = await novoPlano();
+    const item = await novoItem(plano.id);
+    if (clinicaId) {
+      memoria.procedimentos.set("proc-fora", { id: "proc-fora", clinicaId, nome: "Fora", tempoMedioMinutos: 10, valorMedio: 1 });
+    }
+    const alvo = { procedimentoId: clinicaId ? "proc-fora" : "nao-existe" };
+
+    const novo = await adicionarItem(memoria.deps(), dentista, { planoId: plano.id, ...entrada(), ...alvo }, AGORA);
+    const edicao = await editarItem(memoria.deps(), dentista, { itemId: item.id, ...entrada(), ...alvo });
+
+    expect(novo).toEqual({ ok: false, mensagem: MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO });
+    expect(edicao).toEqual({ ok: false, mensagem: MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO });
+    expect(memoria.itens.size).toBe(1);
+    expect(memoria.itens.get(item.id)).toEqual(item);
+  });
+
+  it("dado um item pendente, quando o dentista muda procedimento, dentes, valor e agendamento, então o item guarda tudo e continua pendente", async () => {
+    const plano = await novoPlano();
+    const item = await novoItem(plano.id);
+    memoria.procedimentos.set("proc-limpeza", {
+      id: "proc-limpeza",
+      clinicaId: CLINICA_ID,
+      nome: "Limpeza",
+      tempoMedioMinutos: 20,
+      valorMedio: 100,
+    });
+
+    const resultado = await editarItem(memoria.deps(), dentista, {
+      itemId: item.id,
+      procedimentoId: "proc-limpeza",
+      dentes: [11, 21],
+      valor: 99,
+      agendamentoId: CONSULTA,
+    });
+
+    expect(resultado.ok && resultado.valor).toMatchObject({
+      procedimentoId: "proc-limpeza",
+      dentes: [11, 21],
+      valor: 99,
+      agendamentoId: CONSULTA,
+      status: "pendente",
+    });
+    expect(memoria.procedimentos.get("proc-limpeza")?.valorMedio).toBe(100);
+  });
+
   it("dado um item pendente, quando o dentista edita com dente inválido ou valor negativo, então bloqueia e o item não muda", async () => {
     const plano = await novoPlano();
     const item = await novoItem(plano.id);
@@ -366,6 +423,20 @@ describe("plano de tratamento", () => {
         });
       }
       expect(memoria.debitos).toEqual([]);
+    });
+
+    it("dado um plano em andamento com dois itens em consultas distintas, quando a evolução da primeira salva, então continua em andamento e, quando a da última salva, então conclui", async () => {
+      const plano = await novoPlano();
+      memoria.semearConsulta({ id: "consulta-002" });
+      await novoItem(plano.id, { dentes: [26], agendamentoId: CONSULTA });
+      await novoItem(plano.id, { dentes: [16], agendamentoId: "consulta-002" });
+      await marcarEmAndamento(memoria.deps(), dentista, plano.id);
+
+      await salvarEvolucao(memoria.depsProntuario(), dentista, CONSULTA, "Texto 1", AGORA);
+      expect(memoria.planos.get(plano.id)?.status).toBe("em_andamento");
+
+      await salvarEvolucao(memoria.depsProntuario(), dentista, "consulta-002", "Texto 2", DEPOIS);
+      expect(memoria.planos.get(plano.id)?.status).toBe("concluido");
     });
 
     it("dado uma consulta sem itens, quando conclui os itens, então devolve ok sem registro", async () => {
