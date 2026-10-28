@@ -49,6 +49,7 @@ class Memoria {
       notificacoes: notificacoesVazias(),
       retornos: { concluirPendentes: async () => {} },
       reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
+      notificarAgendamentoCriado: async () => {},
       agendamentos: {
         listar: async (clinicaId) => daClinica(clinicaId),
         listarEntre: async (clinicaId, inicio, fim) =>

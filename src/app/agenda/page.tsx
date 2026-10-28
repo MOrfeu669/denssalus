@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { listarOpcoesAgendamento, verAgenda } from "../../domain/agendamento/casos";
 import type { FiltroAgenda } from "../../domain/agendamento/tipos";
-import { dependenciasAgendamento } from "../dependencias";
+import { enviarPendentes, reenviarFalhas } from "../../domain/mensagem/casos";
+import { dependenciasAgendamento, dependenciasMensagem } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
 import { Grade } from "./grade";
@@ -55,6 +56,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
         <p>Nenhuma sessão aberta.</p>
       </main>
     );
+  }
+
+  const agora = new Date();
+  const mensagens = dependenciasMensagem();
+  try {
+    await enviarPendentes(mensagens, sessao.usuario.clinicaId, agora);
+    await reenviarFalhas(mensagens, sessao.usuario.clinicaId, agora);
+  } catch (erro) {
+    falha(erro);
   }
 
   try {

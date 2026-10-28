@@ -110,6 +110,14 @@ async function gravar(
   return { ok: true, valor: agendamento };
 }
 
+async function notificarCriado(deps: Dependencias, agendamento: Agendamento): Promise<void> {
+  try {
+    await deps.notificarAgendamentoCriado(agendamento, new Date());
+  } catch {
+    return;
+  }
+}
+
 export async function criarAgendamento(
   deps: Dependencias,
   ator: Sessao,
@@ -138,6 +146,7 @@ export async function criarAgendamento(
   const gravado = await gravar(deps, ator, contexto.clinica.id, entrada, false);
   if (gravado.ok) {
     await deps.retornos.concluirPendentes(gravado.valor.clinicaId, gravado.valor.pacienteId);
+    await notificarCriado(deps, gravado.valor);
   }
   return gravado;
 }
@@ -153,7 +162,9 @@ export async function registrarEmergencia(
   const entidades = await validarEntidades(deps, contexto.clinica.id, entrada);
   if (!entidades.ok) return entidades;
 
-  return gravar(deps, ator, contexto.clinica.id, entrada, true);
+  const gravado = await gravar(deps, ator, contexto.clinica.id, entrada, true);
+  if (gravado.ok) await notificarCriado(deps, gravado.valor);
+  return gravado;
 }
 
 export async function iniciarAtendimento(

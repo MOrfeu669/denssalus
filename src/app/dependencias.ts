@@ -1,3 +1,4 @@
+import { criarEnviador, criarMensagens, criarModelosMensagem } from "../lib/mensagem/envio";
 import { criarGateway } from "../lib/supabase/gateway";
 import { criarAgendaAlertas } from "../lib/supabase/agenda-alertas";
 import { criarAgendaDentistas } from "../lib/supabase/agenda-dentistas";
@@ -5,6 +6,7 @@ import { criarAgendamentos } from "../lib/supabase/agendamentos";
 import { criarAvisos } from "../lib/supabase/avisos";
 import { criarBloqueios } from "../lib/supabase/bloqueios";
 import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
+import { criarDashboard } from "../lib/supabase/dashboard";
 import { criarDebitos } from "../lib/supabase/debitos";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarDocumentos } from "../lib/supabase/documentos";
@@ -21,8 +23,11 @@ import { criarConfiguracoesRetorno, criarRetornos } from "../lib/supabase/retorn
 import { ErroAplicacao } from "../lib/supabase/erro";
 import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias as DependenciasAgendamento } from "../domain/agendamento/portas";
+import { notificarAgendamentoCriado } from "../domain/mensagem/casos";
+import type { Dependencias as DependenciasMensagem } from "../domain/mensagem/portas";
 import type { Dependencias } from "../domain/auth/portas";
 import type { Dependencias as DependenciasClinica } from "../domain/clinica/portas";
+import type { Dependencias as DependenciasDashboard } from "../domain/dashboard/portas";
 import { gerarDebitosDoAtendimento as gerarDebitosDoAtendimentoCaso } from "../domain/debito/casos";
 import type { Dependencias as DependenciasDebito } from "../domain/debito/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
@@ -123,6 +128,18 @@ async function publicarParaClinica(
   });
 }
 
+export function dependenciasMensagem(): DependenciasMensagem {
+  return {
+    mensagens: criarMensagens(),
+    modelos: criarModelosMensagem(),
+    pacientes: criarPacientes(),
+    agendamentos: criarAgendamentos(),
+    notificacoes: dependenciasNotificacao(),
+    enviador: criarEnviador(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
 export function dependenciasAgendamento(): DependenciasAgendamento {
   return {
     agendamentos: criarAgendamentos(),
@@ -147,6 +164,9 @@ export function dependenciasAgendamento(): DependenciasAgendamento {
         confirmouReversao,
       ),
     ids: { novo: () => crypto.randomUUID() },
+    notificarAgendamentoCriado: async (agendamento, agora) => {
+      await notificarAgendamentoCriado(dependenciasMensagem(), agendamento, agora);
+    },
   };
 }
 
@@ -319,6 +339,14 @@ export function dependenciasProtese(): DependenciasProtese {
     dentistas: criarDentistas(),
     procedimentos: criarProcedimentos(),
     agendamentos: criarAgendamentos(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasDashboard(): DependenciasDashboard {
+  const dashboard = criarDashboard();
+  return {
+    ...dashboard,
     ids: { novo: () => crypto.randomUUID() },
   };
 }
