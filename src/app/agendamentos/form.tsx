@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import type { Papel } from "../../domain/auth/tipos";
 import { sugerirFim } from "../../domain/agendamento/regras";
 import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/tipos";
+import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
 import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { bloquear, cancelar, criar, iniciar } from "./actions";
@@ -42,7 +43,9 @@ export function Agendamentos({
     atendimento,
     bloqueio,
     retorno,
-    ...(cancelamento.status === "erro" ? [cancelamento] : []),
+    ...(cancelamento.status === "erro" && cancelamento.mensagem !== MENSAGEM_REGISTROS_CONFIRMADOS
+      ? [{ ...cancelamento, detalhe: "" }]
+      : []),
   );
   const podeBloquear = papel === "admin" || papel === "dentista";
 
@@ -78,6 +81,7 @@ export function Agendamentos({
                   id={agendamento.id}
                   acao={acaoCancelar}
                   pendente={pendenteCancelar}
+                  estado={cancelamento}
                 />
               ) : null}
               {agendamento.status === "concluido" && podeBloquear ? (

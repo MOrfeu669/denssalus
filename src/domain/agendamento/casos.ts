@@ -189,6 +189,7 @@ export async function cancelarAgendamento(
   agendamentoId: string,
   motivo: string,
   agora: Date,
+  confirmouReversao: boolean,
 ): Promise<Resultado<Agendamento>> {
   const contexto = await clinicaAutorizada(deps, ator, "agendamento:cancelar");
   if (!contexto.ok) return contexto;
@@ -201,6 +202,9 @@ export async function cancelarAgendamento(
     return { ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO };
   }
   if (atual.status === "concluido") return { ok: false, mensagem: MENSAGEM_JA_CONCLUIDO };
+
+  const reversao = await deps.reverterDoAgendamento(atual.clinicaId, atual.id, confirmouReversao);
+  if (!reversao.ok) return reversao;
 
   const cancelado: Agendamento = {
     ...atual,

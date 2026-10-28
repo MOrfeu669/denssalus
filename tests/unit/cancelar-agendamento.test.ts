@@ -46,6 +46,7 @@ class Memoria {
         },
       },
       retornos: { concluirPendentes: async () => {} },
+      reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
       agendamentos: {
         listar: async (clinicaId) => daClinica(clinicaId),
         listarEntre: async (clinicaId, inicio, fim) =>
@@ -172,7 +173,7 @@ describe("cancelar agendamento", () => {
     const original = memoria.semear({ id: "ag-1", alertaHorario: true });
     const ator = sessao("recepcionista");
 
-    const resultado = await cancelarAgendamento(memoria.deps(), ator, "ag-1", MOTIVO, AGORA);
+    const resultado = await cancelarAgendamento(memoria.deps(), ator, "ag-1", MOTIVO, AGORA, false);
 
     expect(resultado.ok).toBe(true);
     if (!resultado.ok) return;
@@ -200,6 +201,7 @@ describe("cancelar agendamento", () => {
         "ag-1",
         motivo,
         AGORA,
+        false,
       );
 
       expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_MOTIVO_OBRIGATORIO });
@@ -219,6 +221,7 @@ describe("cancelar agendamento", () => {
       "ag-1",
       `  ${MOTIVO}  `,
       AGORA,
+      false,
     );
 
     expect(resultado.ok).toBe(true);
@@ -230,7 +233,7 @@ describe("cancelar agendamento", () => {
     memoria.semear({ id: "ag-1" });
     const deps = memoria.deps();
 
-    await cancelarAgendamento(deps, sessao("recepcionista"), "ag-1", MOTIVO, AGORA);
+    await cancelarAgendamento(deps, sessao("recepcionista"), "ag-1", MOTIVO, AGORA, false);
     const novo = await criarAgendamento(deps, sessao("dentista"), {
       pacienteId: "paciente-maria",
       dentistaId: DENTISTA_CARLOS,
@@ -257,6 +260,7 @@ describe("cancelar agendamento", () => {
         "ag-1",
         MOTIVO,
         AGORA,
+        false,
       );
 
       expect(resultado.ok).toBe(true);
@@ -274,6 +278,7 @@ describe("cancelar agendamento", () => {
       "ag-1",
       MOTIVO,
       AGORA,
+      false,
     );
 
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_JA_CONCLUIDO });
@@ -292,6 +297,7 @@ describe("cancelar agendamento", () => {
       "ag-1",
       MOTIVO,
       AGORA,
+      false,
     );
 
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO });
@@ -306,6 +312,7 @@ describe("cancelar agendamento", () => {
       "ag-inexistente",
       MOTIVO,
       AGORA,
+      false,
     );
 
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO });
@@ -323,6 +330,7 @@ describe("cancelar agendamento", () => {
         "ag-outra",
         MOTIVO,
         AGORA,
+        false,
       );
 
       expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO });
@@ -337,9 +345,9 @@ describe("cancelar agendamento", () => {
     const deps = memoria.deps();
     const ator = sessao("recepcionista");
 
-    await cancelarAgendamento(deps, ator, "ag-1", MOTIVO, AGORA);
+    await cancelarAgendamento(deps, ator, "ag-1", MOTIVO, AGORA, false);
     expect(memoria.avisos).toHaveLength(1);
-    await cancelarAgendamento(deps, ator, "ag-2", "Paciente viajou", AGORA);
+    await cancelarAgendamento(deps, ator, "ag-2", "Paciente viajou", AGORA, false);
 
     expect(memoria.avisos).toEqual([
       { clinicaId: CLINICA_ID, agendamentoId: "ag-1", pacienteId: PACIENTE_JOAO, motivo: MOTIVO },
@@ -370,6 +378,7 @@ describe("cancelar agendamento", () => {
         "ag-1",
         MOTIVO,
         AGORA,
+        false,
       );
 
       expect(resultado.ok).toBe(true);
@@ -389,6 +398,7 @@ describe("cancelar agendamento", () => {
       "ag-1",
       MOTIVO,
       AGORA,
+      false,
     );
 
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_PAPEL });
@@ -406,6 +416,7 @@ describe("cancelar agendamento", () => {
       "ag-1",
       MOTIVO,
       AGORA,
+      false,
     );
 
     expect(resultado.ok).toBe(true);

@@ -1,3 +1,4 @@
+import type { Resultado } from "../auth/tipos";
 import type { Cadeiras, Clinicas } from "../clinica/portas";
 import type { Dentistas } from "../dentista/portas";
 import type { Pacientes } from "../paciente/portas";
@@ -44,5 +45,10 @@ export type Dependencias = {
   pacientes: Pick<Pacientes, "buscarPorId" | "listar">;
   procedimentos: Pick<Procedimentos, "buscarPorId" | "listar">;
   retornos: ResolvedorRetorno;
+  reverterDoAgendamento(
+    clinicaId: string,
+    agendamentoId: string,
+    confirmouReversao: boolean,
+  ): Promise<Resultado<void>>;
   ids: { novo(): string };
 };

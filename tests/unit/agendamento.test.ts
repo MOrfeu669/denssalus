@@ -76,6 +76,7 @@ class Memoria {
     return {
       avisos: { avisarRecepcionista: async () => {} },
       retornos: { concluirPendentes: async () => {} },
+      reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
       agendamentos: {
         listar: async (clinicaId) => this.daClinica(this.agendamentos, clinicaId),
         listarEntre: async (clinicaId, inicio, fim) =>
