@@ -8,6 +8,7 @@ import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDebitos } from "../lib/supabase/debitos";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarDocumentos } from "../lib/supabase/documentos";
+import { criarImagens } from "../lib/supabase/imagens";
 import { criarOdontograma } from "../lib/supabase/odontograma";
 import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarPlanos } from "../lib/supabase/plano";
@@ -23,6 +24,7 @@ import { gerarDebitosDoAtendimento as gerarDebitosDoAtendimentoCaso } from "../d
 import type { Dependencias as DependenciasDebito } from "../domain/debito/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
 import type { Dependencias as DependenciasDocumento } from "../domain/documento/portas";
+import type { Dependencias as DependenciasImagem } from "../domain/imagem/portas";
 import { reverterDoAgendamento as reverterDoAgendamentoCaso } from "../domain/odontograma/casos";
 import type { Dependencias as DependenciasOdontograma } from "../domain/odontograma/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
@@ -152,6 +154,21 @@ export function dependenciasDocumento(): DependenciasDocumento {
     auditoria: criarProntuario().auditoria,
     ids: { novo: () => crypto.randomUUID() },
   };
+}
+
+export function dependenciasImagem(): DependenciasImagem {
+  const imagens = criarImagens();
+  return {
+    imagens: imagens.imagens,
+    arquivos: imagens.arquivos,
+    pacientes: criarPacientes(),
+    agendamentos: criarAgendamentos(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function urlsImagem() {
+  return criarImagens().arquivos;
 }
 
 export function dependenciasRetorno(): DependenciasRetorno {

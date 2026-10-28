@@ -26,6 +26,8 @@ import { SecaoDebitos } from "./debitos";
 import { SecaoDocumentos, type DocumentoItem } from "./documentos";
 import { dataAgendamento } from "./formato";
 import { Odontograma } from "./odontograma";
+import { carregarImagens } from "./carregar-imagens";
+import { SecaoImagens } from "./imagens";
 import { SecaoPlano } from "./plano";
 import { Auditoria, Historico, VisaoGeral } from "./secoes";
 import type { ProcedimentoOpcao } from "./tipos-odontograma";
@@ -167,6 +169,8 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const planos = await carregarPlanos(sessao, pacienteId);
   const debitos = await carregarDebitos(sessao, pacienteId);
   const documentos = await carregarDocumentos(sessao, pacienteId);
+  const imagens = await carregarImagens(sessao, pacienteId);
+  const todosAgendamentos = historico.map(({ id, inicio, status }) => ({ id, inicio, status }));
   const agendamentosAbertos = historico
     .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
     .map(({ id, inicio, status }) => ({ id, inicio, status }));
@@ -225,12 +229,30 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
             pacienteId={pacienteId}
             registros={odontograma.valor}
             procedimentos={procedimentos}
-            agendamentos={historico.map(({ id, inicio, status }) => ({ id, inicio, status }))}
+            agendamentos={todosAgendamentos}
+            imagens={imagens.ok ? imagens.ativas : []}
             podeEscrever={podeEscrever}
           />
         ) : (
           <p role="alert" tabIndex={-1}>
             {odontograma.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="raio-x">
+        <h2 id="raio-x">Raio X e imagens</h2>
+        {imagens.ok ? (
+          <SecaoImagens
+            pacienteId={pacienteId}
+            ativas={imagens.ativas}
+            pendentes={imagens.pendentes}
+            agendamentos={todosAgendamentos}
+            podeEscrever={podeEscrever}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {imagens.mensagem}
           </p>
         )}
       </section>

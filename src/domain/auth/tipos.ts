@@ -44,4 +44,5 @@ export type Acao =
   | "debito:descontar"
   | "debito:quitar"
   | "documento:modelar"
-  | "documento:gerar";
+  | "documento:gerar"
+  | "imagem:anexar";
