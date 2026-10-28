@@ -39,6 +39,8 @@ export default async function Page() {
             {" · "}
             <Link href="/dentistas">Dentistas</Link>
             {" · "}
+            <Link href="/mensagens">Mensagens</Link>
+            {" · "}
           </>
         ) : null}
         {sessao.usuario.papel === "admin" || sessao.usuario.papel === "dentista" ? (

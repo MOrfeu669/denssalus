@@ -97,6 +97,7 @@ class Memoria {
       avisos: retornos.avisos,
       notificacoes: retornos.notificacoes,
       reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
+      notificarAgendamentoCriado: async () => {},
       retornos: {
         concluirPendentes: (clinicaId, pacienteId) =>
           reagendarPorNovoAgendamento(retornos, clinicaId, pacienteId),

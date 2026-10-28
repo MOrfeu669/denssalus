@@ -52,5 +52,6 @@ export type Dependencias = {
     agendamentoId: string,
     confirmouReversao: boolean,
   ): Promise<Resultado<void>>;
+  notificarAgendamentoCriado(agendamento: Agendamento, agora: Date): Promise<void>;
   ids: { novo(): string };
 };

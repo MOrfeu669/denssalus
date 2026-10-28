@@ -57,6 +57,7 @@ class Cenario {
       avisos: { avisarRecepcionista: async () => {} },
       retornos: { concluirPendentes: async () => {} },
       reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
+      notificarAgendamentoCriado: async () => {},
       clinicas: {
         buscarPorId: async (id) =>
           ({ id, nome: "Clínica OdontoSmile", adminId: USUARIO_ADMIN }) as Clinica,

@@ -97,6 +97,7 @@ class Memoria {
       },
       reverterDoAgendamento: (clinicaId, agendamentoId, confirmou) =>
         reverterDoAgendamento(this.deps(), clinicaId, agendamentoId, confirmou),
+      notificarAgendamentoCriado: async () => {},
     } satisfies Partial<DependenciasAgenda>;
     return parcial as unknown as DependenciasAgenda;
   }

@@ -1,3 +1,4 @@
+import { criarEnviador, criarMensagens, criarModelosMensagem } from "../lib/mensagem/envio";
 import { criarGateway } from "../lib/supabase/gateway";
 import { criarAgendaAlertas } from "../lib/supabase/agenda-alertas";
 import { criarAgendaDentistas } from "../lib/supabase/agenda-dentistas";
@@ -22,6 +23,8 @@ import { criarConfiguracoesRetorno, criarRetornos } from "../lib/supabase/retorn
 import { ErroAplicacao } from "../lib/supabase/erro";
 import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias as DependenciasAgendamento } from "../domain/agendamento/portas";
+import { notificarAgendamentoCriado } from "../domain/mensagem/casos";
+import type { Dependencias as DependenciasMensagem } from "../domain/mensagem/portas";
 import type { Dependencias } from "../domain/auth/portas";
 import type { Dependencias as DependenciasClinica } from "../domain/clinica/portas";
 import type { Dependencias as DependenciasDashboard } from "../domain/dashboard/portas";
@@ -125,6 +128,18 @@ async function publicarParaClinica(
   });
 }
 
+export function dependenciasMensagem(): DependenciasMensagem {
+  return {
+    mensagens: criarMensagens(),
+    modelos: criarModelosMensagem(),
+    pacientes: criarPacientes(),
+    agendamentos: criarAgendamentos(),
+    notificacoes: dependenciasNotificacao(),
+    enviador: criarEnviador(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
 export function dependenciasAgendamento(): DependenciasAgendamento {
   return {
     agendamentos: criarAgendamentos(),
@@ -149,6 +164,9 @@ export function dependenciasAgendamento(): DependenciasAgendamento {
         confirmouReversao,
       ),
     ids: { novo: () => crypto.randomUUID() },
+    notificarAgendamentoCriado: async (agendamento, agora) => {
+      await notificarAgendamentoCriado(dependenciasMensagem(), agendamento, agora);
+    },
   };
 }
 
