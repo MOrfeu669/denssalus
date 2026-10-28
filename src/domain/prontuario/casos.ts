@@ -101,6 +101,8 @@ export async function salvarEvolucao(
   await deps.evolucoes.salvar(evolucao);
   if (!anterior) {
     await deps.agendamentos.salvar({ ...consulta, status: "concluido", concluidoEm: instante });
+    await deps.concluirItensDoAgendamento(consulta.clinicaId, agendamentoId, ator, agora);
+    await deps.gerarDebitosDoAtendimento(consulta.clinicaId, agendamentoId, ator);
   }
   await deps.auditoria.registrar({
     id: deps.ids.novo(),
