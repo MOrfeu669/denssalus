@@ -1,5 +1,4 @@
 import type { Agendamentos } from "../agendamento/portas";
-import type { Sessao } from "../auth/tipos";
 import type { Pacientes } from "../paciente/portas";
 import type { Anamnese, Evolucao, RegistroAuditoria } from "./tipos";
 
@@ -28,17 +27,6 @@ export type Dependencias = {
   evolucoes: Evolucoes;
   auditoria: Auditoria;
   estoque: BaixaEstoque;
-  concluirItensDoAgendamento(
-    clinicaId: string,
-    agendamentoId: string,
-    ator: Sessao,
-    agora: Date,
-  ): Promise<void>;
-  gerarDebitosDoAtendimento(
-    clinicaId: string,
-    agendamentoId: string,
-    ator: Sessao,
-  ): Promise<void>;
   agendamentos: Pick<Agendamentos, "buscarPorId" | "listar" | "salvar">;
   pacientes: Pick<Pacientes, "buscarPorId">;
   ids: { novo(): string };
