@@ -93,6 +93,7 @@ class Memoria {
     const retornos = this.deps();
     return {
       avisos: retornos.avisos,
+      reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
       retornos: {
         concluirPendentes: (clinicaId, pacienteId) =>
           reagendarPorNovoAgendamento(retornos, clinicaId, pacienteId),

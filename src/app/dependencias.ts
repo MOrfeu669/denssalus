@@ -6,6 +6,7 @@ import { criarAvisos } from "../lib/supabase/avisos";
 import { criarBloqueios } from "../lib/supabase/bloqueios";
 import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDentistas } from "../lib/supabase/dentistas";
+import { criarOdontograma } from "../lib/supabase/odontograma";
 import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarProcedimentos } from "../lib/supabase/procedimentos";
 import { criarProntuario } from "../lib/supabase/prontuario";
@@ -15,6 +16,8 @@ import type { Dependencias as DependenciasAgendamento } from "../domain/agendame
 import type { Dependencias } from "../domain/auth/portas";
 import type { Dependencias as DependenciasClinica } from "../domain/clinica/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
+import { reverterDoAgendamento as reverterDoAgendamentoCaso } from "../domain/odontograma/casos";
+import type { Dependencias as DependenciasOdontograma } from "../domain/odontograma/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
 import type { Dependencias as DependenciasProcedimento } from "../domain/procedimento/portas";
 import type { Dependencias as DependenciasProntuario } from "../domain/prontuario/portas";
@@ -80,6 +83,24 @@ export function dependenciasAgendamento(): DependenciasAgendamento {
         await reagendarPorNovoAgendamento(dependenciasRetorno(), clinicaId, pacienteId);
       },
     },
+    reverterDoAgendamento: (clinicaId, agendamentoId, confirmouReversao) =>
+      reverterDoAgendamentoCaso(
+        dependenciasOdontograma(),
+        clinicaId,
+        agendamentoId,
+        confirmouReversao,
+      ),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasOdontograma(): DependenciasOdontograma {
+  return {
+    registros: criarOdontograma(),
+    auditoria: criarProntuario().auditoria,
+    pacientes: criarPacientes(),
+    procedimentos: criarProcedimentos(),
+    agendamentos: criarAgendamentos(),
     ids: { novo: () => crypto.randomUUID() },
   };
 }

@@ -119,8 +119,9 @@ export async function cancelar(
       texto(formData, "id"),
       validado.valor,
       new Date(),
+      texto(formData, "confirmouReversao") === "sim",
     );
-    if (!resultado.ok) return estado("erro", resultado.mensagem);
+    if (!resultado.ok) return estado("erro", resultado.mensagem, texto(formData, "id"));
     revalidatePath("/agendamentos");
     return estado("sucesso", "Deseja reagendar?", resultado.valor.id);
   } catch (causa) {

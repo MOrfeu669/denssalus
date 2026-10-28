@@ -1,13 +1,48 @@
 import Link from "next/link";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
+import { listarOdontograma } from "../../../domain/odontograma/casos";
+import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
+import { listarProcedimentos } from "../../../domain/procedimento/casos";
 import { abrirProntuario, listarAuditoria } from "../../../domain/prontuario/casos";
 import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
-import { dependenciasProntuario } from "../../dependencias";
+import {
+  dependenciasOdontograma,
+  dependenciasProcedimento,
+  dependenciasProntuario,
+} from "../../dependencias";
 import { falha } from "../../falha";
 import { sessaoAtual } from "../../sessao";
 import { FormularioAnamnese, FormularioEvolucao } from "./form";
 import { dataAgendamento } from "./formato";
+import { Odontograma } from "./odontograma";
 import { Auditoria, Historico, VisaoGeral } from "./secoes";
+import type { ProcedimentoOpcao } from "./tipos-odontograma";
+
+type ResultadoOdontograma =
+  | { ok: true; valor: RegistroOdontograma[] }
+  | { ok: false; mensagem: string };
+
+async function carregarOdontograma(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  pacienteId: string,
+): Promise<ResultadoOdontograma> {
+  try {
+    return await listarOdontograma(dependenciasOdontograma(), sessao, pacienteId);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+async function carregarProcedimentos(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+): Promise<ProcedimentoOpcao[]> {
+  try {
+    const lista = await listarProcedimentos(dependenciasProcedimento(), sessao);
+    return lista.ok ? lista.valor.map(({ id, nome }) => ({ id, nome })) : [];
+  } catch {
+    return [];
+  }
+}
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +90,8 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
 
   const { paciente, anamnese, historico, evolucoes } = resultado.valor;
   const consultas = historico.filter((item) => item.status === "iniciado" || item.status === "concluido");
+  const odontograma = await carregarOdontograma(sessao, pacienteId);
+  const procedimentos = await carregarProcedimentos(sessao);
 
   return (
     <main>
@@ -101,6 +138,23 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
           })}
         </ul>
         {podeEscrever ? null : <p>{MENSAGEM_PAPEL}</p>}
+      </section>
+
+      <section aria-labelledby="odontograma">
+        <h2 id="odontograma">Odontograma</h2>
+        {odontograma.ok ? (
+          <Odontograma
+            pacienteId={pacienteId}
+            registros={odontograma.valor}
+            procedimentos={procedimentos}
+            agendamentos={historico.map(({ id, inicio, status }) => ({ id, inicio, status }))}
+            podeEscrever={podeEscrever}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {odontograma.mensagem}
+          </p>
+        )}
       </section>
 
       {auditoria?.ok ? <Auditoria registros={auditoria.valor} /> : null}

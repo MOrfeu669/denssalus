@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { Agendamento } from "../../domain/agendamento/tipos";
+import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
 import type { EstadoFormulario } from "../formulario";
 
 export function podeCancelar(agendamento: Agendamento): boolean {
@@ -17,21 +18,46 @@ export function FormularioCancelar({
   id,
   acao,
   pendente,
+  estado,
 }: {
   id: string;
   acao: (formData: FormData) => void;
   pendente: boolean;
+  estado: EstadoFormulario;
 }) {
+  const [motivo, setMotivo] = useState("");
+  const pedeConfirmacao =
+    estado.status === "erro" &&
+    estado.detalhe === id &&
+    estado.mensagem === MENSAGEM_REGISTROS_CONFIRMADOS;
+  const mensagemRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (pedeConfirmacao) mensagemRef.current?.focus();
+  }, [pedeConfirmacao, estado.quando]);
+
   return (
     <form action={acao} aria-busy={pendente}>
       <input type="hidden" name="id" value={id} />
+      {pedeConfirmacao ? <input type="hidden" name="confirmouReversao" value="sim" /> : null}
       <label>
         Motivo
-        <input name="motivo" />
+        <input name="motivo" value={motivo} onChange={(evento) => setMotivo(evento.target.value)} />
       </label>
-      <button type="submit" disabled={pendente}>
-        Cancelar agendamento
-      </button>
+      {pedeConfirmacao ? (
+        <>
+          <p ref={mensagemRef} role="alert" tabIndex={-1}>
+            {estado.mensagem}
+          </p>
+          <button type="submit" disabled={pendente}>
+            Confirmar reversão
+          </button>
+        </>
+      ) : (
+        <button type="submit" disabled={pendente}>
+          Cancelar agendamento
+        </button>
+      )}
     </form>
   );
 }
