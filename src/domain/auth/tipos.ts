@@ -47,4 +47,5 @@ export type Acao =
   | "documento:gerar"
   | "imagem:anexar"
   | "protese:gerir"
-  | "estoque:gerir";
+  | "estoque:gerir"
+  | "dashboard:ver";
