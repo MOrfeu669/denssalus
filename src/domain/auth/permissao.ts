@@ -19,6 +19,7 @@ const MINIMO: Record<Acao, Papel> = {
   "agendamento:bloquear": "dentista",
   "agendamento:cancelar": "recepcionista",
   "agenda:ver": "recepcionista",
+  "retorno:marcar": "dentista",
 };
 
 export function permite(papel: Papel, acao: Acao): boolean {

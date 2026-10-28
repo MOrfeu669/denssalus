@@ -45,6 +45,7 @@ class Memoria {
           this.avisos.push(aviso);
         },
       },
+      retornos: { concluirPendentes: async () => {} },
       agendamentos: {
         listar: async (clinicaId) => daClinica(clinicaId),
         listarEntre: async (clinicaId, inicio, fim) =>

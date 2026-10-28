@@ -34,4 +34,5 @@ export type Acao =
   | "agendamento:criar"
   | "agendamento:bloquear"
   | "agendamento:cancelar"
-  | "agenda:ver";
+  | "agenda:ver"
+  | "retorno:marcar";

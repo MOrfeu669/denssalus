@@ -52,6 +52,8 @@ export default async function Page() {
         <Link href="/agendamentos">Agendamentos</Link>
         {" · "}
         <Link href="/agenda">Agenda</Link>
+        {" · "}
+        <Link href="/retornos">Retornos</Link>
       </p>
     </main>
   );

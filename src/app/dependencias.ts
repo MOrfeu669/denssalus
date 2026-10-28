@@ -8,6 +8,7 @@ import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarProcedimentos } from "../lib/supabase/procedimentos";
+import { criarConfiguracoesRetorno, criarRetornos } from "../lib/supabase/retornos";
 import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias as DependenciasAgendamento } from "../domain/agendamento/portas";
 import type { Dependencias } from "../domain/auth/portas";
@@ -15,6 +16,8 @@ import type { Dependencias as DependenciasClinica } from "../domain/clinica/port
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
 import type { Dependencias as DependenciasProcedimento } from "../domain/procedimento/portas";
+import { reagendarPorNovoAgendamento } from "../domain/retorno/casos";
+import type { Dependencias as DependenciasRetorno } from "../domain/retorno/portas";
 
 export function dependencias(): Dependencias {
   return {
@@ -70,6 +73,22 @@ export function dependenciasAgendamento(): DependenciasAgendamento {
     dentistas: criarDentistas(),
     pacientes: criarPacientes(),
     procedimentos: criarProcedimentos(),
+    retornos: {
+      async concluirPendentes(clinicaId, pacienteId) {
+        await reagendarPorNovoAgendamento(dependenciasRetorno(), clinicaId, pacienteId);
+      },
+    },
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasRetorno(): DependenciasRetorno {
+  return {
+    retornos: criarRetornos(),
+    configuracoes: criarConfiguracoesRetorno(),
+    agendamentos: criarAgendamentos(),
+    pacientes: criarPacientes(),
+    avisos: criarAvisos(),
     ids: { novo: () => crypto.randomUUID() },
   };
 }
