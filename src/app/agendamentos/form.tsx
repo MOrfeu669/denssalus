@@ -8,7 +8,7 @@ import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/ti
 import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
 import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
-import { bloquear, cancelar, criar, iniciar } from "./actions";
+import { bloquear, cancelar, chegar, criar, iniciar } from "./actions";
 import { marcar } from "../retornos/actions";
 import { FormularioMarcarRetorno } from "../retornos/form";
 import { FormularioCancelar, PerguntaReagendar, podeCancelar } from "./cancelar";
@@ -35,12 +35,14 @@ export function Agendamentos({
   const roteador = useRouter();
   const [criacao, acaoCriar, pendenteCriar] = useActionState(criar, estadoVazio);
   const [atendimento, acaoIniciar, pendenteIniciar] = useActionState(iniciar, estadoVazio);
+  const [chegada, acaoChegar, pendenteChegar] = useActionState(chegar, estadoVazio);
   const [bloqueio, acaoBloquear, pendenteBloquear] = useActionState(bloquear, estadoVazio);
   const [cancelamento, acaoCancelar, pendenteCancelar] = useActionState(cancelar, estadoVazio);
   const [retorno, acaoRetorno, pendenteRetorno] = useActionState(marcar, estadoVazio);
   const aviso = avisoVisivel(
     criacao,
     atendimento,
+    chegada,
     bloqueio,
     retorno,
     ...(cancelamento.status === "erro" && cancelamento.mensagem !== MENSAGEM_REGISTROS_CONFIRMADOS
@@ -51,11 +53,13 @@ export function Agendamentos({
 
   useEffect(() => {
     if (
-      [criacao, atendimento, bloqueio, cancelamento, retorno].some((item) => item.status === "sucesso")
+      [criacao, atendimento, chegada, bloqueio, cancelamento, retorno].some(
+        (item) => item.status === "sucesso",
+      )
     ) {
       roteador.refresh();
     }
-  }, [criacao, atendimento, bloqueio, cancelamento, retorno, roteador]);
+  }, [criacao, atendimento, chegada, bloqueio, cancelamento, retorno, roteador]);
 
   return (
     <>
@@ -68,6 +72,14 @@ export function Agendamentos({
           {agendamentos.map((agendamento) => (
             <li key={agendamento.id}>
               <span>{resumo(agendamento, opcoes)}</span>
+              {agendamento.status === "agendado" ? (
+                <form action={acaoChegar} aria-busy={pendenteChegar}>
+                  <input type="hidden" name="id" value={agendamento.id} />
+                  <button type="submit" disabled={pendenteChegar}>
+                    Marcar chegada
+                  </button>
+                </form>
+              ) : null}
               {podeIniciar(agendamento, papel, usuarioId, opcoes.dentistas) ? (
                 <form action={acaoIniciar} aria-busy={pendenteIniciar}>
                   <input type="hidden" name="id" value={agendamento.id} />

@@ -6,6 +6,8 @@ import { listarDebitos } from "../../../domain/debito/casos";
 import type { DebitoComPagamento } from "../../../domain/debito/tipos";
 import { listarDocumentos, listarModelos } from "../../../domain/documento/casos";
 import type { ModeloDocumento } from "../../../domain/documento/tipos";
+import { listarMateriaisDaConsulta } from "../../../domain/estoque/atendimento";
+import type { MaterialDaConsulta } from "../../../domain/estoque/tipos";
 import { listarPlanos } from "../../../domain/plano/casos";
 import type { PlanoComItens } from "../../../domain/plano/tipos";
 import { listarProcedimentos } from "../../../domain/procedimento/casos";
@@ -14,6 +16,7 @@ import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
 import {
   dependenciasDebito,
   dependenciasDocumento,
+  dependenciasEstoque,
   dependenciasOdontograma,
   dependenciasPlano,
   dependenciasProcedimento,
@@ -120,6 +123,23 @@ async function carregarProcedimentos(
   }
 }
 
+async function carregarMateriais(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  agendamentoId: string,
+): Promise<MaterialDaConsulta[]> {
+  try {
+    const lista = await listarMateriaisDaConsulta(
+      dependenciasEstoque(),
+      sessao,
+      agendamentoId,
+      new Date(),
+    );
+    return lista.ok ? lista.valor : [];
+  } catch {
+    return [];
+  }
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function Page({ params }: { params: Promise<{ pacienteId: string }> }) {
@@ -173,6 +193,13 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const documentos = await carregarDocumentos(sessao, pacienteId);
   const imagens = await carregarImagens(sessao, pacienteId);
   const proteses = await carregarProteses(sessao, pacienteId);
+  const materiaisDasConsultas = new Map<string, MaterialDaConsulta[]>();
+  if (podeEscrever) {
+    for (const consulta of consultas) {
+      if (evolucoes.some((item) => item.agendamentoId === consulta.id)) continue;
+      materiaisDasConsultas.set(consulta.id, await carregarMateriais(sessao, consulta.id));
+    }
+  }
   const todosAgendamentos = historico.map(({ id, inicio, status }) => ({ id, inicio, status }));
   const agendamentosAbertos = historico
     .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
@@ -214,6 +241,7 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
                     agendamentoId={consulta.id}
                     rotulo={inicio}
                     texto={atual?.texto ?? ""}
+                    materiais={atual ? undefined : materiaisDasConsultas.get(consulta.id)}
                   />
                 ) : (
                   <p>{atual ? atual.texto : "Nenhuma evolução registrada."}</p>

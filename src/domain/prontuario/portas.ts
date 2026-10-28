@@ -1,5 +1,6 @@
 import type { Agendamentos } from "../agendamento/portas";
 import type { Sessao } from "../auth/tipos";
+import type { AjusteBaixa } from "../estoque/tipos";
 import type { Pacientes } from "../paciente/portas";
 import type { Anamnese, Evolucao, RegistroAuditoria } from "./tipos";
 
@@ -20,7 +21,12 @@ export type Auditoria = {
 };
 
 export type BaixaEstoque = {
-  baixar(agendamentoId: string): Promise<void>;
+  baixar(
+    agendamentoId: string,
+    ajustes: AjusteBaixa[],
+    usuarioId: string,
+    agora: Date,
+  ): Promise<void>;
 };
 
 export type Dependencias = {

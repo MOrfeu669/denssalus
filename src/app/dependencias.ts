@@ -8,7 +8,9 @@ import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDebitos } from "../lib/supabase/debitos";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarDocumentos } from "../lib/supabase/documentos";
+import { criarEstoque } from "../lib/supabase/estoque";
 import { criarImagens } from "../lib/supabase/imagens";
+import { criarNotificacoes } from "../lib/supabase/notificacoes";
 import { criarOdontograma } from "../lib/supabase/odontograma";
 import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarPlanos } from "../lib/supabase/plano";
@@ -25,7 +27,13 @@ import { gerarDebitosDoAtendimento as gerarDebitosDoAtendimentoCaso } from "../d
 import type { Dependencias as DependenciasDebito } from "../domain/debito/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
 import type { Dependencias as DependenciasDocumento } from "../domain/documento/portas";
+import { baixarPorAtendimento } from "../domain/estoque/casos";
+import type { Dependencias as DependenciasEstoque } from "../domain/estoque/portas";
 import type { Dependencias as DependenciasImagem } from "../domain/imagem/portas";
+import { publicar } from "../domain/notificacao/casos";
+import type { Dependencias as DependenciasNotificacao } from "../domain/notificacao/portas";
+import { destinatarios } from "../domain/notificacao/regras";
+import type { TipoNotificacao } from "../domain/notificacao/tipos";
 import { reverterDoAgendamento as reverterDoAgendamentoCaso } from "../domain/odontograma/casos";
 import type { Dependencias as DependenciasOdontograma } from "../domain/odontograma/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
@@ -81,10 +89,45 @@ export function dependenciasProcedimento(): DependenciasProcedimento {
   };
 }
 
+export function dependenciasNotificacao(): DependenciasNotificacao {
+  const usuarios = criarUsuarios();
+  return {
+    notificacoes: criarNotificacoes(),
+    usuarios: {
+      async listarAtivos(clinicaId) {
+        const todos = await usuarios.listarDaClinica(clinicaId);
+        return todos
+          .filter((usuario) => usuario.ativo)
+          .map((usuario) => ({ id: usuario.id, papel: usuario.papel, ativo: usuario.ativo }));
+      },
+    },
+    ids: { novo: () => crypto.randomUUID() },
+    agora: () => new Date().toISOString(),
+  };
+}
+
+async function publicarParaClinica(
+  clinicaId: string,
+  tipo: TipoNotificacao,
+  referenciaId: string,
+  mensagem: string,
+): Promise<void> {
+  const deps = dependenciasNotificacao();
+  const ativos = await deps.usuarios.listarAtivos(clinicaId);
+  await publicar(deps, {
+    clinicaId,
+    tipo,
+    referenciaId,
+    mensagem,
+    destinatarioIds: destinatarios(ativos, tipo),
+  });
+}
+
 export function dependenciasAgendamento(): DependenciasAgendamento {
   return {
     agendamentos: criarAgendamentos(),
     avisos: criarAvisos(),
+    notificacoes: dependenciasNotificacao(),
     bloqueios: criarBloqueios(),
     clinicas: criarClinicas(),
     cadeiras: criarCadeiras(),
@@ -180,6 +223,7 @@ export function dependenciasRetorno(): DependenciasRetorno {
     agendamentos: criarAgendamentos(),
     pacientes: criarPacientes(),
     avisos: criarAvisos(),
+    notificacoes: dependenciasNotificacao(),
     ids: { novo: () => crypto.randomUUID() },
   };
 }
@@ -190,7 +234,17 @@ export function dependenciasProntuario(): DependenciasProntuario {
     anamneses: prontuario.anamneses,
     evolucoes: prontuario.evolucoes,
     auditoria: prontuario.auditoria,
-    estoque: prontuario.estoque,
+    estoque: {
+      async baixar(agendamentoId, ajustes, usuarioId, agora) {
+        await baixarPorAtendimento(
+          dependenciasEstoque(),
+          agendamentoId,
+          ajustes,
+          usuarioId,
+          agora,
+        );
+      },
+    },
     agendamentos: criarAgendamentos(),
     pacientes: criarPacientes(),
     concluirItensDoAgendamento: async (clinicaId, agendamentoId, ator, agora) => {
@@ -215,12 +269,52 @@ export function dependenciasProntuario(): DependenciasProntuario {
   };
 }
 
+export function dependenciasEstoque(): DependenciasEstoque {
+  const estoque = criarEstoque();
+  return {
+    materiais: estoque.materiais,
+    lotes: estoque.lotes,
+    vinculos: estoque.vinculos,
+    movimentacoes: estoque.movimentacoes,
+    avisos: {
+      ...estoque.avisos,
+      async registrar(aviso) {
+        await estoque.avisos.registrar(aviso);
+        const material = await estoque.materiais.buscarPorId(aviso.materialId);
+        if (!material) return;
+        await publicarParaClinica(
+          material.clinicaId,
+          aviso.tipo === "estoque_minimo" ? "estoque_abaixo_minimo" : "estoque_baixa_insuficiente",
+          aviso.materialId,
+          aviso.texto,
+        );
+      },
+    },
+    agendamentos: criarAgendamentos(),
+    itensPlano: criarPlanos().itens,
+    procedimentos: criarProcedimentos(),
+    clinicas: criarClinicas(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
 export function dependenciasProtese(): DependenciasProtese {
   const proteses = criarProteses();
   return {
     proteses: proteses.proteses,
     configuracoes: proteses.configuracoes,
-    avisos: proteses.avisos,
+    avisos: {
+      ...proteses.avisos,
+      async salvar(aviso) {
+        await proteses.avisos.salvar(aviso);
+        await publicarParaClinica(
+          aviso.clinicaId,
+          "atraso_protese",
+          aviso.proteseId,
+          "Atraso de prótese",
+        );
+      },
+    },
     pacientes: criarPacientes(),
     dentistas: criarDentistas(),
     procedimentos: criarProcedimentos(),

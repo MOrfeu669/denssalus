@@ -2,6 +2,7 @@ import type { Resultado } from "../auth/tipos";
 import type { Cadeiras, Clinicas } from "../clinica/portas";
 import type { Dentistas } from "../dentista/portas";
 import type { Pacientes } from "../paciente/portas";
+import type { Dependencias as DependenciasNotificacao } from "../notificacao/portas";
 import type { Procedimentos } from "../procedimento/portas";
 import type { ResolvedorRetorno } from "../retorno/portas";
 import type { Agendamento, BloqueioAgenda, ConflitoAgenda } from "./tipos";
@@ -38,6 +39,7 @@ export type Avisos = {
 export type Dependencias = {
   agendamentos: Agendamentos;
   avisos: Avisos;
+  notificacoes: DependenciasNotificacao;
   bloqueios: BloqueiosAgenda;
   clinicas: Pick<Clinicas, "buscarPorId">;
   cadeiras: Pick<Cadeiras, "listar">;

@@ -1,6 +1,7 @@
 import { MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO } from "../agendamento/tipos";
 import { autorizarAcao } from "../auth/casos";
 import { MENSAGEM_PAPEL, type Resultado, type Sessao } from "../auth/tipos";
+import { publicarPorRegra, resolver } from "../notificacao/casos";
 import type { Dependencias } from "./portas";
 import { dataFutura, dentroDoPrazo } from "./regras";
 import {
@@ -98,6 +99,12 @@ export async function verificarRetornos(deps: Dependencias, hoje: Date): Promise
       pacienteId: retorno.pacienteId,
       motivo: textoAvisoRetorno(paciente.nome),
     });
+    await publicarPorRegra(deps.notificacoes, {
+      clinicaId: retorno.clinicaId,
+      tipo: "retorno_reagendar",
+      referenciaId: retorno.id,
+      mensagem: textoAvisoRetorno(paciente.nome),
+    });
     await deps.retornos.salvar({ ...retorno, status: "notificado" });
   }
 }
@@ -128,5 +135,6 @@ export async function reagendarPorNovoAgendamento(
   for (const retorno of retornos) {
     if (retorno.pacienteId !== pacienteId || retorno.status === "reagendado") continue;
     await deps.retornos.salvar({ ...retorno, status: "reagendado" });
+    await resolver(deps.notificacoes, clinicaId, "retorno_reagendar", retorno.id);
   }
 }

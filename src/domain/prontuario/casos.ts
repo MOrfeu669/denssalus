@@ -1,6 +1,7 @@
 import { MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO, type Agendamento } from "../agendamento/tipos";
 import { autorizarAcao } from "../auth/casos";
 import { MENSAGEM_PAPEL, type Resultado, type Sessao } from "../auth/tipos";
+import type { AjusteBaixa } from "../estoque/tipos";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../paciente/tipos";
 import type { Dependencias } from "./portas";
 import {
@@ -74,6 +75,7 @@ export async function salvarEvolucao(
   agendamentoId: string,
   texto: string,
   agora: Date,
+  ajustes: AjusteBaixa[] = [],
 ): Promise<Resultado<Evolucao>> {
   const permitido = autorizarAcao(ator, "evolucao:registrar");
   if (!permitido.ok) return permitido;
@@ -117,7 +119,7 @@ export async function salvarEvolucao(
 
   if (!anterior) {
     try {
-      await deps.estoque.baixar(agendamentoId);
+      await deps.estoque.baixar(agendamentoId, ajustes, ator.usuario.id, agora);
     } catch {
       // Estoque não bloqueia a conclusão; a regra da baixa insuficiente é da Feature 017.
     }
