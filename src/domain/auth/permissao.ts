@@ -23,8 +23,18 @@ const MINIMO: Record<Acao, Papel> = {
   "anamnese:preencher": "dentista",
   "evolucao:registrar": "dentista",
   "auditoria:ler": "admin",
+  "plano:editar": "dentista",
+  "debito:ver": "recepcionista",
+  "debito:descontar": "dentista",
+  "debito:quitar": "admin",
+  "documento:modelar": "dentista",
+  "documento:gerar": "dentista",
+  "imagem:anexar": "dentista",
+  "protese:gerir": "recepcionista",
 };
 
 export function permite(papel: Papel, acao: Acao): boolean {
+  // Gerar documento é exclusivo do dentista: fora da pirâmide (admin não passa).
+  if (acao === "documento:gerar") return papel === "dentista";
   return NIVEL[papel] >= NIVEL[MINIMO[acao]];
 }

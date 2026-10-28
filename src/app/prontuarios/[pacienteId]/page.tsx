@@ -2,19 +2,35 @@ import Link from "next/link";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
 import { listarOdontograma } from "../../../domain/odontograma/casos";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
+import { listarDebitos } from "../../../domain/debito/casos";
+import type { DebitoComPagamento } from "../../../domain/debito/tipos";
+import { listarDocumentos, listarModelos } from "../../../domain/documento/casos";
+import type { ModeloDocumento } from "../../../domain/documento/tipos";
+import { listarPlanos } from "../../../domain/plano/casos";
+import type { PlanoComItens } from "../../../domain/plano/tipos";
 import { listarProcedimentos } from "../../../domain/procedimento/casos";
 import { abrirProntuario, listarAuditoria } from "../../../domain/prontuario/casos";
 import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
 import {
+  dependenciasDebito,
+  dependenciasDocumento,
   dependenciasOdontograma,
+  dependenciasPlano,
   dependenciasProcedimento,
   dependenciasProntuario,
 } from "../../dependencias";
 import { falha } from "../../falha";
 import { sessaoAtual } from "../../sessao";
 import { FormularioAnamnese, FormularioEvolucao } from "./form";
+import { SecaoDebitos } from "./debitos";
+import { SecaoDocumentos, type DocumentoItem } from "./documentos";
 import { dataAgendamento } from "./formato";
 import { Odontograma } from "./odontograma";
+import { carregarImagens } from "./carregar-imagens";
+import { SecaoImagens } from "./imagens";
+import { SecaoPlano } from "./plano";
+import { carregarProteses } from "./carregar-proteses";
+import { SecaoProteses } from "./proteses";
 import { Auditoria, Historico, VisaoGeral } from "./secoes";
 import type { ProcedimentoOpcao } from "./tipos-odontograma";
 
@@ -28,6 +44,66 @@ async function carregarOdontograma(
 ): Promise<ResultadoOdontograma> {
   try {
     return await listarOdontograma(dependenciasOdontograma(), sessao, pacienteId);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+type ResultadoPlanos =
+  | { ok: true; valor: PlanoComItens[] }
+  | { ok: false; mensagem: string };
+
+async function carregarPlanos(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  pacienteId: string,
+): Promise<ResultadoPlanos> {
+  try {
+    return await listarPlanos(dependenciasPlano(), sessao, pacienteId);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+type ResultadoDebitos =
+  | { ok: true; valor: DebitoComPagamento[] }
+  | { ok: false; mensagem: string };
+
+async function carregarDebitos(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  pacienteId: string,
+): Promise<ResultadoDebitos> {
+  try {
+    return await listarDebitos(dependenciasDebito(), sessao, pacienteId);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+type ResultadoDocumentos =
+  | { ok: true; documentos: DocumentoItem[]; modelos: ModeloDocumento[]; importados: string[] }
+  | { ok: false; mensagem: string };
+
+async function carregarDocumentos(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  pacienteId: string,
+): Promise<ResultadoDocumentos> {
+  try {
+    const deps = dependenciasDocumento();
+    const lista = await listarDocumentos(deps, sessao, pacienteId);
+    if (!lista.ok) return lista;
+    const modelos = await listarModelos(deps, sessao);
+    if (!modelos.ok) return modelos;
+    return {
+      ok: true,
+      documentos: lista.valor.map(({ id, modeloId, geradoEm, conteudoFinal }) => ({
+        id,
+        modeloId,
+        geradoEm,
+        conteudoFinal,
+      })),
+      modelos: modelos.valor.modelos,
+      importados: modelos.valor.importados,
+    };
   } catch (erro) {
     return falha(erro);
   }
@@ -92,6 +168,15 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const consultas = historico.filter((item) => item.status === "iniciado" || item.status === "concluido");
   const odontograma = await carregarOdontograma(sessao, pacienteId);
   const procedimentos = await carregarProcedimentos(sessao);
+  const planos = await carregarPlanos(sessao, pacienteId);
+  const debitos = await carregarDebitos(sessao, pacienteId);
+  const documentos = await carregarDocumentos(sessao, pacienteId);
+  const imagens = await carregarImagens(sessao, pacienteId);
+  const proteses = await carregarProteses(sessao, pacienteId);
+  const todosAgendamentos = historico.map(({ id, inicio, status }) => ({ id, inicio, status }));
+  const agendamentosAbertos = historico
+    .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
+    .map(({ id, inicio, status }) => ({ id, inicio, status }));
 
   return (
     <main>
@@ -147,12 +232,96 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
             pacienteId={pacienteId}
             registros={odontograma.valor}
             procedimentos={procedimentos}
-            agendamentos={historico.map(({ id, inicio, status }) => ({ id, inicio, status }))}
+            agendamentos={todosAgendamentos}
+            imagens={imagens.ok ? imagens.ativas : []}
+            proteses={proteses.ok ? proteses.proteses : []}
             podeEscrever={podeEscrever}
           />
         ) : (
           <p role="alert" tabIndex={-1}>
             {odontograma.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="proteses">
+        <h2 id="proteses">Próteses</h2>
+        {proteses.ok ? (
+          <SecaoProteses
+            pacienteId={pacienteId}
+            proteses={proteses.proteses}
+            responsaveis={proteses.responsaveis}
+            procedimentos={procedimentos}
+            agendamentos={agendamentosAbertos}
+            papel={papel}
+            limite={proteses.limite}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {proteses.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="raio-x">
+        <h2 id="raio-x">Raio X e imagens</h2>
+        {imagens.ok ? (
+          <SecaoImagens
+            pacienteId={pacienteId}
+            ativas={imagens.ativas}
+            pendentes={imagens.pendentes}
+            agendamentos={todosAgendamentos}
+            podeEscrever={podeEscrever}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {imagens.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="plano">
+        <h2 id="plano">Plano de tratamento</h2>
+        {planos.ok ? (
+          <SecaoPlano
+            pacienteId={pacienteId}
+            planos={planos.valor}
+            procedimentos={procedimentos}
+            agendamentos={agendamentosAbertos}
+            podeEscrever={podeEscrever}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {planos.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="debitos">
+        <h2 id="debitos">Débitos</h2>
+        {debitos.ok ? (
+          <SecaoDebitos pacienteId={pacienteId} debitos={debitos.valor} papel={papel} />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {debitos.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="documentos">
+        <h2 id="documentos">Documentos</h2>
+        {documentos.ok ? (
+          <SecaoDocumentos
+            pacienteId={pacienteId}
+            papel={papel}
+            usuarioId={sessao.usuario.id}
+            documentos={documentos.documentos}
+            modelos={documentos.modelos}
+            importados={documentos.importados}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {documentos.mensagem}
           </p>
         )}
       </section>

@@ -25,6 +25,9 @@ import {
   MENSAGEM_REGISTROS_CONFIRMADOS,
   type RegistroOdontograma,
 } from "../../src/domain/odontograma/tipos";
+import { concluirItensDoAgendamento } from "../../src/domain/plano/casos";
+import type { Dependencias as DependenciasPlano } from "../../src/domain/plano/portas";
+import type { ItemPlano, PlanoTratamento } from "../../src/domain/plano/tipos";
 
 const CLINICA_ID = "clinica-001";
 const OUTRA_CLINICA = "clinica-002";
@@ -350,7 +353,50 @@ describe("odontograma", () => {
     });
   });
 
-  it.todo("Feature 012: criar o registro ao concluir o item do plano");
+  it("dado um item pendente com os dentes 26 e 16, quando a consulta do item conclui, então grava dois registros confirmados de atendimento", async () => {
+    const planos = new Map<string, PlanoTratamento>([
+      ["plano-1", { id: "plano-1", clinicaId: CLINICA_ID, pacienteId: PACIENTE_JOAO, criadoPor: "ator-dentista", status: "proposto", criadoEm: AGORA.toISOString() }],
+    ]);
+    const itens = new Map<string, ItemPlano>([
+      ["item-1", { id: "item-1", planoId: "plano-1", procedimentoId: RESTAURACAO, dentes: [26, 16], valor: 150, agendamentoId: CONSULTA, status: "pendente", executadoPor: null, concluidoEm: null }],
+    ]);
+    const depsPlano: DependenciasPlano = {
+      ...memoria.deps(),
+      planos: {
+        listarPorPaciente: async () => [...planos.values()],
+        buscarPorId: async (id) => planos.get(id) ?? null,
+        salvar: async (plano) => {
+          planos.set(plano.id, plano);
+        },
+      },
+      itens: {
+        listarPorPlano: async (planoId) => [...itens.values()].filter((i) => i.planoId === planoId),
+        listarPorAgendamento: async (_clinicaId, agendamentoId) =>
+          [...itens.values()].filter((i) => i.agendamentoId === agendamentoId),
+        buscarPorId: async (id) => itens.get(id) ?? null,
+        salvar: async (item) => {
+          itens.set(item.id, item);
+        },
+      },
+    };
+
+    const resultado = await concluirItensDoAgendamento(depsPlano, CLINICA_ID, CONSULTA, sessao("dentista"), AGORA);
+
+    expect(resultado).toEqual({ ok: true, valor: undefined });
+    const registros = [...memoria.registros.values()];
+    expect(registros.map((r) => r.dente).sort()).toEqual([16, 26]);
+    for (const registro of registros) {
+      expect(registro).toMatchObject({
+        status: "confirmado",
+        origem: "atendimento",
+        agendamentoId: CONSULTA,
+        procedimentoId: RESTAURACAO,
+      });
+    }
+    expect(itens.get("item-1")?.status).toBe("concluido");
+  });
+
+
   it.todo("Feature 015: imagem no dente");
   it.todo("Feature 016: prótese no dente 16");
 });

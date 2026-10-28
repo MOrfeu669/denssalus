@@ -166,10 +166,8 @@ await comunicacaoService.reenviarMensagensFalhas();
 - [stated] Pelo menos um canal de comunicação é obrigatório no cadastro do paciente (Feature 004); envio só pelo canal preferido
 - [stated] Nenhum agendamento cujo início já passou gera mensagem ou lembrete
 - [stated] A falha final de envio gera notificação interna do tipo `falha_envio_mensagem` (Feature 018)
-
-### ⚠️ PENDENTE (não definido ainda pelo usuário)
-- ⚠️ Provedor de envio (Twilio, outro serviço de SMS/WhatsApp, serviço de Email) — ainda não definido
-- ⚠️ Provedor de e-mail de produção da recuperação de senha (Feature 001). O ambiente local dessa feature usa o e-mail do Supabase Auth e não escolhe SMTP
+- [stated] 2026-10-28 — WhatsApp é o canal externo principal a suportar, junto de SMS e e-mail conforme o cadastro. A marca do provedor de WhatsApp/SMS fica em `docs/TECNOLOGIAS.md` e não trava Twilio nesta spec
+- [stated] 2026-10-28 — E-mail de produção é um SMTP único no Supabase Auth (recuperação da Feature 001 e mensagem ao paciente). No ambiente local, a recuperação continua no e-mail do Auth
 
 ---
 
@@ -177,4 +175,4 @@ await comunicacaoService.reenviarMensagensFalhas();
 
 Esta feature resolve o gap identificado nas Features 009 e 018 (comunicação externa mencionada no levantamento inicial, mas até então fora do roadmap). As Features 009 e 018 devem ser atualizadas para referenciar esta spec como responsável pelo contato direto com o paciente.
 
-**Histórico:** 2026-10-02 — renumerada de 019 para 020; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-01, INC-10, INC-15, ESC-14, REF-04). `PreferenciaComunicacao` foi substituída pela `CanalComunicacao` da Feature 004; adicionado o Cenário 7 (agendamento retroativo).
+**Histórico:** 2026-10-02 — renumerada de 019 para 020; aplicadas decisões da análise de consistência (`context/ANALISE_SPECS.md`: INC-01, INC-10, INC-15, ESC-14, REF-04). `PreferenciaComunicacao` foi substituída pela `CanalComunicacao` da Feature 004; adicionado o Cenário 7 (agendamento retroativo). 2026-10-28 — Bernardo: WhatsApp como canal principal sem travar marca; SMTP único para produção (001 e 020).
