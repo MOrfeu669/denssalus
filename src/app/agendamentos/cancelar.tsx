@@ -36,13 +36,21 @@ export function FormularioCancelar({
   );
 }
 
-function caminhoDeReagendar(agendamento: Agendamento): string {
+export function caminhoDeReagendar(agendamento: Agendamento): string {
   const params = new URLSearchParams({
     paciente: agendamento.pacienteId,
     dentista: agendamento.dentistaId,
     procedimento: agendamento.procedimentoId ?? "",
   });
   return `/agendamentos?${params.toString()}`;
+}
+
+// "nao" não abre fluxo nem cria consulta; "sim" leva ao fluxo de novo agendamento.
+export function respostaReagendar(
+  agendamento: Agendamento,
+  resposta: "sim" | "nao",
+): string | null {
+  return resposta === "sim" ? caminhoDeReagendar(agendamento) : null;
 }
 
 export function PerguntaReagendar({

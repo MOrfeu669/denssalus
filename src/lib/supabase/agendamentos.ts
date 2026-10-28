@@ -28,6 +28,7 @@ type LinhaAgendamento = {
   motivo_cancelamento: string | null;
   cancelado_por: string | null;
   cancelado_em: string | null;
+  concluido_em: string | null;
 };
 
 type ErroPostgres = {
@@ -57,6 +58,7 @@ function paraAgendamento(linha: LinhaAgendamento): Agendamento {
     motivoCancelamento: linha.motivo_cancelamento,
     canceladoPor: linha.cancelado_por,
     canceladoEm: linha.cancelado_em,
+    concluidoEm: linha.concluido_em,
   };
 }
 
@@ -80,6 +82,7 @@ function paraLinha(agendamento: Agendamento): LinhaAgendamento {
     motivo_cancelamento: agendamento.motivoCancelamento,
     cancelado_por: agendamento.canceladoPor,
     cancelado_em: agendamento.canceladoEm,
+    concluido_em: agendamento.concluidoEm,
   };
 }
 

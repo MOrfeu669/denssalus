@@ -8,6 +8,8 @@ import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/ti
 import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { bloquear, cancelar, criar, iniciar } from "./actions";
+import { marcar } from "../retornos/actions";
+import { FormularioMarcarRetorno } from "../retornos/form";
 import { FormularioCancelar, PerguntaReagendar, podeCancelar } from "./cancelar";
 
 export type ValoresIniciais = {
@@ -34,19 +36,23 @@ export function Agendamentos({
   const [atendimento, acaoIniciar, pendenteIniciar] = useActionState(iniciar, estadoVazio);
   const [bloqueio, acaoBloquear, pendenteBloquear] = useActionState(bloquear, estadoVazio);
   const [cancelamento, acaoCancelar, pendenteCancelar] = useActionState(cancelar, estadoVazio);
+  const [retorno, acaoRetorno, pendenteRetorno] = useActionState(marcar, estadoVazio);
   const aviso = avisoVisivel(
     criacao,
     atendimento,
     bloqueio,
+    retorno,
     ...(cancelamento.status === "erro" ? [cancelamento] : []),
   );
   const podeBloquear = papel === "admin" || papel === "dentista";
 
   useEffect(() => {
-    if ([criacao, atendimento, bloqueio, cancelamento].some((item) => item.status === "sucesso")) {
+    if (
+      [criacao, atendimento, bloqueio, cancelamento, retorno].some((item) => item.status === "sucesso")
+    ) {
       roteador.refresh();
     }
-  }, [criacao, atendimento, bloqueio, cancelamento, roteador]);
+  }, [criacao, atendimento, bloqueio, cancelamento, retorno, roteador]);
 
   return (
     <>
@@ -72,6 +78,13 @@ export function Agendamentos({
                   id={agendamento.id}
                   acao={acaoCancelar}
                   pendente={pendenteCancelar}
+                />
+              ) : null}
+              {agendamento.status === "concluido" && podeBloquear ? (
+                <FormularioMarcarRetorno
+                  id={agendamento.id}
+                  acao={acaoRetorno}
+                  pendente={pendenteRetorno}
                 />
               ) : null}
             </li>

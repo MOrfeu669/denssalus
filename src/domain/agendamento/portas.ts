@@ -2,6 +2,7 @@ import type { Cadeiras, Clinicas } from "../clinica/portas";
 import type { Dentistas } from "../dentista/portas";
 import type { Pacientes } from "../paciente/portas";
 import type { Procedimentos } from "../procedimento/portas";
+import type { ResolvedorRetorno } from "../retorno/portas";
 import type { Agendamento, BloqueioAgenda, ConflitoAgenda } from "./tipos";
 
 export type Agendamentos = {
@@ -42,5 +43,6 @@ export type Dependencias = {
   dentistas: Pick<Dentistas, "buscarPorId" | "listar">;
   pacientes: Pick<Pacientes, "buscarPorId" | "listar">;
   procedimentos: Pick<Procedimentos, "buscarPorId" | "listar">;
+  retornos: ResolvedorRetorno;
   ids: { novo(): string };
 };

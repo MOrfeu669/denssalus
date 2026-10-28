@@ -101,6 +101,7 @@ async function gravar(
     motivoCancelamento: null,
     canceladoPor: null,
     canceladoEm: null,
+    concluidoEm: null,
   };
   const conflito = await deps.agendamentos.salvar(agendamento);
   if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };
@@ -132,7 +133,11 @@ export async function criarAgendamento(
   );
   if (mensagem) return { ok: false, mensagem };
 
-  return gravar(deps, ator, contexto.clinica.id, entrada, false);
+  const gravado = await gravar(deps, ator, contexto.clinica.id, entrada, false);
+  if (gravado.ok) {
+    await deps.retornos.concluirPendentes(gravado.valor.clinicaId, gravado.valor.pacienteId);
+  }
+  return gravado;
 }
 
 export async function registrarEmergencia(

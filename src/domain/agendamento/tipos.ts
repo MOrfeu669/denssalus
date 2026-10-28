@@ -24,6 +24,7 @@ export type Agendamento = {
   motivoCancelamento: string | null;
   canceladoPor: string | null;
   canceladoEm: string | null;
+  concluidoEm: string | null;
 };
 
 export type BloqueioAgenda = {
