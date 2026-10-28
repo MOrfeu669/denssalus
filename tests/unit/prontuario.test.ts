@@ -65,6 +65,7 @@ class Memoria {
           this.baixas.push(agendamentoId);
         },
       },
+      concluirItensDoAgendamento: async () => {},
       agendamentos: {
         listar: async (clinicaId) =>
           [...this.agendamentos.values()].filter((a) => a.clinicaId === clinicaId),

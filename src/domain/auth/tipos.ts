@@ -38,4 +38,5 @@ export type Acao =
   | "retorno:marcar"
   | "anamnese:preencher"
   | "evolucao:registrar"
-  | "auditoria:ler";
+  | "auditoria:ler"
+  | "plano:editar";

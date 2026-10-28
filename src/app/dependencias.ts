@@ -8,9 +8,11 @@ import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarOdontograma } from "../lib/supabase/odontograma";
 import { criarPacientes } from "../lib/supabase/pacientes";
+import { criarPlanos } from "../lib/supabase/plano";
 import { criarProcedimentos } from "../lib/supabase/procedimentos";
 import { criarProntuario } from "../lib/supabase/prontuario";
 import { criarConfiguracoesRetorno, criarRetornos } from "../lib/supabase/retornos";
+import { ErroAplicacao } from "../lib/supabase/erro";
 import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias as DependenciasAgendamento } from "../domain/agendamento/portas";
 import type { Dependencias } from "../domain/auth/portas";
@@ -19,6 +21,8 @@ import type { Dependencias as DependenciasDentista } from "../domain/dentista/po
 import { reverterDoAgendamento as reverterDoAgendamentoCaso } from "../domain/odontograma/casos";
 import type { Dependencias as DependenciasOdontograma } from "../domain/odontograma/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
+import { concluirItensDoAgendamento as concluirItensDoAgendamentoCaso } from "../domain/plano/casos";
+import type { Dependencias as DependenciasPlano } from "../domain/plano/portas";
 import type { Dependencias as DependenciasProcedimento } from "../domain/procedimento/portas";
 import type { Dependencias as DependenciasProntuario } from "../domain/prontuario/portas";
 import { reagendarPorNovoAgendamento } from "../domain/retorno/casos";
@@ -105,6 +109,20 @@ export function dependenciasOdontograma(): DependenciasOdontograma {
   };
 }
 
+export function dependenciasPlano(): DependenciasPlano {
+  const plano = criarPlanos();
+  return {
+    planos: plano.planos,
+    itens: plano.itens,
+    pacientes: criarPacientes(),
+    procedimentos: criarProcedimentos(),
+    agendamentos: criarAgendamentos(),
+    registros: criarOdontograma(),
+    auditoria: criarProntuario().auditoria,
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
 export function dependenciasRetorno(): DependenciasRetorno {
   return {
     retornos: criarRetornos(),
@@ -125,6 +143,16 @@ export function dependenciasProntuario(): DependenciasProntuario {
     estoque: prontuario.estoque,
     agendamentos: criarAgendamentos(),
     pacientes: criarPacientes(),
+    concluirItensDoAgendamento: async (clinicaId, agendamentoId, ator, agora) => {
+      const resultado = await concluirItensDoAgendamentoCaso(
+        dependenciasPlano(),
+        clinicaId,
+        agendamentoId,
+        ator,
+        agora,
+      );
+      if (!resultado.ok) throw new ErroAplicacao(resultado.mensagem);
+    },
     ids: { novo: () => crypto.randomUUID() },
   };
 }
