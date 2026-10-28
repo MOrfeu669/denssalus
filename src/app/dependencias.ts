@@ -14,6 +14,7 @@ import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarPlanos } from "../lib/supabase/plano";
 import { criarProcedimentos } from "../lib/supabase/procedimentos";
 import { criarProntuario } from "../lib/supabase/prontuario";
+import { criarProteses } from "../lib/supabase/proteses";
 import { criarConfiguracoesRetorno, criarRetornos } from "../lib/supabase/retornos";
 import { ErroAplicacao } from "../lib/supabase/erro";
 import { criarUsuarios } from "../lib/supabase/usuarios";
@@ -32,6 +33,7 @@ import { concluirItensDoAgendamento as concluirItensDoAgendamentoCaso } from "..
 import type { Dependencias as DependenciasPlano } from "../domain/plano/portas";
 import type { Dependencias as DependenciasProcedimento } from "../domain/procedimento/portas";
 import type { Dependencias as DependenciasProntuario } from "../domain/prontuario/portas";
+import type { Dependencias as DependenciasProtese } from "../domain/protese/portas";
 import { reagendarPorNovoAgendamento } from "../domain/retorno/casos";
 import type { Dependencias as DependenciasRetorno } from "../domain/retorno/portas";
 
@@ -209,6 +211,20 @@ export function dependenciasProntuario(): DependenciasProntuario {
       );
       if (!resultado.ok) throw new ErroAplicacao(resultado.mensagem);
     },
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasProtese(): DependenciasProtese {
+  const proteses = criarProteses();
+  return {
+    proteses: proteses.proteses,
+    configuracoes: proteses.configuracoes,
+    avisos: proteses.avisos,
+    pacientes: criarPacientes(),
+    dentistas: criarDentistas(),
+    procedimentos: criarProcedimentos(),
+    agendamentos: criarAgendamentos(),
     ids: { novo: () => crypto.randomUUID() },
   };
 }

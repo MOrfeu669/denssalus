@@ -30,6 +30,7 @@ const MINIMO: Record<Acao, Papel> = {
   "documento:modelar": "dentista",
   "documento:gerar": "dentista",
   "imagem:anexar": "dentista",
+  "protese:gerir": "recepcionista",
 };
 
 export function permite(papel: Papel, acao: Acao): boolean {

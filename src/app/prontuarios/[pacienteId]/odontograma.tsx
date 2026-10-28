@@ -4,9 +4,11 @@ import { useState } from "react";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
 import { fileiras } from "../../../domain/odontograma/regras";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
+import type { Protese } from "../../../domain/protese/tipos";
 import { FormulariosDoDente } from "./form-odontograma";
 import { instante } from "./formato";
 import { ImagensDoDente } from "./imagens";
+import { ProtesesDoDente } from "./proteses";
 import type { ImagemDoDente } from "./tipos-imagem";
 import type { AgendamentoOpcao, ProcedimentoOpcao } from "./tipos-odontograma";
 
@@ -78,6 +80,7 @@ export function Odontograma({
   procedimentos,
   agendamentos,
   imagens = [],
+  proteses = [],
   podeEscrever,
 }: {
   pacienteId: string;
@@ -85,6 +88,7 @@ export function Odontograma({
   procedimentos: ProcedimentoOpcao[];
   agendamentos: AgendamentoOpcao[];
   imagens?: ImagemDoDente[];
+  proteses?: Protese[];
   podeEscrever: boolean;
 }) {
   const [selecionado, setSelecionado] = useState<number | null>(null);
@@ -117,6 +121,7 @@ export function Odontograma({
           <h3>Dente {selecionado}</h3>
           <Historico registros={doDente} procedimentos={procedimentos} />
           <ImagensDoDente imagens={imagens} dente={selecionado} />
+          <ProtesesDoDente proteses={proteses} dente={selecionado} />
           {podeEscrever ? (
             <FormulariosDoDente
               key={selecionado}

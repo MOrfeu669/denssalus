@@ -29,6 +29,8 @@ import { Odontograma } from "./odontograma";
 import { carregarImagens } from "./carregar-imagens";
 import { SecaoImagens } from "./imagens";
 import { SecaoPlano } from "./plano";
+import { carregarProteses } from "./carregar-proteses";
+import { SecaoProteses } from "./proteses";
 import { Auditoria, Historico, VisaoGeral } from "./secoes";
 import type { ProcedimentoOpcao } from "./tipos-odontograma";
 
@@ -170,6 +172,7 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const debitos = await carregarDebitos(sessao, pacienteId);
   const documentos = await carregarDocumentos(sessao, pacienteId);
   const imagens = await carregarImagens(sessao, pacienteId);
+  const proteses = await carregarProteses(sessao, pacienteId);
   const todosAgendamentos = historico.map(({ id, inicio, status }) => ({ id, inicio, status }));
   const agendamentosAbertos = historico
     .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
@@ -231,11 +234,31 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
             procedimentos={procedimentos}
             agendamentos={todosAgendamentos}
             imagens={imagens.ok ? imagens.ativas : []}
+            proteses={proteses.ok ? proteses.proteses : []}
             podeEscrever={podeEscrever}
           />
         ) : (
           <p role="alert" tabIndex={-1}>
             {odontograma.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="proteses">
+        <h2 id="proteses">Próteses</h2>
+        {proteses.ok ? (
+          <SecaoProteses
+            pacienteId={pacienteId}
+            proteses={proteses.proteses}
+            responsaveis={proteses.responsaveis}
+            procedimentos={procedimentos}
+            agendamentos={agendamentosAbertos}
+            papel={papel}
+            limite={proteses.limite}
+          />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {proteses.mensagem}
           </p>
         )}
       </section>
