@@ -34,6 +34,11 @@ export type Dependencias = {
     ator: Sessao,
     agora: Date,
   ): Promise<void>;
+  gerarDebitosDoAtendimento(
+    clinicaId: string,
+    agendamentoId: string,
+    ator: Sessao,
+  ): Promise<void>;
   agendamentos: Pick<Agendamentos, "buscarPorId" | "listar" | "salvar">;
   pacientes: Pick<Pacientes, "buscarPorId">;
   ids: { novo(): string };

@@ -110,6 +110,7 @@ class Memoria {
         this.conclusoes += 1;
         await concluirItensDoAgendamento(this.deps(), clinicaId, agendamentoId, ator, agora);
       },
+      gerarDebitosDoAtendimento: async () => {},
       agendamentos: {
         listar: async (clinicaId) => [...this.agendamentos.values()].filter((a) => a.clinicaId === clinicaId),
         buscarPorId: async (id) => this.agendamentos.get(id) ?? null,

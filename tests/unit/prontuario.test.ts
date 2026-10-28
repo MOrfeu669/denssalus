@@ -66,6 +66,7 @@ class Memoria {
         },
       },
       concluirItensDoAgendamento: async () => {},
+      gerarDebitosDoAtendimento: async () => {},
       agendamentos: {
         listar: async (clinicaId) =>
           [...this.agendamentos.values()].filter((a) => a.clinicaId === clinicaId),

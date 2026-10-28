@@ -5,6 +5,7 @@ import { criarAgendamentos } from "../lib/supabase/agendamentos";
 import { criarAvisos } from "../lib/supabase/avisos";
 import { criarBloqueios } from "../lib/supabase/bloqueios";
 import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
+import { criarDebitos } from "../lib/supabase/debitos";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarOdontograma } from "../lib/supabase/odontograma";
 import { criarPacientes } from "../lib/supabase/pacientes";
@@ -17,6 +18,8 @@ import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias as DependenciasAgendamento } from "../domain/agendamento/portas";
 import type { Dependencias } from "../domain/auth/portas";
 import type { Dependencias as DependenciasClinica } from "../domain/clinica/portas";
+import { gerarDebitosDoAtendimento as gerarDebitosDoAtendimentoCaso } from "../domain/debito/casos";
+import type { Dependencias as DependenciasDebito } from "../domain/debito/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
 import { reverterDoAgendamento as reverterDoAgendamentoCaso } from "../domain/odontograma/casos";
 import type { Dependencias as DependenciasOdontograma } from "../domain/odontograma/portas";
@@ -123,6 +126,19 @@ export function dependenciasPlano(): DependenciasPlano {
   };
 }
 
+export function dependenciasDebito(): DependenciasDebito {
+  const debitos = criarDebitos();
+  return {
+    debitos: debitos.debitos,
+    pagamentos: debitos.pagamentos,
+    itens: criarPlanos().itens,
+    agendamentos: criarAgendamentos(),
+    procedimentos: criarProcedimentos(),
+    pacientes: criarPacientes(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
 export function dependenciasRetorno(): DependenciasRetorno {
   return {
     retornos: criarRetornos(),
@@ -150,6 +166,14 @@ export function dependenciasProntuario(): DependenciasProntuario {
         agendamentoId,
         ator,
         agora,
+      );
+      if (!resultado.ok) throw new ErroAplicacao(resultado.mensagem);
+    },
+    gerarDebitosDoAtendimento: async (_clinicaId, agendamentoId, ator) => {
+      const resultado = await gerarDebitosDoAtendimentoCaso(
+        dependenciasDebito(),
+        ator,
+        agendamentoId,
       );
       if (!resultado.ok) throw new ErroAplicacao(resultado.mensagem);
     },

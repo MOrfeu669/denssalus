@@ -39,4 +39,7 @@ export type Acao =
   | "anamnese:preencher"
   | "evolucao:registrar"
   | "auditoria:ler"
-  | "plano:editar";
+  | "plano:editar"
+  | "debito:ver"
+  | "debito:descontar"
+  | "debito:quitar";

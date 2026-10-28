@@ -2,12 +2,15 @@ import Link from "next/link";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
 import { listarOdontograma } from "../../../domain/odontograma/casos";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
+import { listarDebitos } from "../../../domain/debito/casos";
+import type { DebitoComPagamento } from "../../../domain/debito/tipos";
 import { listarPlanos } from "../../../domain/plano/casos";
 import type { PlanoComItens } from "../../../domain/plano/tipos";
 import { listarProcedimentos } from "../../../domain/procedimento/casos";
 import { abrirProntuario, listarAuditoria } from "../../../domain/prontuario/casos";
 import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
 import {
+  dependenciasDebito,
   dependenciasOdontograma,
   dependenciasPlano,
   dependenciasProcedimento,
@@ -16,6 +19,7 @@ import {
 import { falha } from "../../falha";
 import { sessaoAtual } from "../../sessao";
 import { FormularioAnamnese, FormularioEvolucao } from "./form";
+import { SecaoDebitos } from "./debitos";
 import { dataAgendamento } from "./formato";
 import { Odontograma } from "./odontograma";
 import { SecaoPlano } from "./plano";
@@ -47,6 +51,21 @@ async function carregarPlanos(
 ): Promise<ResultadoPlanos> {
   try {
     return await listarPlanos(dependenciasPlano(), sessao, pacienteId);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+type ResultadoDebitos =
+  | { ok: true; valor: DebitoComPagamento[] }
+  | { ok: false; mensagem: string };
+
+async function carregarDebitos(
+  sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
+  pacienteId: string,
+): Promise<ResultadoDebitos> {
+  try {
+    return await listarDebitos(dependenciasDebito(), sessao, pacienteId);
   } catch (erro) {
     return falha(erro);
   }
@@ -112,6 +131,7 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const odontograma = await carregarOdontograma(sessao, pacienteId);
   const procedimentos = await carregarProcedimentos(sessao);
   const planos = await carregarPlanos(sessao, pacienteId);
+  const debitos = await carregarDebitos(sessao, pacienteId);
   const agendamentosAbertos = historico
     .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
     .map(({ id, inicio, status }) => ({ id, inicio, status }));
@@ -193,6 +213,17 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
         ) : (
           <p role="alert" tabIndex={-1}>
             {planos.mensagem}
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="debitos">
+        <h2 id="debitos">Débitos</h2>
+        {debitos.ok ? (
+          <SecaoDebitos pacienteId={pacienteId} debitos={debitos.valor} papel={papel} />
+        ) : (
+          <p role="alert" tabIndex={-1}>
+            {debitos.mensagem}
           </p>
         )}
       </section>
