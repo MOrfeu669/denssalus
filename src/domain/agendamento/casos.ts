@@ -101,6 +101,7 @@ async function gravar(
     motivoCancelamento: null,
     canceladoPor: null,
     canceladoEm: null,
+    concluidoEm: null,
   };
   const conflito = await deps.agendamentos.salvar(agendamento);
   if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };

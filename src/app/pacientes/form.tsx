@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useId, useState } from "react";
 import type { Canal, CanalComunicacao, Paciente } from "../../domain/paciente/tipos";
@@ -45,6 +46,9 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
               >
                 Editar paciente
               </button>
+              <Link href={`/prontuarios/${paciente.id}`} aria-label={`Prontuário de ${paciente.nome}`}>
+                Prontuário
+              </Link>
               {editandoId === paciente.id ? (
                 <form action={acaoEditar} aria-busy={pendenteEditar}>
                   <input type="hidden" name="id" value={paciente.id} />

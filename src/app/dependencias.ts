@@ -8,6 +8,7 @@ import { criarCadeiras, criarClinicas } from "../lib/supabase/clinicas";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarPacientes } from "../lib/supabase/pacientes";
 import { criarProcedimentos } from "../lib/supabase/procedimentos";
+import { criarProntuario } from "../lib/supabase/prontuario";
 import { criarConfiguracoesRetorno, criarRetornos } from "../lib/supabase/retornos";
 import { criarUsuarios } from "../lib/supabase/usuarios";
 import type { Dependencias as DependenciasAgendamento } from "../domain/agendamento/portas";
@@ -16,6 +17,7 @@ import type { Dependencias as DependenciasClinica } from "../domain/clinica/port
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
 import type { Dependencias as DependenciasPaciente } from "../domain/paciente/portas";
 import type { Dependencias as DependenciasProcedimento } from "../domain/procedimento/portas";
+import type { Dependencias as DependenciasProntuario } from "../domain/prontuario/portas";
 import { reagendarPorNovoAgendamento } from "../domain/retorno/casos";
 import type { Dependencias as DependenciasRetorno } from "../domain/retorno/portas";
 
@@ -89,6 +91,19 @@ export function dependenciasRetorno(): DependenciasRetorno {
     agendamentos: criarAgendamentos(),
     pacientes: criarPacientes(),
     avisos: criarAvisos(),
+    ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasProntuario(): DependenciasProntuario {
+  const prontuario = criarProntuario();
+  return {
+    anamneses: prontuario.anamneses,
+    evolucoes: prontuario.evolucoes,
+    auditoria: prontuario.auditoria,
+    estoque: prontuario.estoque,
+    agendamentos: criarAgendamentos(),
+    pacientes: criarPacientes(),
     ids: { novo: () => crypto.randomUUID() },
   };
 }

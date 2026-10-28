@@ -46,6 +46,7 @@ function agendamento(parcial: Partial<Agendamento> & Pick<Agendamento, "id">): A
     motivoCancelamento: null,
     canceladoPor: null,
     canceladoEm: null,
+    concluidoEm: null,
     ...parcial,
   };
 }

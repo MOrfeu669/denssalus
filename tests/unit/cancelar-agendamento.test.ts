@@ -126,6 +126,7 @@ class Memoria {
       motivoCancelamento: null,
       canceladoPor: null,
       canceladoEm: null,
+      concluidoEm: null,
       ...parcial,
     };
     this.agendamentos.set(agendamento.id, agendamento);

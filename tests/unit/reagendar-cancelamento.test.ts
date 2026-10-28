@@ -22,6 +22,7 @@ function agendamento(procedimentoId: string | null = "proc-1"): Agendamento {
     motivoCancelamento: "Paciente desmarcou",
     canceladoPor: "usr-1",
     canceladoEm: "2026-11-01T08:00",
+    concluidoEm: null,
   };
 }
 
