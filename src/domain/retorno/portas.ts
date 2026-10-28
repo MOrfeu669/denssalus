@@ -1,4 +1,5 @@
 import type { Agendamentos, Avisos } from "../agendamento/portas";
+import type { Dependencias as DependenciasNotificacao } from "../notificacao/portas";
 import type { Pacientes } from "../paciente/portas";
 import type { ConfiguracaoRetorno, Retorno } from "./tipos";
 
@@ -24,5 +25,6 @@ export type Dependencias = {
   agendamentos: Pick<Agendamentos, "buscarPorId">;
   pacientes: Pick<Pacientes, "buscarPorId">;
   avisos: Avisos;
+  notificacoes: DependenciasNotificacao;
   ids: { novo(): string };
 };

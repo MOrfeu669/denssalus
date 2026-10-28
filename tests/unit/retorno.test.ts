@@ -11,6 +11,7 @@ import {
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import type { Clinica } from "../../src/domain/clinica/tipos";
 import type { Paciente } from "../../src/domain/paciente/tipos";
+import { notificacoesVazias } from "./apoio-notificacao";
 import {
   configurarPrazo,
   listarRetornosPendentes,
@@ -83,6 +84,7 @@ class Memoria {
           this.avisos.push(aviso);
         },
       },
+      notificacoes: notificacoesVazias(),
       ids: { novo: () => `id-${++this.proximoId}` },
     };
   }
@@ -93,6 +95,7 @@ class Memoria {
     const retornos = this.deps();
     return {
       avisos: retornos.avisos,
+      notificacoes: retornos.notificacoes,
       reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
       retornos: {
         concluirPendentes: (clinicaId, pacienteId) =>

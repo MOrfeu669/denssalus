@@ -7,6 +7,7 @@ import {
   criarAgendamento,
   criarBloqueio,
   iniciarAtendimento,
+  marcarChegada,
 } from "../../domain/agendamento/casos";
 import { dependencias, dependenciasAgendamento } from "../dependencias";
 import { falha } from "../falha";
@@ -79,6 +80,26 @@ export async function iniciar(
     if (!resultado.ok) return estado("erro", resultado.mensagem);
     revalidatePath("/agendamentos");
     return estado("sucesso", "Atendimento iniciado");
+  } catch (causa) {
+    return estado("erro", falha(causa).mensagem);
+  }
+}
+
+export async function chegar(
+  _estado: EstadoFormulario,
+  formData: FormData,
+): Promise<EstadoFormulario> {
+  try {
+    const sessao = await obterSessao(dependencias());
+    if (!sessao) return estado("erro", SEM_SESSAO);
+    const resultado = await marcarChegada(
+      dependenciasAgendamento(),
+      sessao,
+      texto(formData, "id"),
+    );
+    if (!resultado.ok) return estado("erro", resultado.mensagem);
+    revalidatePath("/agendamentos");
+    return estado("sucesso", "Chegada marcada");
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
   }

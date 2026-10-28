@@ -1,7 +1,6 @@
 import type {
   Anamneses,
   Auditoria,
-  BaixaEstoque,
   Evolucoes,
 } from "../../domain/prontuario/portas";
 import type {
@@ -103,7 +102,6 @@ export function criarProntuario(): {
   anamneses: Anamneses;
   evolucoes: Evolucoes;
   auditoria: Auditoria;
-  estoque: BaixaEstoque;
 } {
   const admin = createAdminClient();
 
@@ -172,10 +170,5 @@ export function criarProntuario(): {
     },
   };
 
-  // Baixa temporária: não escreve estoque e não lança.
-  const estoque: BaixaEstoque = {
-    async baixar() {},
-  };
-
-  return { anamneses, evolucoes, auditoria, estoque };
+  return { anamneses, evolucoes, auditoria };
 }

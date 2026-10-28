@@ -11,6 +11,7 @@ import {
 } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import type { Clinica } from "../../src/domain/clinica/tipos";
+import { notificacoesVazias } from "./apoio-notificacao";
 
 const CLINICA_ID = "clinica-001";
 const OUTRA_CLINICA = "clinica-002";
@@ -45,6 +46,7 @@ class Memoria {
           this.avisos.push(aviso);
         },
       },
+      notificacoes: notificacoesVazias(),
       retornos: { concluirPendentes: async () => {} },
       reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
       agendamentos: {

@@ -42,11 +42,13 @@ export function FormularioEvolucao({
   agendamentoId,
   rotulo,
   texto,
+  materiais,
 }: {
   pacienteId: string;
   agendamentoId: string;
   rotulo: string;
   texto: string;
+  materiais?: { materialId: string; nome: string; quantidade: number }[];
 }) {
   const roteador = useRouter();
   const [resultado, acao, pendente] = useActionState(registrarEvolucao, estadoVazio);
@@ -61,6 +63,21 @@ export function FormularioEvolucao({
       <form action={acao} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="agendamentoId" value={agendamentoId} />
+        {materiais?.map((material) => (
+          <div key={material.materialId}>
+            <input type="hidden" name="materialId" value={material.materialId} />
+            <label>
+              {`Quantidade usada de ${material.nome}`}
+              <input
+                type="number"
+                name={`quantidade-${material.materialId}`}
+                defaultValue={material.quantidade}
+                min={0}
+                step={1}
+              />
+            </label>
+          </div>
+        ))}
         <label>
           {`Evolução da consulta de ${rotulo}`}
           <textarea name="texto" defaultValue={texto} rows={5} />

@@ -4,6 +4,7 @@ import type { Dependencias as DependenciasAgenda } from "../../src/domain/agenda
 import { MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO, type Agendamento } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import type { Clinica } from "../../src/domain/clinica/tipos";
+import { notificacoesVazias } from "./apoio-notificacao";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../../src/domain/paciente/tipos";
 import {
   MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO,
@@ -81,6 +82,7 @@ class Memoria {
   depsAgenda(): DependenciasAgenda {
     const parcial = {
       avisos: { avisarRecepcionista: async () => {} },
+      notificacoes: notificacoesVazias(),
       clinicas: {
         buscarPorId: async (id) => ({ id, nome: "Clínica", adminId: "ator-admin" }) as Clinica,
       },

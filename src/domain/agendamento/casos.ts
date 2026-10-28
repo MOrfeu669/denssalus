@@ -4,6 +4,8 @@ import type { Cadeira, Clinica } from "../clinica/tipos";
 import { MENSAGEM_CADEIRA_NAO_ENCONTRADA, MENSAGEM_CLINICA_NAO_ENCONTRADA } from "../clinica/tipos";
 import type { Dentista } from "../dentista/tipos";
 import { MENSAGEM_DENTISTA_NAO_ENCONTRADO } from "../dentista/tipos";
+import { publicar, publicarPorRegra } from "../notificacao/casos";
+import { MENSAGEM_CANCELAMENTO_COMUNICAR, MENSAGEM_PACIENTE_AGUARDANDO } from "../notificacao/regras";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO } from "../paciente/tipos";
 import { MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO } from "../procedimento/tipos";
 import type { Dependencias } from "./portas";
@@ -222,7 +224,43 @@ export async function cancelarAgendamento(
     pacienteId: cancelado.pacienteId,
     motivo: motivoLimpo,
   });
+  await publicarPorRegra(deps.notificacoes, {
+    clinicaId: cancelado.clinicaId,
+    tipo: "cancelamento_comunicar",
+    referenciaId: cancelado.id,
+    mensagem: MENSAGEM_CANCELAMENTO_COMUNICAR,
+  });
   return { ok: true, valor: cancelado };
+}
+
+export async function marcarChegada(
+  deps: Dependencias,
+  ator: Sessao,
+  agendamentoId: string,
+): Promise<Resultado<Agendamento>> {
+  const permitido = autorizarAcao(ator, "agendamento:criar");
+  if (!permitido.ok) return permitido;
+
+  const atual = await deps.agendamentos.buscarPorId(agendamentoId);
+  if (!atual || atual.clinicaId !== ator.usuario.clinicaId || atual.status !== "agendado") {
+    return { ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO };
+  }
+
+  const aguardando: Agendamento = { ...atual, status: "em_espera" };
+  const conflito = await deps.agendamentos.salvar(aguardando);
+  if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };
+
+  const dentista = await deps.dentistas.buscarPorId(atual.dentistaId);
+  if (dentista) {
+    await publicar(deps.notificacoes, {
+      clinicaId: atual.clinicaId,
+      tipo: "paciente_aguardando",
+      referenciaId: atual.id,
+      mensagem: MENSAGEM_PACIENTE_AGUARDANDO,
+      destinatarioIds: [dentista.usuarioId],
+    });
+  }
+  return { ok: true, valor: aguardando };
 }
 
 export async function criarBloqueio(

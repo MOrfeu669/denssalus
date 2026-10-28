@@ -8,6 +8,7 @@ import {
   registrarEmergencia,
 } from "../../src/domain/agendamento/casos";
 import type { Dependencias } from "../../src/domain/agendamento/portas";
+import { notificacoesVazias } from "./apoio-notificacao";
 import { intervalosSobrepoem, ocupaAgenda, sugerirFim } from "../../src/domain/agendamento/regras";
 import {
   MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO,
@@ -75,6 +76,7 @@ class Memoria {
   deps(): Dependencias {
     return {
       avisos: { avisarRecepcionista: async () => {} },
+      notificacoes: notificacoesVazias(),
       retornos: { concluirPendentes: async () => {} },
       reverterDoAgendamento: async () => ({ ok: true, valor: undefined }),
       agendamentos: {
