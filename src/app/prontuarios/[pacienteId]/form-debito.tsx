@@ -83,7 +83,7 @@ export function FormularioQuitar({
           <input type="date" name="data" required />
         </label>
         <button type="submit" disabled={pendente}>
-          Quitar débito
+          Quitar
         </button>
       </form>
     </>

@@ -3,21 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import type { DetalheClinica } from "../../domain/clinica/tipos";
-import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { adicionar, criar, desativar, salvarHorario } from "./actions";
-import { DIAS } from "./validar";
+import { Alerta, BotaoAcao } from "./alerta";
+import { Funcionamento, type CamposFuncionamento } from "./funcionamento";
+import { CLINICA_CADEIRAS_VAZIO, CLINICA_SEM_CLINICA, mensagemComDetalhe } from "./texto";
 
 const DIAS_PADRAO = ["segunda", "terca", "quarta", "quinta", "sexta"];
-
-type Campos = { dias: readonly string[]; abertura: string; fechamento: string };
 
 export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
   const roteador = useRouter();
   const [criacao, acaoCriar, pendenteCriar] = useActionState(criar, estadoVazio);
   const [horario, acaoHorario, pendenteHorario] = useActionState(salvarHorario, estadoVazio);
   const [inclusao, acaoAdicionar, pendenteAdicionar] = useActionState(adicionar, estadoVazio);
-  const [desativacao, acaoDesativar, pendenteDesativar] = useActionState(desativar, estadoVazio);
+  const [desativacao, acaoDesativar] = useActionState(desativar, estadoVazio);
   const aviso = avisoVisivel(criacao, horario, inclusao, desativacao);
 
   useEffect(() => {
@@ -28,28 +27,36 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
   if (!detalhe) {
     return (
       <>
-        <Aviso tipo={aviso.status} mensagem={aviso.mensagem} />
-        <p>Esta conta ainda não tem clínica. Crie a clínica para configurar horário e cadeiras.</p>
-        <form action={acaoCriar} aria-busy={pendenteCriar}>
-          <label>
-            Nome da clínica
-            <input name="nome" required />
-          </label>
-          <Funcionamento campos={{ dias: DIAS_PADRAO, abertura: "08:00", fechamento: "18:00" }} />
-          <label>
-            Cadeiras
-            <input name="cadeiras" type="number" min={1} step={1} defaultValue={1} required />
-          </label>
-          <button type="submit" disabled={pendenteCriar}>
-            {pendenteCriar ? "Salvando…" : "Criar clínica"}
-          </button>
-        </form>
+        <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+        <section className="clinica-cartao" aria-labelledby="clinica-nova">
+          <h2 id="clinica-nova" className="clinica-subtitulo">
+            Criar clínica
+          </h2>
+          <p className="clinica-intro">{CLINICA_SEM_CLINICA}</p>
+          <form action={acaoCriar} aria-busy={pendenteCriar} className="clinica-form">
+            <label className="clinica-campo">
+              Nome da clínica
+              <input name="nome" required />
+            </label>
+            <Funcionamento
+              campos={{ dias: DIAS_PADRAO, abertura: "08:00", fechamento: "18:00" }}
+              sugestao
+            />
+            <label className="clinica-campo">
+              Cadeiras
+              <input name="cadeiras" type="number" min={1} step={1} defaultValue={1} required />
+            </label>
+            <div className="clinica-acoes">
+              <BotaoAcao rotulo="Criar clínica" pendente="Salvando…" className="clinica-botao" />
+            </div>
+          </form>
+        </section>
       </>
     );
   }
 
   const { clinica, cadeiras } = detalhe;
-  const campos: Campos = {
+  const campos: CamposFuncionamento = {
     dias: clinica.diasAtendimento,
     abertura: clinica.horarioAbertura,
     fechamento: clinica.horarioFechamento,
@@ -57,85 +64,73 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
 
   return (
     <>
-      <Aviso tipo={aviso.status} mensagem={aviso.mensagem} />
-      <h2>{clinica.nome}</h2>
-      <form
-        key={`${campos.dias.join(",")}-${campos.abertura}-${campos.fechamento}`}
-        action={acaoHorario}
-        aria-busy={pendenteHorario}
-      >
-        <Funcionamento campos={campos} />
-        <button type="submit" disabled={pendenteHorario}>
-          {pendenteHorario ? "Salvando…" : "Salvar horário"}
-        </button>
-      </form>
-      <h2>Cadeiras</h2>
-      {cadeiras.length === 0 ? (
-        <p>Nenhuma cadeira cadastrada nesta clínica.</p>
-      ) : (
-        <ul className="lista">
-          {cadeiras.map((cadeira) => (
-            <li key={cadeira.id}>
-              <span>
-                {cadeira.identificacao}
-                {cadeira.ativa ? "" : " · ! desativada"}
-              </span>
-              {cadeira.ativa ? (
-                <form action={acaoDesativar}>
-                  <input type="hidden" name="id" value={cadeira.id} />
-                  <button
-                    type="submit"
-                    disabled={pendenteDesativar}
-                    aria-label={`Desativar cadeira ${cadeira.identificacao}`}
-                  >
-                    Desativar cadeira
-                  </button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-      <form action={acaoAdicionar} aria-busy={pendenteAdicionar}>
-        <button type="submit" disabled={pendenteAdicionar}>
-          {pendenteAdicionar ? "Salvando…" : "Adicionar cadeira"}
-        </button>
-      </form>
-    </>
-  );
-}
-
-function Funcionamento({ campos }: { campos: Campos }) {
-  return (
-    <>
-      <fieldset>
-        <legend>Dias de atendimento</legend>
-        {DIAS.map((dia) => (
-          <label key={dia.valor}>
-            <input
-              type="checkbox"
-              name="dias"
-              value={dia.valor}
-              defaultChecked={campos.dias.includes(dia.valor)}
+      <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+      <section className="clinica-cartao" aria-labelledby="clinica-funcionamento">
+        <h2 id="clinica-funcionamento" className="clinica-subtitulo">
+          {clinica.nome}
+        </h2>
+        <form
+          key={`${campos.dias.join(",")}-${campos.abertura}-${campos.fechamento}`}
+          action={acaoHorario}
+          aria-busy={pendenteHorario}
+          className="clinica-form"
+        >
+          <Funcionamento campos={campos} />
+          <div className="clinica-acoes">
+            <BotaoAcao rotulo="Salvar horário e dias" pendente="Salvando…" className="clinica-botao" />
+          </div>
+        </form>
+      </section>
+      <section className="clinica-cartao" aria-labelledby="clinica-cadeiras">
+        <h2 id="clinica-cadeiras" className="clinica-subtitulo">
+          Cadeiras
+        </h2>
+        {cadeiras.length === 0 ? (
+          <p className="clinica-vazio">{CLINICA_CADEIRAS_VAZIO}</p>
+        ) : (
+          <ul className="clinica-lista">
+            {cadeiras.map((cadeira) => (
+              <li key={cadeira.id} className="clinica-linha">
+                <span className="clinica-cadeira">
+                  <span className="clinica-nome">{cadeira.identificacao}</span>
+                  {cadeira.ativa ? null : (
+                    <span className="clinica-inativa">! Desativada</span>
+                  )}
+                </span>
+                {cadeira.ativa ? (
+                  <form action={acaoDesativar} className="clinica-desativar">
+                    <input type="hidden" name="id" value={cadeira.id} />
+                    <BotaoAcao
+                      rotulo="Desativar"
+                      pendente="Desativando…"
+                      className="clinica-botao-sec"
+                      nomeAcessivel={`Desativar cadeira ${cadeira.identificacao}`}
+                    />
+                  </form>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+        <form action={acaoAdicionar} aria-busy={pendenteAdicionar} className="clinica-form">
+          <div className="clinica-acoes">
+            <BotaoAcao
+              rotulo="Adicionar cadeira"
+              pendente="Adicionando…"
+              className="clinica-botao-sec"
             />
-            {dia.rotulo}
-          </label>
-        ))}
-      </fieldset>
-      <label>
-        Abertura
-        <input name="abertura" type="time" defaultValue={campos.abertura} required />
-      </label>
-      <label>
-        Fechamento
-        <input name="fechamento" type="time" defaultValue={campos.fechamento} required />
-      </label>
+          </div>
+        </form>
+      </section>
     </>
   );
 }
 
 function avisoVisivel(...estados: EstadoFormulario[]) {
   const escolhido = estados.reduce((atual, item) => (item.quando > atual.quando ? item : atual));
-  const mensagem = escolhido.detalhe ? `${escolhido.mensagem}: ${escolhido.detalhe}` : escolhido.mensagem;
-  return { status: escolhido.status, mensagem };
+  return {
+    status: escolhido.status,
+    mensagem: mensagemComDetalhe(escolhido.mensagem, escolhido.detalhe),
+    quando: escolhido.quando,
+  };
 }

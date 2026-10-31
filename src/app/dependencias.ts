@@ -35,6 +35,7 @@ import type { Dependencias as DependenciasDocumento } from "../domain/documento/
 import { baixarPorAtendimento } from "../domain/estoque/casos";
 import type { Dependencias as DependenciasEstoque } from "../domain/estoque/portas";
 import type { Dependencias as DependenciasImagem } from "../domain/imagem/portas";
+import type { Dependencias as DependenciasInicio } from "../domain/inicio/casos";
 import { publicar } from "../domain/notificacao/casos";
 import type { Dependencias as DependenciasNotificacao } from "../domain/notificacao/portas";
 import { destinatarios } from "../domain/notificacao/regras";
@@ -348,5 +349,15 @@ export function dependenciasDashboard(): DependenciasDashboard {
   return {
     ...dashboard,
     ids: { novo: () => crypto.randomUUID() },
+  };
+}
+
+export function dependenciasInicio(): DependenciasInicio {
+  return {
+    clinicas: criarClinicas(),
+    cadeiras: criarCadeiras(),
+    dentistas: criarDentistas(),
+    pacientes: criarPacientes(),
+    agendamentos: criarAgendamentos(),
   };
 }

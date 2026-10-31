@@ -1,0 +1,547 @@
+.casca {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 264px 1fr;
+  background: #f6f8f9;
+  color: #0f1a20;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.casca,
+.casca *,
+.casca *::before,
+.casca *::after {
+  box-sizing: border-box;
+}
+
+.casca.casca-aberta {
+  grid-template-columns: 1fr;
+}
+
+.casca :focus-visible {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca-lateral {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px 16px 20px;
+  background: #0f433d;
+  color: #fff;
+}
+
+.casca .casca-lateral :focus-visible {
+  outline-color: #fff;
+}
+
+.casca .casca-lateral p {
+  margin: 0;
+}
+
+.casca a.casca-marca,
+.casca .casca-marca {
+  padding: 0 12px;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+
+.casca .casca-clinica {
+  padding: 0 12px 16px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  color: #d3f3ec;
+  overflow-wrap: anywhere;
+}
+
+.casca-menu {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.casca .casca-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.casca .casca-menu a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca .casca-menu a:hover {
+  background: #158172;
+}
+
+.casca .casca-menu a[aria-current="page"] {
+  background: #158172;
+  box-shadow: inset 3px 0 0 #3fbba8;
+}
+
+.casca-usuario {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 12px 0;
+  border-top: 1px solid #158172;
+}
+
+.casca .casca-usuario .casca-usuario-nome {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.casca .casca-usuario .casca-usuario-papel {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: #d3f3ec;
+}
+
+.casca .casca-usuario form {
+  display: block;
+  margin: 12px 0 0;
+}
+
+.casca button.casca-sair {
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid #158172;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca button.casca-sair:hover {
+  background: #158172;
+}
+
+.casca .casca-miolo {
+  max-width: none;
+  margin: 0;
+  padding: 40px 48px;
+  border: 0;
+  border-radius: 0;
+  background: #f6f8f9;
+  color: #0f1a20;
+  min-width: 0;
+}
+
+.casca .casca-miolo h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #0f1a20;
+}
+
+.casca .casca-quem {
+  margin: 0 0 28px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #475760;
+}
+
+.casca .casca-texto {
+  margin: 0 0 20px;
+  max-width: 560px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.casca .casca-guia {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.casca .casca-passo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.casca .casca-passo-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.casca .casca-passo-numero {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8eef0;
+  color: #475760;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.casca .casca-passo-concluido {
+  background: #ecfdf3;
+  border-color: #178a4c;
+}
+
+.casca .casca-passo-concluido .casca-passo-numero {
+  background: #178a4c;
+  color: #fff;
+}
+
+.casca .casca-passo-estado {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #146c3e;
+}
+
+.casca .casca-passo-atual {
+  border-color: #158172;
+  box-shadow: 0 0 0 2px #d3f3ec;
+}
+
+.casca .casca-passo-atual .casca-passo-numero {
+  background: #158172;
+  color: #fff;
+}
+
+.casca a.casca-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: 44px;
+  margin: 0;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #158172;
+  color: #fff;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca a.casca-botao:hover {
+  background: #0f433d;
+}
+
+.casca a.casca-link {
+  color: #14665b;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca a.casca-link:hover {
+  text-decoration: underline;
+}
+
+.casca .casca-alerta {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid #d4372c;
+  border-radius: 14px;
+  background: #fef0ef;
+}
+
+.casca .casca-alerta p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #ad2a21;
+}
+
+.casca .casca-aviso {
+  max-width: 560px;
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.casca-coluna {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.casca-topo {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 0;
+}
+
+.casca .sino {
+  position: static;
+}
+
+.casca .casca-atalhos {
+  margin-top: 28px;
+  max-width: 720px;
+}
+
+.casca .casca-atalhos ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.casca .casca-atalhos a {
+  display: inline-flex;
+  padding: 8px 12px;
+  border: 1px solid #cbd4d9;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f433d;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca .casca-miolo h2 {
+  margin: 28px 0 8px;
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.casca .casca-miolo form {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8ec;
+  border-radius: 16px;
+}
+
+.casca .casca-miolo .lista form,
+.casca .casca-miolo .grade form {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.casca .casca-miolo .lista {
+  background: #fff;
+  border: 1px solid #e2e8ec;
+  border-radius: 16px;
+  padding: 4px 16px;
+}
+
+.casca .casca-miolo input,
+.casca .casca-miolo select,
+.casca .casca-miolo textarea {
+  padding: 10px 12px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+}
+
+.casca .casca-miolo button,
+.casca .casca-miolo a.acao {
+  width: fit-content;
+  border: 0;
+  border-radius: 10px;
+  background: #158172;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 16px;
+}
+
+.casca .casca-miolo button[type="button"] {
+  background: #fff;
+  color: #14665b;
+  border: 1px solid #158172;
+}
+
+.casca .casca-miolo .nav a {
+  color: #14665b;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca .erro,
+.casca .sucesso {
+  margin: 0 0 16px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid;
+  font-weight: 600;
+}
+
+.casca .erro {
+  background: #fef0ef;
+  border-color: #d4372c;
+  color: #ad2a21;
+}
+
+.casca .sucesso {
+  background: #ecfdf3;
+  border-color: #178a4c;
+  color: #146c3e;
+}
+
+.casca .casca-nota {
+  max-width: 640px;
+  margin: 0 0 16px;
+  color: #475760;
+}
+
+.casca .abaixo {
+  background: #fef0ef;
+  color: #ad2a21;
+}
+
+.casca .dente {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f433d;
+  border: 1px solid #cbd4d9;
+}
+
+.casca .dente.com-registro {
+  background: #d3f3ec;
+}
+
+.casca .dente[aria-pressed="true"] {
+  background: #158172;
+  color: #fff;
+}
+
+@media (max-width: 960px) {
+  .casca {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .casca-lateral {
+    position: static;
+    height: auto;
+    padding: 20px 16px;
+  }
+
+  .casca .casca-menu ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .casca .casca-miolo {
+    padding: 28px 20px;
+  }
+}
+
+.casca .sino-botao {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cbd4d9;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f433d;
+  cursor: pointer;
+}
+
+.casca .sino-contagem {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #d4372c;
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 700;
+}
+
+.casca .prontuario-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 20px;
+}
+
+.casca .prontuario-nav a {
+  color: #14665b;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca .prontuario-secao {
+  margin: 0 0 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8ec;
+  border-radius: 16px;
+}

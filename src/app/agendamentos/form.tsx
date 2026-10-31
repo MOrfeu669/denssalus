@@ -6,12 +6,30 @@ import type { Papel } from "../../domain/auth/tipos";
 import { sugerirFim } from "../../domain/agendamento/regras";
 import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/tipos";
 import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
-import { Aviso } from "../aviso";
+import { rotuloStatus } from "../agenda/rotulo";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
-import { bloquear, cancelar, chegar, criar, iniciar } from "./actions";
+import { bloquear, cancelar, chegar, criar, emergencia, iniciar } from "./actions";
 import { marcar } from "../retornos/actions";
+import { registrarEvolucao } from "../prontuarios/[pacienteId]/actions";
 import { FormularioMarcarRetorno } from "../retornos/form";
+import { Alerta } from "./alerta";
 import { FormularioCancelar, PerguntaReagendar, podeCancelar } from "./cancelar";
+import { FormularioEvolucao, podeEvoluir } from "./evolucao";
+import {
+  intervaloLegivel,
+  PENDENTE_BLOQUEAR,
+  PENDENTE_CHEGADA,
+  PENDENTE_CRIAR,
+  PENDENTE_EMERGENCIA,
+  PENDENTE_INICIAR,
+  ROTULO_BLOQUEAR,
+  ROTULO_CHEGADA,
+  ROTULO_CRIAR,
+  ROTULO_EMERGENCIA,
+  ROTULO_INICIAR,
+  rotuloDoBotao,
+  VAZIO_AGENDAMENTOS,
+} from "./texto";
 
 export type ValoresIniciais = {
   pacienteId: string;
@@ -34,17 +52,21 @@ export function Agendamentos({
 }) {
   const roteador = useRouter();
   const [criacao, acaoCriar, pendenteCriar] = useActionState(criar, estadoVazio);
+  const [emergenciaEstado, acaoEmergencia, pendenteEmergencia] = useActionState(emergencia, estadoVazio);
   const [atendimento, acaoIniciar, pendenteIniciar] = useActionState(iniciar, estadoVazio);
   const [chegada, acaoChegar, pendenteChegar] = useActionState(chegar, estadoVazio);
   const [bloqueio, acaoBloquear, pendenteBloquear] = useActionState(bloquear, estadoVazio);
   const [cancelamento, acaoCancelar, pendenteCancelar] = useActionState(cancelar, estadoVazio);
   const [retorno, acaoRetorno, pendenteRetorno] = useActionState(marcar, estadoVazio);
+  const [evolucao, acaoEvolucao, pendenteEvolucao] = useActionState(registrarEvolucao, estadoVazio);
   const aviso = avisoVisivel(
     criacao,
+    emergenciaEstado,
     atendimento,
     chegada,
     bloqueio,
     retorno,
+    evolucao,
     ...(cancelamento.status === "erro" && cancelamento.mensagem !== MENSAGEM_REGISTROS_CONFIRMADOS
       ? [{ ...cancelamento, detalhe: "" }]
       : []),
@@ -53,95 +75,177 @@ export function Agendamentos({
 
   useEffect(() => {
     if (
-      [criacao, atendimento, chegada, bloqueio, cancelamento, retorno].some(
+      [criacao, emergenciaEstado, atendimento, chegada, bloqueio, cancelamento, retorno, evolucao].some(
         (item) => item.status === "sucesso",
       )
     ) {
       roteador.refresh();
     }
-  }, [criacao, atendimento, chegada, bloqueio, cancelamento, retorno, roteador]);
+  }, [criacao, emergenciaEstado, atendimento, chegada, bloqueio, cancelamento, retorno, evolucao, roteador]);
 
   return (
-    <>
-      <Aviso tipo={aviso.status} mensagem={aviso.mensagem} />
+    <div className="agendamentos-tela">
+      <Alerta
+        tipo={aviso.status === "sucesso" ? "sucesso" : "erro"}
+        mensagem={aviso.mensagem}
+        quando={aviso.quando}
+        classe={`agendamentos-aviso agendamentos-aviso-${aviso.status === "sucesso" ? "sucesso" : "erro"}`}
+      />
       <PerguntaReagendar estado={cancelamento} agendamentos={agendamentos} />
-      {agendamentos.length === 0 ? (
-        <p>Nenhum agendamento nesta clínica.</p>
-      ) : (
-        <ul className="lista">
-          {agendamentos.map((agendamento) => (
-            <li key={agendamento.id}>
-              <span>{resumo(agendamento, opcoes)}</span>
-              {agendamento.status === "agendado" ? (
-                <form action={acaoChegar} aria-busy={pendenteChegar}>
-                  <input type="hidden" name="id" value={agendamento.id} />
-                  <button type="submit" disabled={pendenteChegar}>
-                    Marcar chegada
-                  </button>
-                </form>
-              ) : null}
-              {podeIniciar(agendamento, papel, usuarioId, opcoes.dentistas) ? (
-                <form action={acaoIniciar} aria-busy={pendenteIniciar}>
-                  <input type="hidden" name="id" value={agendamento.id} />
-                  <button type="submit" disabled={pendenteIniciar}>
-                    Iniciar atendimento
-                  </button>
-                </form>
-              ) : null}
-              {podeCancelar(agendamento) ? (
-                <FormularioCancelar
-                  id={agendamento.id}
-                  acao={acaoCancelar}
-                  pendente={pendenteCancelar}
-                  estado={cancelamento}
-                />
-              ) : null}
-              {agendamento.status === "concluido" && podeBloquear ? (
-                <FormularioMarcarRetorno
-                  id={agendamento.id}
-                  acao={acaoRetorno}
-                  pendente={pendenteRetorno}
-                />
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-      <form
-        key={`${criacao.status === "sucesso" ? criacao.quando : 0}|${inicial.pacienteId}|${inicial.dentistaId}|${inicial.procedimentoId}`}
-        action={acaoCriar}
-        aria-busy={pendenteCriar}
-      >
-        <CamposCriar opcoes={opcoes} inicial={inicial} />
-        <button type="submit" disabled={pendenteCriar}>
-          Criar agendamento
-        </button>
-      </form>
-      {podeBloquear ? (
+
+      <section className="agendamentos-bloco" aria-labelledby="agendamentos-novo">
+        <h2 id="agendamentos-novo">Novo agendamento</h2>
         <form
-          key={bloqueio.status === "sucesso" ? bloqueio.quando : 0}
-          action={acaoBloquear}
-          aria-busy={pendenteBloquear}
+          className="agendamentos-form"
+          key={`${criacao.status === "sucesso" ? criacao.quando : 0}|${inicial.pacienteId}|${inicial.dentistaId}|${inicial.procedimentoId}`}
+          action={acaoCriar}
+          aria-busy={pendenteCriar || pendenteEmergencia}
         >
-          <DentistaDoBloqueio papel={papel} usuarioId={usuarioId} dentistas={opcoes.dentistas} />
-          <label>
-            Início
-            <input name="inicio" type="datetime-local" required />
-          </label>
-          <label>
-            Fim
-            <input name="fim" type="datetime-local" required />
-          </label>
-          <label>
-            Motivo
-            <input name="motivo" />
-          </label>
-          <button type="submit" disabled={pendenteBloquear}>
-            Bloquear agenda
-          </button>
+          <CamposCriar opcoes={opcoes} inicial={inicial} />
+          <div className="agendamentos-botoes">
+            <button type="submit" disabled={pendenteCriar || pendenteEmergencia}>
+              {rotuloDoBotao(ROTULO_CRIAR, PENDENTE_CRIAR, pendenteCriar)}
+            </button>
+            <button
+              type="submit"
+              formAction={acaoEmergencia}
+              disabled={pendenteCriar || pendenteEmergencia}
+            >
+              {rotuloDoBotao(ROTULO_EMERGENCIA, PENDENTE_EMERGENCIA, pendenteEmergencia)}
+            </button>
+          </div>
         </form>
+      </section>
+
+      {podeBloquear ? (
+        <section className="agendamentos-bloco" aria-labelledby="agendamentos-bloqueio">
+          <h2 id="agendamentos-bloqueio">Bloqueio de agenda</h2>
+          <form
+            className="agendamentos-form"
+            key={bloqueio.status === "sucesso" ? bloqueio.quando : 0}
+            action={acaoBloquear}
+            aria-busy={pendenteBloquear}
+          >
+            <DentistaDoBloqueio papel={papel} usuarioId={usuarioId} dentistas={opcoes.dentistas} />
+            <label className="agendamentos-campo">
+              Início
+              <input name="inicio" type="datetime-local" required />
+            </label>
+            <label className="agendamentos-campo">
+              Fim
+              <input name="fim" type="datetime-local" required />
+            </label>
+            <label className="agendamentos-campo">
+              Motivo
+              <input name="motivo" />
+            </label>
+            <div className="agendamentos-botoes">
+              <button type="submit" disabled={pendenteBloquear}>
+                {rotuloDoBotao(ROTULO_BLOQUEAR, PENDENTE_BLOQUEAR, pendenteBloquear)}
+              </button>
+            </div>
+          </form>
+        </section>
       ) : null}
-    </>
+
+      <section className="agendamentos-bloco" aria-labelledby="agendamentos-lista">
+        <h2 id="agendamentos-lista">Agendamentos da clínica</h2>
+        {agendamentos.length === 0 ? (
+          <p className="agendamentos-vazio">{VAZIO_AGENDAMENTOS}</p>
+        ) : (
+          <ul className="agendamentos-lista">
+            {agendamentos.map((agendamento) => (
+              <li id={agendamento.id} key={agendamento.id} className="agendamentos-item">
+                <ResumoAgendamento agendamento={agendamento} opcoes={opcoes} />
+                <div className="agendamentos-acoes">
+                  {agendamento.status === "agendado" ? (
+                    <form action={acaoChegar} aria-busy={pendenteChegar}>
+                      <input type="hidden" name="id" value={agendamento.id} />
+                      <button type="submit" disabled={pendenteChegar}>
+                        {rotuloDoBotao(ROTULO_CHEGADA, PENDENTE_CHEGADA, pendenteChegar)}
+                      </button>
+                    </form>
+                  ) : null}
+                  {podeIniciar(agendamento, papel, usuarioId, opcoes.dentistas) ? (
+                    <form action={acaoIniciar} aria-busy={pendenteIniciar}>
+                      <input type="hidden" name="id" value={agendamento.id} />
+                      <button type="submit" disabled={pendenteIniciar}>
+                        {rotuloDoBotao(ROTULO_INICIAR, PENDENTE_INICIAR, pendenteIniciar)}
+                      </button>
+                    </form>
+                  ) : null}
+                  {podeCancelar(agendamento) ? (
+                    <FormularioCancelar
+                      id={agendamento.id}
+                      acao={acaoCancelar}
+                      pendente={pendenteCancelar}
+                      estado={cancelamento}
+                    />
+                  ) : null}
+                  {podeEvoluir(agendamento, papel, usuarioId, opcoes.dentistas) ? (
+                    <FormularioEvolucao
+                      agendamento={agendamento}
+                      acao={acaoEvolucao}
+                      pendente={pendenteEvolucao}
+                    />
+                  ) : null}
+                  {agendamento.status === "concluido" && podeBloquear ? (
+                    <FormularioMarcarRetorno
+                      id={agendamento.id}
+                      acao={acaoRetorno}
+                      pendente={pendenteRetorno}
+                    />
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function ResumoAgendamento({
+  agendamento,
+  opcoes,
+}: {
+  agendamento: Agendamento;
+  opcoes: OpcoesAgendamento;
+}) {
+  const paciente = opcoes.pacientes.find((item) => item.id === agendamento.pacienteId)?.nome;
+  const dentista = opcoes.dentistas.find((item) => item.id === agendamento.dentistaId)?.nome;
+  const cadeira = opcoes.cadeiras.find((item) => item.id === agendamento.cadeiraId)?.identificacao;
+  const procedimento = agendamento.procedimentoId
+    ? opcoes.procedimentos.find((item) => item.id === agendamento.procedimentoId)?.nome
+    : null;
+  return (
+    <div className="agendamentos-resumo">
+      <p className="agendamentos-paciente">{paciente ?? "—"}</p>
+      <span className={`agendamentos-status agendamentos-status-${agendamento.status}`}>
+        {rotuloStatus(agendamento.status)}
+      </span>
+      <dl className="agendamentos-campos">
+        <div>
+          <dt>Dentista</dt>
+          <dd>{dentista ?? "—"}</dd>
+        </div>
+        <div>
+          <dt>Cadeira</dt>
+          <dd>{cadeira ?? "—"}</dd>
+        </div>
+        <div>
+          <dt>Intervalo</dt>
+          <dd>{intervaloLegivel(agendamento.inicio, agendamento.fim)}</dd>
+        </div>
+        {procedimento ? (
+          <div>
+            <dt>Procedimento</dt>
+            <dd>{procedimento}</dd>
+          </div>
+        ) : null}
+      </dl>
+    </div>
   );
 }
 
@@ -167,7 +271,7 @@ function CamposCriar({
 
   return (
     <>
-      <label>
+      <label className="agendamentos-campo">
         Paciente
         <select name="pacienteId" defaultValue={inicial.pacienteId} required>
           <option value="">Selecione</option>
@@ -178,7 +282,7 @@ function CamposCriar({
           ))}
         </select>
       </label>
-      <label>
+      <label className="agendamentos-campo">
         Dentista
         <select name="dentistaId" defaultValue={inicial.dentistaId} required>
           <option value="">Selecione</option>
@@ -189,7 +293,7 @@ function CamposCriar({
           ))}
         </select>
       </label>
-      <label>
+      <label className="agendamentos-campo">
         Cadeira
         <select name="cadeiraId" defaultValue="" required>
           <option value="">Selecione</option>
@@ -200,7 +304,7 @@ function CamposCriar({
           ))}
         </select>
       </label>
-      <label>
+      <label className="agendamentos-campo">
         Início
         <input
           name="inicio"
@@ -210,7 +314,7 @@ function CamposCriar({
           required
         />
       </label>
-      <label>
+      <label className="agendamentos-campo">
         Fim
         <input
           name="fim"
@@ -220,7 +324,7 @@ function CamposCriar({
           required
         />
       </label>
-      <label>
+      <label className="agendamentos-campo">
         Procedimento
         <select
           name="procedimentoId"
@@ -250,7 +354,7 @@ function DentistaDoBloqueio({
 }) {
   if (papel === "admin") {
     return (
-      <label>
+      <label className="agendamentos-campo">
         Dentista
         <select name="dentistaId" defaultValue="" required>
           <option value="">Selecione</option>
@@ -282,23 +386,8 @@ function podeIniciar(
   );
 }
 
-function resumo(agendamento: Agendamento, opcoes: OpcoesAgendamento): string {
-  const paciente = opcoes.pacientes.find((item) => item.id === agendamento.pacienteId)?.nome;
-  const dentista = opcoes.dentistas.find((item) => item.id === agendamento.dentistaId)?.nome;
-  const cadeira = opcoes.cadeiras.find((item) => item.id === agendamento.cadeiraId)?.identificacao;
-  const procedimento = agendamento.procedimentoId
-    ? opcoes.procedimentos.find((item) => item.id === agendamento.procedimentoId)?.nome
-    : null;
-  const quando = `${agendamento.inicio}–${agendamento.fim}`;
-  return [paciente, dentista, cadeira, procedimento, quando, agendamento.status]
-    .filter((parte) => parte)
-    .join(" · ");
-}
-
+// Uma mensagem por vez: a mais recente. `detalhe` guarda id para a tela, não texto para a pessoa.
 function avisoVisivel(...estados: EstadoFormulario[]) {
   const escolhido = estados.reduce((atual, item) => (item.quando > atual.quando ? item : atual));
-  const mensagem = escolhido.detalhe
-    ? `${escolhido.mensagem}: ${escolhido.detalhe}`
-    : escolhido.mensagem;
-  return { status: escolhido.status, mensagem };
+  return { status: escolhido.status, mensagem: escolhido.mensagem, quando: escolhido.quando };
 }

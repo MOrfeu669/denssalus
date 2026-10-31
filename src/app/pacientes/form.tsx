@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useEffect, useId, useState, type ReactNode } from "react";
+import { dataValida, menorDeIdade } from "../../domain/paciente/regras";
 import type { Canal, CanalComunicacao, Paciente } from "../../domain/paciente/tipos";
-import { Aviso } from "../aviso";
-import { estadoVazio, type EstadoFormulario } from "../formulario";
+import { estadoVazio } from "../formulario";
 import { cadastrar, editar } from "./actions";
+import { Alerta } from "./alerta";
+import { ROTULO_CANAL, ROTULO_SEXO, TEXTO_VAZIO, textoIdade } from "./texto";
 
 export type PacienteLinha = Paciente & { idade: number | null };
 
-const ROTULO_CANAL: Record<Canal, string> = { sms: "SMS", email: "E-mail", whatsapp: "WhatsApp" };
 const CANAIS_ORDEM: Canal[] = ["whatsapp", "email", "sms"];
 const LINHA_VAZIA: CanalComunicacao = { canal: "whatsapp", contato: "", preferido: true };
 
@@ -19,7 +20,7 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
   const [cadastro, acaoCadastrar, pendenteCadastrar] = useActionState(cadastrar, estadoVazio);
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
-  const aviso = avisoVisivel(cadastro, edicao);
+  const aviso = cadastro.quando >= edicao.quando ? cadastro : edicao;
 
   useEffect(() => {
     if (edicao.status === "sucesso") setEditandoId(null);
@@ -31,111 +32,184 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
 
   return (
     <>
-      <Aviso tipo={aviso.status} mensagem={aviso.mensagem} />
-      {pacientes.length === 0 ? (
-        <p>Nenhum paciente cadastrado nesta clínica.</p>
-      ) : (
-        <ul className="lista">
-          {pacientes.map((paciente) => (
-            <li key={paciente.id}>
-              <span>{resumo(paciente)}</span>
-              <button
-                type="button"
-                onClick={() => setEditandoId(editandoId === paciente.id ? null : paciente.id)}
-                aria-label={`Editar paciente ${paciente.nome}`}
-              >
-                Editar paciente
-              </button>
-              <Link href={`/prontuarios/${paciente.id}`} aria-label={`Prontuário de ${paciente.nome}`}>
-                Prontuário
-              </Link>
-              {editandoId === paciente.id ? (
-                <form action={acaoEditar} aria-busy={pendenteEditar}>
-                  <input type="hidden" name="id" value={paciente.id} />
-                  <Campos paciente={paciente} />
-                  <button type="submit" disabled={pendenteEditar}>
-                    {pendenteEditar ? "Salvando…" : "Salvar paciente"}
-                  </button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-      <form
-        key={cadastro.status === "sucesso" ? cadastro.quando : 0}
-        action={acaoCadastrar}
-        aria-busy={pendenteCadastrar}
-      >
-        <Campos />
-        <button type="submit" disabled={pendenteCadastrar}>
-          {pendenteCadastrar ? "Salvando…" : "Cadastrar paciente"}
-        </button>
-      </form>
+      <Alerta estado={aviso} />
+      <div className="pacientes-colunas">
+        <section className="pacientes-secao" aria-labelledby="pacientes-lista-titulo">
+          <h2 id="pacientes-lista-titulo">Pacientes da clínica</h2>
+          {pacientes.length === 0 ? (
+            <p className="pacientes-vazio">{TEXTO_VAZIO}</p>
+          ) : (
+            <ul className="pacientes-lista">
+              {pacientes.map((paciente) => (
+                <li key={paciente.id} className="pacientes-item">
+                  <div className="pacientes-linha">
+                    <Resumo paciente={paciente} />
+                    <div className="pacientes-acoes">
+                      <button
+                        type="button"
+                        className="pacientes-botao pacientes-botao-secundario"
+                        aria-expanded={editandoId === paciente.id}
+                        onClick={() => setEditandoId(editandoId === paciente.id ? null : paciente.id)}
+                        aria-label={`Editar paciente ${paciente.nome}`}
+                      >
+                        Editar paciente
+                      </button>
+                      <Link
+                        className="pacientes-link"
+                        href={`/prontuarios/${paciente.id}`}
+                        aria-label={`Prontuário de ${paciente.nome}`}
+                      >
+                        Prontuário
+                      </Link>
+                    </div>
+                  </div>
+                  {editandoId === paciente.id ? (
+                    <form className="pacientes-form" action={acaoEditar} aria-busy={pendenteEditar}>
+                      <input type="hidden" name="id" value={paciente.id} />
+                      <Campos paciente={paciente} />
+                      <Enviar pendente={pendenteEditar} texto="Salvar paciente" />
+                    </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section className="pacientes-secao" aria-labelledby="pacientes-novo-titulo">
+          <h2 id="pacientes-novo-titulo">Novo paciente</h2>
+          <form
+            className="pacientes-form"
+            key={cadastro.status === "sucesso" ? cadastro.quando : 0}
+            action={acaoCadastrar}
+            aria-busy={pendenteCadastrar}
+          >
+            <Campos />
+            <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" />
+          </form>
+        </section>
+      </div>
     </>
   );
 }
 
-function resumo(paciente: PacienteLinha): string {
-  const partes = [paciente.nome];
-  if (paciente.idade !== null) partes.push(`${paciente.idade} anos`);
-  partes.push(
-    paciente.canais
-      .map((item) => `${ROTULO_CANAL[item.canal]} ${item.contato}${item.preferido ? " (preferido)" : ""}`)
-      .join(", "),
+function Enviar({ pendente, texto }: { pendente: boolean; texto: string }) {
+  return (
+    <button type="submit" className="pacientes-botao" disabled={pendente}>
+      {pendente ? "Salvando…" : texto}
+    </button>
   );
-  if (paciente.responsavel) partes.push(`Responsável ${paciente.responsavel.nome}`);
-  return partes.join(" · ");
 }
 
+function Resumo({ paciente }: { paciente: PacienteLinha }) {
+  return (
+    <div className="pacientes-resumo">
+      <span className="pacientes-nome">{paciente.nome}</span>
+      {paciente.idade !== null ? (
+        <span className="pacientes-meta">
+          {textoIdade(paciente.idade)}
+          {paciente.idade < 18 ? " · Menor de idade" : ""}
+        </span>
+      ) : null}
+      <ul className="pacientes-canais" aria-label={`Canais de ${paciente.nome}`}>
+        {paciente.canais.map((item, indice) => (
+          <li key={indice}>
+            {ROTULO_CANAL[item.canal]} {item.contato}
+            {item.preferido ? <span className="pacientes-selo">Preferido</span> : null}
+          </li>
+        ))}
+      </ul>
+      {paciente.responsavel ? (
+        <span className="pacientes-meta">Responsável {paciente.responsavel.nome}</span>
+      ) : null}
+    </div>
+  );
+}
+
+function Campo({ rotulo, nota, children }: { rotulo: string; nota?: string; children: ReactNode }) {
+  return (
+    <label className="pacientes-campo">
+      <span>
+        {rotulo}
+        {nota ? <span className="pacientes-nota"> ({nota})</span> : null}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+// Os campos são controlados: a resposta da action não apaga o que a pessoa digitou.
+type Chave =
+  | "nome"
+  | "cpf"
+  | "endereco"
+  | "dataNascimento"
+  | "sexo"
+  | "responsavelNome"
+  | "responsavelCpf"
+  | "responsavelTelefone";
+
 function Campos({ paciente }: { paciente?: PacienteLinha }) {
+  const [valores, setValores] = useState<Record<Chave, string>>({
+    nome: paciente?.nome ?? "",
+    cpf: paciente?.cpf ?? "",
+    endereco: paciente?.endereco ?? "",
+    dataNascimento: paciente?.dataNascimento ?? "",
+    sexo: paciente?.sexo ?? "",
+    responsavelNome: paciente?.responsavel?.nome ?? "",
+    responsavelCpf: paciente?.responsavel?.cpf ?? "",
+    responsavelTelefone: paciente?.responsavel?.telefone ?? "",
+  });
+  const ligar = (chave: Chave) => ({
+    name: chave,
+    value: valores[chave],
+    onChange: (evento: { target: { value: string } }) =>
+      setValores((atual) => ({ ...atual, [chave]: evento.target.value })),
+  });
+  const menor = dataValida(valores.dataNascimento) && menorDeIdade(valores.dataNascimento, new Date());
+
   return (
     <>
-      <label>
-        Nome
-        <input name="nome" defaultValue={paciente?.nome} required />
-      </label>
+      <Campo rotulo="Nome completo" nota="obrigatório">
+        <input {...ligar("nome")} required />
+      </Campo>
       <Canais inicial={paciente?.canais} />
-      <label>
-        CPF
-        <input name="cpf" defaultValue={paciente?.cpf ?? ""} />
-      </label>
-      <label>
-        Endereço
-        <input name="endereco" defaultValue={paciente?.endereco ?? ""} />
-      </label>
-      <label>
-        Data de nascimento
-        <input name="dataNascimento" type="date" defaultValue={paciente?.dataNascimento ?? ""} />
-      </label>
-      <label>
-        Sexo
-        <select name="sexo" defaultValue={paciente?.sexo ?? ""}>
+      <div className="pacientes-grade">
+        <Campo rotulo="CPF" nota="opcional">
+          <input {...ligar("cpf")} inputMode="numeric" />
+        </Campo>
+        <Campo rotulo="Data de nascimento" nota="opcional">
+          <input {...ligar("dataNascimento")} type="date" />
+        </Campo>
+      </div>
+      <Campo rotulo="Endereço" nota="opcional">
+        <input {...ligar("endereco")} />
+      </Campo>
+      <Campo rotulo="Sexo" nota="opcional">
+        <select {...ligar("sexo")}>
           <option value="">Não informado</option>
-          <option value="masculino">Masculino</option>
-          <option value="feminino">Feminino</option>
-          <option value="outro">Outro</option>
+          {(["masculino", "feminino", "outro"] as const).map((sexo) => (
+            <option key={sexo} value={sexo}>
+              {ROTULO_SEXO[sexo]}
+            </option>
+          ))}
         </select>
-      </label>
-      <fieldset>
-        <legend>Responsável legal (obrigatório para menor de 18 anos)</legend>
-        <label>
-          Nome do responsável
-          <input name="responsavelNome" defaultValue={paciente?.responsavel?.nome ?? ""} />
-        </label>
-        <label>
-          CPF do responsável
-          <input name="responsavelCpf" defaultValue={paciente?.responsavel?.cpf ?? ""} />
-        </label>
-        <label>
-          Telefone do responsável
-          <input
-            name="responsavelTelefone"
-            type="tel"
-            defaultValue={paciente?.responsavel?.telefone ?? ""}
-          />
-        </label>
-      </fieldset>
+      </Campo>
+      {menor ? (
+        <fieldset className="pacientes-grupo">
+          <legend>Responsável legal (obrigatório para menor de 18 anos)</legend>
+          <Campo rotulo="Nome completo do responsável" nota="obrigatório">
+            <input {...ligar("responsavelNome")} required />
+          </Campo>
+          <div className="pacientes-grade">
+            <Campo rotulo="CPF do responsável" nota="obrigatório">
+              <input {...ligar("responsavelCpf")} inputMode="numeric" required />
+            </Campo>
+            <Campo rotulo="Telefone do responsável" nota="opcional">
+              <input {...ligar("responsavelTelefone")} type="tel" />
+            </Campo>
+          </div>
+        </fieldset>
+      ) : null}
     </>
   );
 }
@@ -164,11 +238,11 @@ function Canais({ inicial }: { inicial?: CanalComunicacao[] }) {
   }
 
   return (
-    <fieldset>
-      <legend>Canais de comunicação</legend>
+    <fieldset className="pacientes-grupo">
+      <legend>Canais de comunicação (ao menos um; um preferido)</legend>
       <input type="hidden" name="canais" value={JSON.stringify(linhas)} />
       {linhas.map((linha, indice) => (
-        <div key={indice} className="canal">
+        <div key={indice} className="pacientes-canal">
           <select
             value={linha.canal}
             onChange={(evento) => alterar(indice, { canal: evento.target.value as Canal })}
@@ -185,7 +259,7 @@ function Canais({ inicial }: { inicial?: CanalComunicacao[] }) {
             onChange={(evento) => alterar(indice, { contato: evento.target.value })}
             aria-label={`Contato do canal ${indice + 1}`}
           />
-          <label>
+          <label className="pacientes-preferido">
             <input
               type="radio"
               name={`${grupo}-preferido`}
@@ -195,7 +269,12 @@ function Canais({ inicial }: { inicial?: CanalComunicacao[] }) {
             Preferido
           </label>
           {linhas.length > 1 ? (
-            <button type="button" onClick={() => remover(indice)} aria-label={`Remover canal ${indice + 1}`}>
+            <button
+              type="button"
+              className="pacientes-botao pacientes-botao-secundario"
+              onClick={() => remover(indice)}
+              aria-label={`Remover canal ${indice + 1}`}
+            >
               Remover canal
             </button>
           ) : null}
@@ -203,16 +282,11 @@ function Canais({ inicial }: { inicial?: CanalComunicacao[] }) {
       ))}
       <button
         type="button"
+        className="pacientes-botao pacientes-botao-secundario"
         onClick={() => setLinhas((atual) => [...atual, { canal: "email", contato: "", preferido: false }])}
       >
         Adicionar canal
       </button>
     </fieldset>
   );
-}
-
-function avisoVisivel(...estados: EstadoFormulario[]) {
-  const escolhido = estados.reduce((atual, item) => (item.quando > atual.quando ? item : atual));
-  const mensagem = escolhido.detalhe ? `${escolhido.mensagem}: ${escolhido.detalhe}` : escolhido.mensagem;
-  return { status: escolhido.status, mensagem };
 }

@@ -1,66 +1,50 @@
-import Link from "next/link";
-import { sair } from "./auth/actions";
+import type { Sessao } from "../domain/auth/tipos";
+import { lerBaseDaClinica } from "../domain/inicio/casos";
+import { CascaAberta } from "./casca";
+import { dependenciasInicio } from "./dependencias";
+import { falha } from "./falha";
+import { Inicio, InicioFalha, InicioSemSessao } from "./inicio";
 import { sessaoAtual } from "./sessao";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
-  const sessao = await sessaoAtual();
+async function abrirSessao(): Promise<{ ok: true; sessao: Sessao | null } | { ok: false; mensagem: string }> {
+  try {
+    return { ok: true, sessao: await sessaoAtual() };
+  } catch (erro) {
+    return falha(erro);
+  }
+}
 
-  if (!sessao) {
+async function lerBase(sessao: Sessao) {
+  try {
+    return await lerBaseDaClinica(dependenciasInicio(), sessao);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
+
+export default async function Page() {
+  const aberta = await abrirSessao();
+  if (!aberta.ok) {
     return (
-      <main>
-        <h1>Sessão</h1>
-        <p>Nenhuma sessão aberta.</p>
-        <p className="nav">
-          <Link className="acao" href="/login">
-            Entrar
-          </Link>
-        </p>
-      </main>
+      <CascaAberta>
+        <InicioFalha mensagem={aberta.mensagem} />
+      </CascaAberta>
     );
   }
 
-  return (
-    <main>
-      <h1>Sessão aberta</h1>
-      <p>
-        {sessao.usuario.nome} · papel {sessao.usuario.papel} · clínica {sessao.usuario.clinicaId}
-      </p>
-      <form action={sair}>
-        <button type="submit">Sair</button>
-      </form>
-      <p className="nav">
-        {sessao.usuario.papel === "admin" ? (
-          <>
-            <Link href="/usuarios">Usuários</Link>
-            {" · "}
-            <Link href="/clinica">Clínica</Link>
-            {" · "}
-            <Link href="/dentistas">Dentistas</Link>
-            {" · "}
-            <Link href="/mensagens">Mensagens</Link>
-            {" · "}
-          </>
-        ) : null}
-        {sessao.usuario.papel === "admin" || sessao.usuario.papel === "dentista" ? (
-          <>
-            <Link href="/procedimentos">Procedimentos</Link>
-            {" · "}
-          </>
-        ) : null}
-        <Link href="/pacientes">Pacientes</Link>
-        {" · "}
-        <Link href="/agendamentos">Agendamentos</Link>
-        {" · "}
-        <Link href="/agenda">Agenda</Link>
-        {" · "}
-        <Link href="/retornos">Retornos</Link>
-        {" · "}
-        <Link href="/estoque">Estoque</Link>
-        {" · "}
-        <Link href="/dashboard">Dashboard</Link>
-      </p>
-    </main>
-  );
+  const sessao = aberta.sessao;
+  if (!sessao) {
+    return (
+      <CascaAberta>
+        <InicioSemSessao />
+      </CascaAberta>
+    );
+  }
+
+  const base = await lerBase(sessao);
+  if (!base.ok) return <InicioFalha mensagem={base.mensagem} />;
+
+  return <Inicio sessao={sessao} base={base.valor} />;
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { AgendamentoNaGrade, Grade as GradeAgenda } from "../../domain/agendamento/tipos";
+import { horarioDoDia, TEXTO_GRADE_ATUALIZA, vazioDaGrade } from "../agendamentos/texto";
 import { rotuloStatus } from "./rotulo";
 
 type Nomes = {
@@ -42,11 +43,12 @@ function faixaDeHoras(abertura: string, fechamento: string): number[] {
   return horas;
 }
 
-function Alerta({ item }: { item: AgendamentoNaGrade }) {
+// Sinal `!` mais o texto já calculado (cadeira desativada, dentista removido, fora de horário).
+function SinalDeAlerta({ item }: { item: AgendamentoNaGrade }) {
   if (!item.alerta) return null;
   return (
-    <span className="alerta" role="img" aria-label={item.textoAlerta ?? "Alerta"}>
-      !
+    <span className="agenda-alerta">
+      <span aria-hidden="true">!</span> {item.textoAlerta ?? "Alerta"}
     </span>
   );
 }
@@ -67,59 +69,83 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, opcoes }: Pro
     ]),
   ].sort((x, y) => x - y);
 
-  function filtrar(proximoDentista: string, proximaCadeira: string) {
-    const query = new URLSearchParams({ data });
+  function filtrar(proximoDentista: string, proximaCadeira: string, proximaData = data) {
+    const query = new URLSearchParams({ data: proximaData });
     if (proximoDentista) query.set("dentista", proximoDentista);
     if (proximaCadeira) query.set("cadeira", proximaCadeira);
     router.push(`/agenda?${query.toString()}`, { scroll: false });
   }
 
   return (
-    <section aria-label="Agenda">
-      <div className="visao" role="group" aria-label="Visualização">
-        <button type="button" aria-pressed={visao === "dia"} onClick={() => setVisao("dia")}>
-          Dia
-        </button>
-        <button type="button" aria-pressed={visao === "semana"} onClick={() => setVisao("semana")}>
-          Semana
-        </button>
+    <section aria-label="Agenda" className="agenda-tela">
+      <div className="agenda-barra">
+        <div className="agenda-visao" role="group" aria-label="Visualização">
+          <button type="button" aria-pressed={visao === "dia"} onClick={() => setVisao("dia")}>
+            Dia
+          </button>
+          <button
+            type="button"
+            aria-pressed={visao === "semana"}
+            onClick={() => setVisao("semana")}
+          >
+            Semana
+          </button>
+        </div>
+
+        <div className="agenda-filtros">
+          <label>
+            Data
+            <input
+              type="date"
+              value={data}
+              onChange={(e) => {
+                if (e.target.value) filtrar(dentistaId ?? "", cadeiraId ?? "", e.target.value);
+              }}
+            />
+          </label>
+          <label>
+            Dentista
+            <select
+              value={dentistaId ?? ""}
+              onChange={(e) => filtrar(e.target.value, cadeiraId ?? "")}
+            >
+              <option value="">Todos</option>
+              {opcoes.dentistas.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Cadeira
+            <select
+              value={cadeiraId ?? ""}
+              onChange={(e) => filtrar(dentistaId ?? "", e.target.value)}
+            >
+              <option value="">Todos</option>
+              {opcoes.cadeiras.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.identificacao}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
-      <div className="filtros">
-        <label>
-          Dentista
-          <select value={dentistaId ?? ""} onChange={(e) => filtrar(e.target.value, cadeiraId ?? "")}>
-            <option value="">Todos</option>
-            {opcoes.dentistas.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.nome}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Cadeira
-          <select value={cadeiraId ?? ""} onChange={(e) => filtrar(dentistaId ?? "", e.target.value)}>
-            <option value="">Todos</option>
-            {opcoes.cadeiras.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.identificacao}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <p className="agenda-nota">{TEXTO_GRADE_ATUALIZA}</p>
 
       {agendamentos.length === 0 && bloqueios.length === 0 ? (
-        <p>Nenhum agendamento neste dia</p>
+        <p className="agenda-vazio">{vazioDaGrade(visao)}</p>
       ) : (
-        <div className="grade-rolagem">
-          <table className="grade">
+        <div className="agenda-rolagem">
+          <table className="agenda-grade">
             <thead>
               <tr>
                 <th scope="col">Hora</th>
                 {colunas.map((dia) => (
-                  <th key={dia} scope="col" className="coluna">
+                  <th key={dia} scope="col" className="agenda-coluna">
                     {rotuloDia(dia)}
                   </th>
                 ))}
@@ -130,14 +156,17 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, opcoes }: Pro
                 <tr key={h}>
                   <th scope="row">{rotuloHora(h)}</th>
                   {colunas.map((dia) => (
-                    <td key={dia} className="coluna">
-                      <ul className="grade-itens">
+                    <td key={dia} className="agenda-coluna">
+                      <ul className="agenda-itens">
                         {bloqueios
                           .filter((b) => diaDe(b.inicio) === dia && horaDe(b.inicio) === h)
                           .map((b) => (
-                            <li key={b.id} className="bloqueio">
-                              Bloqueio · {nome(nomes.dentistas, b.dentistaId)}
-                              {b.motivo ? ` · ${b.motivo}` : ""}
+                            <li key={b.id} className="agenda-bloqueio">
+                              <span className="agenda-hora">{horarioDoDia(b.inicio, b.fim)}</span>
+                              <span>
+                                Bloqueio · {nome(nomes.dentistas, b.dentistaId)}
+                                {b.motivo ? ` · ${b.motivo}` : ""}
+                              </span>
                             </li>
                           ))}
                         {agendamentos
@@ -145,13 +174,30 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, opcoes }: Pro
                           .map((a) => (
                             <li
                               key={a.id}
-                              className={`agendamento${a.status === "cancelado" ? " riscado" : ""}${
-                                a.alerta ? " com-alerta" : ""
+                              className={`agenda-horario${a.status === "cancelado" ? " agenda-riscado" : ""}${
+                                a.alerta ? " agenda-com-alerta" : ""
                               }`}
                             >
-                              <Alerta item={a} /> {nome(nomes.pacientes, a.pacienteId)} ·{" "}
-                              {nome(nomes.dentistas, a.dentistaId)} · {nome(nomes.cadeiras, a.cadeiraId)} ·{" "}
-                              {rotuloStatus(a.status)}
+                              <Link className="agenda-abrir" href={`/agendamentos#${a.id}`}>
+                                <SinalDeAlerta item={a} />
+                              <Link
+                                href={`/agendamentos#${a.id}`}
+                                className="agenda-hora agenda-abrir"
+                                aria-label={`${horarioDoDia(a.inicio, a.fim)}, abrir detalhe de ${nome(nomes.pacientes, a.pacienteId)}`}
+                              >
+                                {horarioDoDia(a.inicio, a.fim)}
+                              </Link>
+                              <span className="agenda-paciente">
+                                  {nome(nomes.pacientes, a.pacienteId)}
+                                </span>
+                                <span className="agenda-detalhe">
+                                  {nome(nomes.dentistas, a.dentistaId)} ·{" "}
+                                  {nome(nomes.cadeiras, a.cadeiraId)}
+                                </span>
+                                <span className={`agenda-status agenda-status-${a.status}`}>
+                                  {rotuloStatus(a.status)}
+                                </span>
+                              </Link>
                             </li>
                           ))}
                       </ul>
@@ -163,10 +209,6 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, opcoes }: Pro
           </table>
         </div>
       )}
-
-      <p className="nav">
-        <Link href="/">Voltar</Link>
-      </p>
     </section>
   );
 }

@@ -36,24 +36,31 @@ function Modelo({
 }) {
   const roteador = useRouter();
   const [resultado, acao, pendente] = useActionState(salvar, estadoVazio);
+  const titulo = `mensagens-titulo-${tipo}`;
 
   useEffect(() => {
     if (resultado.status === "sucesso") roteador.refresh();
   }, [resultado, roteador]);
 
   return (
-    <>
-      <Aviso tipo={resultado.status} mensagem={resultado.mensagem} />
-      <form action={acao} aria-busy={pendente}>
+    <section className="mensagens-modelo" aria-labelledby={titulo}>
+      <h2 id={titulo}>{ROTULO[tipo]}</h2>
+      <Aviso key={resultado.quando} tipo={resultado.status} mensagem={resultado.mensagem} />
+      <form className="mensagens-form" action={acao} aria-busy={pendente}>
         <input type="hidden" name="tipo" value={tipo} />
-        <label>
-          {ROTULO[tipo]}
-          <textarea key={conteudo} name="conteudo" rows={6} defaultValue={conteudo} />
+        <label className="mensagens-campo">
+          {`Texto do modelo de ${ROTULO[tipo]}`}
+          <textarea key={conteudo} name="conteudo" rows={5} defaultValue={conteudo} />
         </label>
-        <button type="submit" disabled={pendente}>
-          Salvar modelo
+        <button
+          type="submit"
+          className="mensagens-botao"
+          aria-label={`Salvar modelo de ${ROTULO[tipo]}`}
+          disabled={pendente}
+        >
+          {pendente ? "Salvando…" : "Salvar modelo"}
         </button>
       </form>
-    </>
+    </section>
   );
 }

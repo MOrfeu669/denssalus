@@ -1,0 +1,206 @@
+.casca .retornos-tela {
+  max-width: 880px;
+}
+
+.casca .retornos-regioes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.casca .retornos-secao {
+  margin: 0;
+  padding: 20px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.casca .retornos-secao h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+  color: #0f433d;
+}
+
+.casca .retornos-nota,
+.casca .retornos-vazio {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #475760;
+}
+
+.casca .retornos-vazio {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.casca .retornos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.casca .retornos-lista li.retornos-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid #cbd4d9;
+  border-radius: 12px;
+  background: #f6f8f9;
+}
+
+.casca .retornos-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.casca .retornos-texto {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #0f1a20;
+  overflow-wrap: anywhere;
+}
+
+.casca .retornos-meta {
+  font-size: 14px;
+  line-height: 20px;
+  color: #475760;
+}
+
+/* Foco da tela: o aviso do prazo. */
+.casca .retornos-prazo {
+  border: 2px solid #158172;
+  background: #f6f8f9;
+}
+
+.casca .retornos-prazo-aviso {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-left: 4px solid #158172;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #0f1a20;
+}
+
+.casca .retornos-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 0;
+}
+
+.casca .retornos-form-marcar {
+  margin-top: 8px;
+}
+
+.casca .retornos-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #0f1a20;
+}
+
+.casca .retornos-campo input {
+  height: 44px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.casca .retornos-campo input:focus-visible {
+  border-color: #158172;
+  outline: 2px solid #158172;
+  outline-offset: 1px;
+}
+
+.casca button.retornos-botao {
+  height: 44px;
+  margin: 0;
+  padding: 0 20px;
+  border: 1px solid #158172;
+  border-radius: 10px;
+  background: #158172;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca button.retornos-botao:hover:not(:disabled) {
+  background: #0f433d;
+  border-color: #0f433d;
+}
+
+.casca button.retornos-botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.casca .retornos-alerta {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #cbd4d9;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.casca .retornos-alerta-sucesso {
+  border-color: #178a4c;
+  background: #ecfdf3;
+  color: #146c3e;
+}
+
+.casca .retornos-alerta-erro {
+  border-color: #d4372c;
+  background: #fef0ef;
+  color: #ad2a21;
+}
+
+.casca div.retornos-alerta {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+}
+
+.casca div.retornos-alerta p {
+  margin: 0;
+}
+
+.casca .retornos-voltar {
+  margin: 20px 0 0;
+}

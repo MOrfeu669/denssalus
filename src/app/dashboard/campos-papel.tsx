@@ -5,12 +5,12 @@ import { CAMPOS_DASHBOARD, type CampoDashboard } from "../../domain/dashboard/ti
 import { salvarCamposDoPapel, type Papel, type RespostaDashboard } from "./actions";
 
 export const ROTULOS_CAMPO: Record<CampoDashboard, string> = {
-  faturamento: "Faturamento",
-  recebido: "Recebido",
+  faturamento: "Faturamento no período",
+  recebido: "Valores recebidos",
   despesa: "Despesa de prótese",
-  ocupacao: "Ocupação",
-  estoque: "Estoque",
-  detalhe: "Detalhe",
+  ocupacao: "Ocupação da agenda",
+  estoque: "Materiais abaixo do mínimo",
+  detalhe: "Faturamento por dentista e por procedimento",
 };
 
 const PAPEIS: Papel[] = ["admin", "dentista", "recepcionista"];
@@ -32,29 +32,32 @@ export function CamposDoPapel({
   }
 
   return (
-    <form onSubmit={salvar} aria-busy={pendente}>
-      <label>
-        Papel
-        <select value={papel} onChange={(evento) => setPapel(evento.target.value as Papel)}>
-          {PAPEIS.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
+    <section className="dashboard-papel" aria-labelledby="dashboard-titulo-papel">
+      <h2 id="dashboard-titulo-papel">Blocos por papel</h2>
+      <form className="dashboard-form" onSubmit={salvar} aria-busy={pendente}>
+        <label className="dashboard-campo">
+          Papel
+          <select value={papel} onChange={(evento) => setPapel(evento.target.value as Papel)}>
+            {PAPEIS.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+        <fieldset className="dashboard-campos-papel" key={papel}>
+          <legend>Campos ocultos para o papel</legend>
+          {CAMPOS_DASHBOARD.map((campo) => (
+            <label key={campo} className="dashboard-marca">
+              <input type="checkbox" name={campo} />
+              {ROTULOS_CAMPO[campo]}
+            </label>
           ))}
-        </select>
-      </label>
-      <fieldset key={papel}>
-        <legend>Campos ocultos para o papel</legend>
-        {CAMPOS_DASHBOARD.map((campo) => (
-          <label key={campo}>
-            <input type="checkbox" name={campo} />
-            {ROTULOS_CAMPO[campo]}
-          </label>
-        ))}
-      </fieldset>
-      <button type="submit" disabled={pendente}>
-        Salvar campos do papel
-      </button>
-    </form>
+        </fieldset>
+        <button type="submit" className="dashboard-botao" disabled={pendente}>
+          Salvar campos do papel
+        </button>
+      </form>
+    </section>
   );
 }

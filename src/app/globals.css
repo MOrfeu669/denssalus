@@ -1,13 +1,17 @@
 :root {
+  --cor-marca: #0f433d;
+  --cor-acao: #158172;
+  --cor-fundo: #f6f8f9;
+  --cor-texto: #0f1a20;
   color-scheme: light;
-  font-family: "Segoe UI", sans-serif;
+  font-family: Inter, "Segoe UI", sans-serif;
   line-height: 1.5;
 }
 
 body {
   margin: 0;
-  background: #f4f7f6;
-  color: #1c2421;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
 }
 
 main {
@@ -53,7 +57,7 @@ button,
   width: fit-content;
   padding: 0.5rem 0.75rem;
   border-radius: 4px;
-  background: #1f6b4a;
+  background: var(--cor-acao);
   color: #fff;
   text-decoration: none;
 }
@@ -63,7 +67,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 [tabindex="-1"]:focus {
-  outline: 3px solid #0b3d2e;
+  outline: 3px solid var(--cor-marca);
   outline-offset: 2px;
 }
 
@@ -111,8 +115,8 @@ main.largura {
 
 .visao button[aria-pressed="false"] {
   background: #fff;
-  color: #1f6b4a;
-  border: 1px solid #1f6b4a;
+  color: var(--cor-acao);
+  border: 1px solid var(--cor-acao);
 }
 
 .grade-rolagem {

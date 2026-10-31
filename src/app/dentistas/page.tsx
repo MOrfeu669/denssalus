@@ -1,52 +1,64 @@
 import Link from "next/link";
+import { MENSAGEM_PAPEL, type Sessao } from "../../domain/auth/tipos";
 import { listarDentistas } from "../../domain/dentista/casos";
+import { CascaAberta } from "../casca";
 import { dependenciasDentista } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
 import { Dentistas } from "./form";
+import { DENTISTAS_SEM_SESSAO } from "./texto";
+import "./tela.css";
 
 export const dynamic = "force-dynamic";
+
+async function carregar(sessao: Sessao) {
+  try {
+    return await listarDentistas(dependenciasDentista(), sessao);
+  } catch (erro) {
+    return falha(erro);
+  }
+}
 
 export default async function Page() {
   const sessao = await sessaoAtual();
   if (!sessao) {
     return (
-      <main>
+      <CascaAberta>
         <h1>Dentistas</h1>
-        <p>Nenhuma sessão aberta.</p>
-      </main>
+        <p className="casca-texto">{DENTISTAS_SEM_SESSAO}</p>
+        <Link className="casca-botao" href="/login">
+          Entrar
+        </Link>
+      </CascaAberta>
     );
   }
 
-  let resultado;
-  try {
-    resultado = await listarDentistas(dependenciasDentista(), sessao);
-  } catch (erro) {
-    resultado = falha(erro);
-  }
+  const resultado = await carregar(sessao);
+
   if (!resultado.ok) {
+    const semPermissao = resultado.mensagem === MENSAGEM_PAPEL;
     return (
-      <main>
+      <>
         <h1>Dentistas</h1>
-        <p role="alert" tabIndex={-1}>
-          {resultado.mensagem}
-        </p>
-        <p className="nav">
-          <Link href="/dentistas">Tentar de novo</Link>
-          {" · "}
-          <Link href="/">Voltar</Link>
-        </p>
-      </main>
+        <div className="casca-alerta" role="alert" tabIndex={-1}>
+          <p>{resultado.mensagem}</p>
+          <Link className="casca-link" href={semPermissao ? "/" : "/dentistas"}>
+            {semPermissao ? "Voltar" : "Tentar de novo"}
+          </Link>
+        </div>
+      </>
     );
   }
 
   return (
-    <main>
+    <>
       <h1>Dentistas</h1>
       <Dentistas dentistas={resultado.valor} />
-      <p className="nav">
-        <Link href="/">Voltar</Link>
+      <p className="dentistas-voltar">
+        <Link className="casca-link" href="/">
+          Voltar
+        </Link>
       </p>
-    </main>
+    </>
   );
 }

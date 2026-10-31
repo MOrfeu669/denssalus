@@ -24,9 +24,12 @@ import {
 } from "../../dependencias";
 import { falha } from "../../falha";
 import { sessaoAtual } from "../../sessao";
+import { CascaAberta } from "../../casca";
+import "./tela.css";
 import { FormularioAnamnese, FormularioEvolucao } from "./form";
 import { SecaoDebitos } from "./debitos";
 import { SecaoDocumentos, type DocumentoItem } from "./documentos";
+import { rotuloStatus } from "../../agenda/rotulo";
 import { dataAgendamento } from "./formato";
 import { Odontograma } from "./odontograma";
 import { carregarImagens } from "./carregar-imagens";
@@ -147,10 +150,13 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
   const sessao = await sessaoAtual();
   if (!sessao) {
     return (
-      <main>
+      <CascaAberta>
         <h1>Prontuário</h1>
-        <p>Nenhuma sessão aberta.</p>
-      </main>
+        <p className="casca-texto">Nenhuma sessão aberta.</p>
+        <Link className="casca-botao" href="/login">
+          Entrar
+        </Link>
+      </CascaAberta>
     );
   }
 
@@ -169,18 +175,17 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
     resultado = falha(erro);
   }
   if (!resultado.ok) {
+    const semPermissao = resultado.mensagem === MENSAGEM_PAPEL;
     return (
-      <main>
+      <>
         <h1>Prontuário</h1>
-        <p role="alert" tabIndex={-1}>
-          {resultado.mensagem}
-        </p>
-        <p className="nav">
-          <Link href={`/prontuarios/${pacienteId}`}>Tentar de novo</Link>
-          {" · "}
-          <Link href="/pacientes">Voltar</Link>
-        </p>
-      </main>
+        <div className="casca-alerta" role="alert" tabIndex={-1}>
+          <p>{resultado.mensagem}</p>
+          <Link className="casca-botao" href={semPermissao ? "/pacientes" : `/prontuarios/${pacienteId}`}>
+            {semPermissao ? "Voltar" : "Tentar de novo"}
+          </Link>
+        </div>
+      </>
     );
   }
 
@@ -206,36 +211,47 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
     .map(({ id, inicio, status }) => ({ id, inicio, status }));
 
   return (
-    <main>
+    <>
       <h1>Prontuário de {paciente.nome}</h1>
+      <nav className="prontuario-nav" aria-label="Seções do prontuário">
+        <a href="#visao-geral">Visão geral</a>
+        {podeEscrever ? <a href="#anamnese">Anamnese</a> : null}
+        <a href="#historico">Histórico</a>
+        {podeEscrever ? <a href="#evolucoes">Evoluções</a> : null}
+        {podeEscrever ? <a href="#odontograma">Odontograma</a> : null}
+        {podeEscrever ? <a href="#plano">Plano de tratamento</a> : null}
+        <a href="#debitos">Débitos</a>
+        {podeEscrever ? <a href="#documentos">Documentos</a> : null}
+        {podeEscrever ? <a href="#raio-x">Raio X e imagens</a> : null}
+        <a href="#proteses">Próteses</a>
+        {papel === "admin" ? <a href="#auditoria">Trilha de auditoria</a> : null}
+      </nav>
+
       <VisaoGeral paciente={paciente} />
+
+      {podeEscrever ? (
+        <section className="prontuario-secao" aria-labelledby="anamnese">
+          <h2 id="anamnese">Anamnese</h2>
+          <FormularioAnamnese pacienteId={pacienteId} conteudo={anamnese?.conteudo ?? ""} />
+          {anamnese ? null : <p>Nenhuma anamnese registrada.</p>}
+        </section>
+      ) : null}
+
       <Historico historico={historico} />
 
-      <section aria-labelledby="anamnese">
-        <h2 id="anamnese">Anamnese</h2>
-        {podeEscrever ? (
-          <FormularioAnamnese pacienteId={pacienteId} conteudo={anamnese?.conteudo ?? ""} />
-        ) : (
-          <>
-            {anamnese ? <p>{anamnese.conteudo}</p> : <p>Nenhuma anamnese registrada.</p>}
-            <p>{MENSAGEM_PAPEL}</p>
-          </>
-        )}
-      </section>
-
-      <section aria-labelledby="evolucoes">
-        <h2 id="evolucoes">Evoluções</h2>
-        {consultas.length === 0 ? <p>Nenhuma consulta iniciada ou concluída.</p> : null}
-        <ul className="lista">
-          {consultas.map((consulta) => {
-            const inicio = dataAgendamento(consulta.inicio);
-            const atual = evolucoes.find((item) => item.agendamentoId === consulta.id);
-            return (
-              <li key={consulta.id}>
-                <span>
-                  {inicio} · {consulta.status}
-                </span>
-                {podeEscrever ? (
+      {podeEscrever ? (
+        <section className="prontuario-secao" aria-labelledby="evolucoes">
+          <h2 id="evolucoes">Evoluções</h2>
+          {consultas.length === 0 ? <p>Nenhuma consulta iniciada ou concluída.</p> : null}
+          <ul className="lista">
+            {consultas.map((consulta) => {
+              const inicio = dataAgendamento(consulta.inicio);
+              const atual = evolucoes.find((item) => item.agendamentoId === consulta.id);
+              return (
+                <li key={consulta.id}>
+                  <span>
+                    {inicio} · {rotuloStatus(consulta.status)}
+                  </span>
                   <FormularioEvolucao
                     pacienteId={pacienteId}
                     agendamentoId={consulta.id}
@@ -243,36 +259,104 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
                     texto={atual?.texto ?? ""}
                     materiais={atual ? undefined : materiaisDasConsultas.get(consulta.id)}
                   />
-                ) : (
-                  <p>{atual ? atual.texto : "Nenhuma evolução registrada."}</p>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-        {podeEscrever ? null : <p>{MENSAGEM_PAPEL}</p>}
-      </section>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
-      <section aria-labelledby="odontograma">
-        <h2 id="odontograma">Odontograma</h2>
-        {odontograma.ok ? (
-          <Odontograma
-            pacienteId={pacienteId}
-            registros={odontograma.valor}
-            procedimentos={procedimentos}
-            agendamentos={todosAgendamentos}
-            imagens={imagens.ok ? imagens.ativas : []}
-            proteses={proteses.ok ? proteses.proteses : []}
-            podeEscrever={podeEscrever}
-          />
+      {podeEscrever ? (
+        <section className="prontuario-secao" aria-labelledby="odontograma">
+          <h2 id="odontograma">Odontograma</h2>
+          {odontograma.ok ? (
+            <Odontograma
+              pacienteId={pacienteId}
+              registros={odontograma.valor}
+              procedimentos={procedimentos}
+              agendamentos={todosAgendamentos}
+              imagens={imagens.ok ? imagens.ativas : []}
+              proteses={proteses.ok ? proteses.proteses : []}
+              podeEscrever={podeEscrever}
+            />
+          ) : (
+            <p role="alert" tabIndex={-1}>
+              {odontograma.mensagem}
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      {podeEscrever ? (
+        <section className="prontuario-secao" aria-labelledby="plano">
+          <h2 id="plano">Plano de tratamento</h2>
+          {planos.ok ? (
+            <SecaoPlano
+              pacienteId={pacienteId}
+              planos={planos.valor}
+              procedimentos={procedimentos}
+              agendamentos={agendamentosAbertos}
+              podeEscrever={podeEscrever}
+            />
+          ) : (
+            <p role="alert" tabIndex={-1}>
+              {planos.mensagem}
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      <section className="prontuario-secao" aria-labelledby="debitos">
+        <h2 id="debitos">Débitos</h2>
+        {debitos.ok ? (
+          <SecaoDebitos pacienteId={pacienteId} debitos={debitos.valor} papel={papel} />
         ) : (
           <p role="alert" tabIndex={-1}>
-            {odontograma.mensagem}
+            {debitos.mensagem}
           </p>
         )}
       </section>
 
-      <section aria-labelledby="proteses">
+      {podeEscrever ? (
+        <section className="prontuario-secao" aria-labelledby="documentos">
+          <h2 id="documentos">Documentos</h2>
+          {documentos.ok ? (
+            <SecaoDocumentos
+              pacienteId={pacienteId}
+              papel={papel}
+              usuarioId={sessao.usuario.id}
+              documentos={documentos.documentos}
+              modelos={documentos.modelos}
+              importados={documentos.importados}
+            />
+          ) : (
+            <p role="alert" tabIndex={-1}>
+              {documentos.mensagem}
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      {podeEscrever ? (
+        <section className="prontuario-secao" aria-labelledby="raio-x">
+          <h2 id="raio-x">Raio X e imagens</h2>
+          {imagens.ok ? (
+            <SecaoImagens
+              pacienteId={pacienteId}
+              ativas={imagens.ativas}
+              pendentes={imagens.pendentes}
+              agendamentos={todosAgendamentos}
+              podeEscrever={podeEscrever}
+            />
+          ) : (
+            <p role="alert" tabIndex={-1}>
+              {imagens.mensagem}
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      <section className="prontuario-secao" aria-labelledby="proteses">
         <h2 id="proteses">Próteses</h2>
         {proteses.ok ? (
           <SecaoProteses
@@ -291,69 +375,6 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
         )}
       </section>
 
-      <section aria-labelledby="raio-x">
-        <h2 id="raio-x">Raio X e imagens</h2>
-        {imagens.ok ? (
-          <SecaoImagens
-            pacienteId={pacienteId}
-            ativas={imagens.ativas}
-            pendentes={imagens.pendentes}
-            agendamentos={todosAgendamentos}
-            podeEscrever={podeEscrever}
-          />
-        ) : (
-          <p role="alert" tabIndex={-1}>
-            {imagens.mensagem}
-          </p>
-        )}
-      </section>
-
-      <section aria-labelledby="plano">
-        <h2 id="plano">Plano de tratamento</h2>
-        {planos.ok ? (
-          <SecaoPlano
-            pacienteId={pacienteId}
-            planos={planos.valor}
-            procedimentos={procedimentos}
-            agendamentos={agendamentosAbertos}
-            podeEscrever={podeEscrever}
-          />
-        ) : (
-          <p role="alert" tabIndex={-1}>
-            {planos.mensagem}
-          </p>
-        )}
-      </section>
-
-      <section aria-labelledby="debitos">
-        <h2 id="debitos">Débitos</h2>
-        {debitos.ok ? (
-          <SecaoDebitos pacienteId={pacienteId} debitos={debitos.valor} papel={papel} />
-        ) : (
-          <p role="alert" tabIndex={-1}>
-            {debitos.mensagem}
-          </p>
-        )}
-      </section>
-
-      <section aria-labelledby="documentos">
-        <h2 id="documentos">Documentos</h2>
-        {documentos.ok ? (
-          <SecaoDocumentos
-            pacienteId={pacienteId}
-            papel={papel}
-            usuarioId={sessao.usuario.id}
-            documentos={documentos.documentos}
-            modelos={documentos.modelos}
-            importados={documentos.importados}
-          />
-        ) : (
-          <p role="alert" tabIndex={-1}>
-            {documentos.mensagem}
-          </p>
-        )}
-      </section>
-
       {auditoria?.ok ? <Auditoria registros={auditoria.valor} /> : null}
       {auditoria && !auditoria.ok ? (
         <p role="alert" tabIndex={-1}>
@@ -364,6 +385,6 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
       <p className="nav">
         <Link href="/pacientes">Voltar</Link>
       </p>
-    </main>
+    </>
   );
 }
