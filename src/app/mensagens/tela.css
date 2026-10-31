@@ -1,0 +1,138 @@
+/* Mensagens. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
+
+.casca .mensagens-tela {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 720px;
+}
+
+.casca .mensagens-tela > h1 {
+  margin: 0;
+  color: #0f433d;
+}
+
+/* Nota de margem: explica quando a mensagem sai. Não é botão de envio. */
+.casca .mensagens-nota {
+  margin: 0;
+  padding: 12px 16px;
+  border-left: 4px solid #158172;
+  border-radius: 0 10px 10px 0;
+  background: #f6f8f9;
+  font-size: 14px;
+  line-height: 20px;
+  color: #0f1a20;
+}
+
+.casca .mensagens-modelo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.casca .mensagens-modelo h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+  color: #0f433d;
+}
+
+.casca .mensagens-tela form.mensagens-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.casca .mensagens-campo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #0f1a20;
+}
+
+.casca .mensagens-campo textarea {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.casca .mensagens-campo textarea:focus-visible {
+  outline: 2px solid #158172;
+  outline-offset: 1px;
+}
+
+.casca .mensagens-tela button.mensagens-botao {
+  width: fit-content;
+  height: 44px;
+  margin: 0;
+  padding: 0 20px;
+  border: 1px solid #158172;
+  border-radius: 10px;
+  background: #158172;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca .mensagens-tela button.mensagens-botao:hover:not(:disabled) {
+  background: #0f433d;
+  border-color: #0f433d;
+}
+
+.casca .mensagens-tela button.mensagens-botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Alerta (erro e sucesso recebem foco) */
+.casca .mensagens-tela .erro,
+.casca .mensagens-tela .sucesso {
+  margin: 0;
+}
+
+.casca .mensagens-tela .erro:focus,
+.casca .mensagens-tela .sucesso:focus {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .mensagens-alerta {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .casca .mensagens-modelo {
+    padding: 16px;
+  }
+}

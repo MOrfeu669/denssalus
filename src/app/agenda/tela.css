@@ -1,0 +1,273 @@
+/* Agenda. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
+
+.casca .agenda-tela {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.casca .agenda-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Dia e Semana */
+.casca .agenda-visao {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid #cbd4d9;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.casca .agenda-visao button {
+  height: 36px;
+  margin: 0;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #0f433d;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca .agenda-visao button:hover {
+  background: #d3f3ec;
+}
+
+.casca .agenda-visao button[aria-pressed="true"] {
+  background: #158172;
+  color: #fff;
+}
+
+/* Filtros */
+.casca .agenda-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.casca .agenda-filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #475760;
+}
+
+.casca .agenda-filtros input,
+.casca .agenda-filtros select {
+  height: 40px;
+  min-width: 160px;
+  padding: 0 12px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-weight: 400;
+}
+
+.casca .agenda-filtros input:focus-visible,
+.casca .agenda-filtros select:focus-visible {
+  border-color: #158172;
+}
+
+/* Vazio */
+.casca .agenda-vazio {
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 16px;
+  line-height: 24px;
+  color: #475760;
+}
+
+/* Grade */
+.casca .agenda-rolagem {
+  overflow-x: auto;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.casca .agenda-grade {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.casca .agenda-grade th,
+.casca .agenda-grade td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e8eef0;
+  vertical-align: top;
+  text-align: left;
+}
+
+.casca .agenda-grade thead th {
+  background: #0f433d;
+  color: #fff;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.casca .agenda-grade tbody th {
+  width: 72px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #475760;
+  white-space: nowrap;
+}
+
+.casca .agenda-grade .agenda-coluna {
+  min-width: 220px;
+}
+
+.casca .agenda-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.casca .agenda-horario,
+.casca .agenda-bloqueio {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.casca .agenda-horario {
+  border: 1px solid #158172;
+  border-left-width: 4px;
+  background: #d3f3ec;
+}
+
+.casca a.agenda-abrir {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.casca .agenda-nota {
+  margin: 0 0 12px;
+  color: #475760;
+}
+
+.casca .agenda-hora {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #475760;
+}
+
+/* O horário é o controle que abre o detalhe em /agendamentos. Cancelado continua riscado. */
+.casca .agenda-hora.agenda-abrir {
+  width: fit-content;
+  color: #0f433d;
+  text-decoration: underline;
+}
+
+.casca .agenda-hora.agenda-abrir:hover {
+  color: #158172;
+}
+
+.casca .agenda-hora.agenda-abrir:focus-visible {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .agenda-riscado .agenda-hora.agenda-abrir {
+  color: #475760;
+  text-decoration: line-through;
+}
+
+.casca .agenda-paciente {
+  font-weight: 700;
+  color: #0f1a20;
+  overflow-wrap: anywhere;
+}
+
+.casca .agenda-detalhe {
+  color: #0f1a20;
+}
+
+.casca .agenda-status {
+  width: fit-content;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f433d;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
+.casca .agenda-status-concluido {
+  color: #146c3e;
+}
+
+.casca .agenda-horario.agenda-riscado {
+  border-color: #cbd4d9;
+  background: #f6f8f9;
+  text-decoration: line-through;
+  color: #475760;
+}
+
+.casca .agenda-riscado .agenda-paciente,
+.casca .agenda-riscado .agenda-detalhe,
+.casca .agenda-riscado .agenda-hora {
+  color: #475760;
+}
+
+/* Alerta: cadeira desativada, dentista removido, fora de horário. O horário não some. */
+.casca .agenda-horario.agenda-com-alerta {
+  border-color: #b26a00;
+  background: #fff4e0;
+}
+
+.casca .agenda-alerta {
+  width: fit-content;
+  color: #ad2a21;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Bloqueio: intervalo sem paciente */
+.casca .agenda-bloqueio {
+  border-left: 4px solid #0f1a20;
+  background: #e8eef0;
+  color: #0f1a20;
+}
+
+@media (max-width: 720px) {
+  .casca .agenda-barra {
+    align-items: stretch;
+  }
+}

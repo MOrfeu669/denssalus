@@ -5,6 +5,16 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { Agendamento } from "../../domain/agendamento/tipos";
 import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
 import type { EstadoFormulario } from "../formulario";
+import {
+  CAMINHO_AGENDA,
+  CAMPO_MOTIVO,
+  PENDENTE_CANCELAR,
+  PERGUNTA_REAGENDAR,
+  RESPOSTA_NAO,
+  RESPOSTA_SIM,
+  ROTULO_CANCELAR,
+  rotuloDoBotao,
+} from "./texto";
 
 export function podeCancelar(agendamento: Agendamento): boolean {
   return (
@@ -41,21 +51,31 @@ export function FormularioCancelar({
       <input type="hidden" name="id" value={id} />
       {pedeConfirmacao ? <input type="hidden" name="confirmouReversao" value="sim" /> : null}
       <label>
-        Motivo
-        <input name="motivo" value={motivo} onChange={(evento) => setMotivo(evento.target.value)} />
+        {CAMPO_MOTIVO}
+        <input
+          name="motivo"
+          value={motivo}
+          required
+          onChange={(evento) => setMotivo(evento.target.value)}
+        />
       </label>
       {pedeConfirmacao ? (
         <>
-          <p ref={mensagemRef} role="alert" tabIndex={-1}>
+          <p
+            ref={mensagemRef}
+            role="alert"
+            tabIndex={-1}
+            className="agendamentos-aviso agendamentos-aviso-erro"
+          >
             {estado.mensagem}
           </p>
-          <button type="submit" disabled={pendente}>
+          <button type="submit" className="agendamentos-perigo" disabled={pendente}>
             Confirmar reversão
           </button>
         </>
       ) : (
-        <button type="submit" disabled={pendente}>
-          Cancelar agendamento
+        <button type="submit" className="agendamentos-perigo" disabled={pendente}>
+          {rotuloDoBotao(ROTULO_CANCELAR, PENDENTE_CANCELAR, pendente)}
         </button>
       )}
     </form>
@@ -104,13 +124,13 @@ export function PerguntaReagendar({
   }
 
   return (
-    <div ref={ref} tabIndex={-1} role="group" aria-labelledby={idPergunta} className="sucesso">
-      <p id={idPergunta}>Deseja reagendar?</p>
-      <button type="button" onClick={dispensar}>
-        Não
-      </button>
+    <div ref={ref} tabIndex={-1} role="group" aria-labelledby={idPergunta} className="agendamentos-pergunta">
+      <p id={idPergunta}>{PERGUNTA_REAGENDAR}</p>
+      <Link href={CAMINHO_AGENDA} onClick={dispensar} className="agendamentos-pergunta-nao">
+        {RESPOSTA_NAO}
+      </Link>
       <Link href={caminhoDeReagendar(agendamento)} onClick={dispensar}>
-        Sim
+        {RESPOSTA_SIM}
       </Link>
     </div>
   );

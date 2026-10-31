@@ -1,14 +1,19 @@
-import Link from "next/link";
 import { listarOpcoesAgendamento, verAgenda } from "../../domain/agendamento/casos";
 import type { FiltroAgenda } from "../../domain/agendamento/tipos";
+import type { Sessao } from "../../domain/auth/tipos";
 import { enviarPendentes, reenviarFalhas } from "../../domain/mensagem/casos";
+import { TelaFalha, TelaSemSessao } from "../agendamentos/estados";
+import { CascaAberta } from "../casca";
 import { dependenciasAgendamento, dependenciasMensagem } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
 import { Grade } from "./grade";
 import { TempoReal } from "./tempo-real";
+import "./tela.css";
 
 export const dynamic = "force-dynamic";
+
+const TITULO = "Agenda";
 
 type Query = Record<string, string | string[] | undefined>;
 
@@ -51,10 +56,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
   const sessao = await sessaoAtual();
   if (!sessao) {
     return (
-      <main>
-        <h1>Agenda</h1>
-        <p>Nenhuma sessão aberta.</p>
-      </main>
+      <CascaAberta>
+        <TelaSemSessao titulo={TITULO} />
+      </CascaAberta>
     );
   }
 
@@ -67,6 +71,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
     falha(erro);
   }
 
+  return <>{await conteudo(query, sessao)}</>;
+}
+
+async function conteudo(query: Query, sessao: Sessao) {
   try {
     const deps = dependenciasAgendamento();
     const filtro = lerFiltro(query);
@@ -83,8 +91,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
     };
 
     return (
-      <main className="largura">
-        <h1>Agenda</h1>
+      <>
+        <h1>{TITULO}</h1>
         <Grade
           grade={grade.valor}
           data={filtro.data}
@@ -97,7 +105,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
           }}
         />
         <TempoReal />
-      </main>
+      </>
     );
   } catch (erro) {
     return erroDeCarregamento(falha(erro).mensagem, query);
@@ -105,17 +113,5 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
 }
 
 function erroDeCarregamento(mensagem: string, query: Query) {
-  return (
-    <main>
-      <h1>Agenda</h1>
-      <p role="alert" tabIndex={-1}>
-        {mensagem}
-      </p>
-      <p className="nav">
-        <Link href={caminhoAgenda(query)}>Tentar de novo</Link>
-        {" · "}
-        <Link href="/">Voltar</Link>
-      </p>
-    </main>
-  );
+  return <TelaFalha titulo={TITULO} mensagem={mensagem} href={caminhoAgenda(query)} />;
 }

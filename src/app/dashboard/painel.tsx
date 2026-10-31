@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import type { CampoDashboard, ResumoDashboard } from "../../domain/dashboard/tipos";
 import { Aviso } from "../aviso";
 import {
@@ -12,52 +12,10 @@ import {
   type RespostaDashboard,
 } from "./actions";
 import { baixarArquivo } from "./baixar";
-import { CamposDoPapel } from "./campos-papel";
+import { Bloco, Valores, data, moeda } from "./blocos";
+import { CamposDoPapel, ROTULOS_CAMPO } from "./campos-papel";
 
 type AvisoTela = { tipo: "erro" | "sucesso"; mensagem: string; quando: number };
-
-function moeda(valor: number): string {
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function Bloco({
-  campo,
-  titulo,
-  ocultos,
-  pendente,
-  ocultar,
-  children,
-}: {
-  campo: CampoDashboard;
-  titulo: string;
-  ocultos: CampoDashboard[];
-  pendente: boolean;
-  ocultar: (campo: CampoDashboard) => void;
-  children: ReactNode;
-}) {
-  if (ocultos.includes(campo)) return null;
-  const id = `bloco-${campo}`;
-  return (
-    <section aria-labelledby={id}>
-      <h2 id={id}>{titulo}</h2>
-      {children}
-      <button type="button" aria-describedby={id} disabled={pendente} onClick={() => ocultar(campo)}>
-        Ocultar
-      </button>
-    </section>
-  );
-}
-
-function Valores({ titulo, itens }: { titulo: string; itens: { id: string; valor: number }[] }) {
-  if (itens.length === 0) return null;
-  return (
-    <ul className="lista" aria-label={titulo}>
-      {itens.map((item) => (
-        <li key={item.id}>{`${item.id} — ${moeda(item.valor)}`}</li>
-      ))}
-    </ul>
-  );
-}
 
 export function Painel({
   papel,
@@ -117,81 +75,116 @@ export function Painel({
     executar(() => salvarPreferencia([...ocultos, campo], periodoSalvo), "Bloco ocultado");
   const bloco = { ocultos, pendente, ocultar };
   const semDetalhe = resumo.porDentista.length === 0 && resumo.porProcedimento.length === 0;
+  const ocupacao = Math.min(100, Math.max(0, resumo.ocupacao));
 
   return (
-    <>
+    <div className="dashboard-painel">
       {aviso ? <Aviso key={aviso.quando} tipo={aviso.tipo} mensagem={aviso.mensagem} /> : null}
 
-      <section aria-label="Período" aria-busy={pendente}>
-        <p>{`Período: ${resumo.periodo.inicio} a ${resumo.periodo.fim}`}</p>
-        <button type="button" disabled={pendente} onClick={() => escolherPeriodo("mes")}>
-          Mês atual
-        </button>
-        <button type="button" disabled={pendente} onClick={() => escolherPeriodo("7dias")}>
-          Últimos 7 dias
-        </button>
-        <form onSubmit={aplicarIntervalo}>
-          <label>
+      <section className="dashboard-periodo" aria-labelledby="dashboard-titulo-periodo" aria-busy={pendente}>
+        <h2 id="dashboard-titulo-periodo">Período</h2>
+        <p className="dashboard-periodo-texto">{`Período: ${data(resumo.periodo.inicio)} a ${data(resumo.periodo.fim)}`}</p>
+        <div className="dashboard-acoes">
+          <button
+            type="button"
+            className="dashboard-botao dashboard-botao-secundario"
+            aria-pressed={periodoSalvo === "mes"}
+            disabled={pendente}
+            onClick={() => escolherPeriodo("mes")}
+          >
+            Mês atual
+          </button>
+          <button
+            type="button"
+            className="dashboard-botao dashboard-botao-secundario"
+            aria-pressed={periodoSalvo === "7dias"}
+            disabled={pendente}
+            onClick={() => escolherPeriodo("7dias")}
+          >
+            Últimos 7 dias
+          </button>
+        </div>
+        <form className="dashboard-form dashboard-form-linha" onSubmit={aplicarIntervalo}>
+          <label className="dashboard-campo">
             Início
             <input name="inicio" type="date" required />
           </label>
-          <label>
+          <label className="dashboard-campo">
             Fim
             <input name="fim" type="date" required />
           </label>
-          <button type="submit" disabled={pendente}>
+          <button type="submit" className="dashboard-botao" disabled={pendente}>
             Aplicar período
           </button>
         </form>
-        <button type="button" disabled={pendente} onClick={() => exportarComo("pdf")}>
-          Exportar PDF
-        </button>
-        <button type="button" disabled={pendente} onClick={() => exportarComo("excel")}>
-          Exportar Excel
-        </button>
+        <div className="dashboard-acoes dashboard-exportar">
+          <button
+            type="button"
+            className="dashboard-botao dashboard-botao-secundario"
+            disabled={pendente}
+            onClick={() => exportarComo("pdf")}
+          >
+            Exportar PDF
+          </button>
+          <button
+            type="button"
+            className="dashboard-botao dashboard-botao-secundario"
+            disabled={pendente}
+            onClick={() => exportarComo("excel")}
+          >
+            Exportar Excel
+          </button>
+        </div>
+        <p className="dashboard-nota">Ocultar um bloco vale só para a sua visão.</p>
       </section>
 
-      <Bloco campo="faturamento" titulo="Faturamento" {...bloco}>
-        <p>{moeda(resumo.faturado)}</p>
+      <Bloco campo="faturamento" titulo={ROTULOS_CAMPO.faturamento} {...bloco}>
+        <p className="dashboard-numero">{moeda(resumo.faturado)}</p>
       </Bloco>
-      <Bloco campo="recebido" titulo="Recebido" {...bloco}>
-        <p>{moeda(resumo.recebido)}</p>
-      </Bloco>
-      <Bloco campo="despesa" titulo="Despesa de prótese" {...bloco}>
-        <p>{moeda(resumo.despesaProtese)}</p>
-      </Bloco>
-      <Bloco campo="ocupacao" titulo="Ocupação" {...bloco}>
-        <p>{`${resumo.ocupacao}%`}</p>
-      </Bloco>
-      <Bloco campo="estoque" titulo="Estoque" {...bloco}>
-        {resumo.estoque.length === 0 ? (
-          <p>Nenhum material abaixo do mínimo</p>
-        ) : (
-          <ul className="lista">
-            {resumo.estoque.map((item) => (
-              <li key={item.materialId} className="alerta">
-                {`${item.nome} — ${item.quantidade} unidades restantes`}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Bloco>
-      <Bloco campo="detalhe" titulo="Detalhe" {...bloco}>
-        {semDetalhe ? <p>Nenhum faturamento no período</p> : null}
+      <Bloco campo="detalhe" titulo={ROTULOS_CAMPO.detalhe} {...bloco}>
+        {semDetalhe ? <p className="dashboard-vazio">Nenhum faturamento no período</p> : null}
         <Valores
           titulo="Por dentista"
+          vazio="Nenhum faturamento por dentista no período"
           itens={resumo.porDentista.map((item) => ({ id: item.dentistaId, valor: item.valor }))}
         />
         <Valores
           titulo="Por procedimento"
+          vazio="Nenhum faturamento por procedimento no período"
           itens={resumo.porProcedimento.map((item) => ({
             id: item.procedimentoId,
             valor: item.valor,
           }))}
         />
       </Bloco>
+      <Bloco campo="recebido" titulo={ROTULOS_CAMPO.recebido} {...bloco}>
+        <p className="dashboard-numero">{moeda(resumo.recebido)}</p>
+      </Bloco>
+      <Bloco campo="despesa" titulo={ROTULOS_CAMPO.despesa} {...bloco}>
+        <p className="dashboard-numero">{moeda(resumo.despesaProtese)}</p>
+        <p className="dashboard-nota">Fora do faturamento.</p>
+      </Bloco>
+      <Bloco campo="ocupacao" titulo={ROTULOS_CAMPO.ocupacao} {...bloco}>
+        <p className="dashboard-numero">{`${resumo.ocupacao}%`}</p>
+        <div className="dashboard-barra" aria-hidden="true">
+          <div className="dashboard-barra-cheia" style={{ width: `${ocupacao}%` }} />
+        </div>
+      </Bloco>
+      <Bloco campo="estoque" titulo={ROTULOS_CAMPO.estoque} {...bloco}>
+        {resumo.estoque.length === 0 ? (
+          <p className="dashboard-vazio">Nenhum material abaixo do mínimo</p>
+        ) : (
+          <ul className="dashboard-valores">
+            {resumo.estoque.map((item) => (
+              <li key={item.materialId} className="dashboard-valor-linha dashboard-alerta alerta">
+                {`${item.nome} — ${item.quantidade} unidades restantes`}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Bloco>
 
       {papel === "admin" ? <CamposDoPapel pendente={pendente} executar={executar} /> : null}
-    </>
+    </div>
   );
 }

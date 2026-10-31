@@ -1,38 +1,49 @@
 import Link from "next/link";
+import { MENSAGEM_PAPEL } from "../../domain/auth/tipos";
 import { historico, listarMateriais } from "../../domain/estoque/casos";
 import { listarProcedimentos } from "../../domain/procedimento/casos";
+import { Aviso } from "../aviso";
+import { CascaAberta } from "../casca";
 import { dependenciasEstoque, dependenciasProcedimento } from "../dependencias";
 import { falha } from "../falha";
 import { instante } from "../prontuarios/[pacienteId]/formato";
 import { sessaoAtual } from "../sessao";
 import { Estoque, type MaterialTela } from "./form";
+import "./tela.css";
 
 export const dynamic = "force-dynamic";
 
 function Erro({ mensagem }: { mensagem: string }) {
+  const semPermissao = mensagem === MENSAGEM_PAPEL;
   return (
-    <main>
+    <div className="estoque-tela">
       <h1>Estoque</h1>
-      <p role="alert" tabIndex={-1}>
-        {mensagem}
-      </p>
-      <p className="nav">
-        <Link href="/estoque">Tentar de novo</Link>
-        {" · "}
-        <Link href="/">Voltar</Link>
-      </p>
-    </main>
+      <div className="estoque-alerta">
+        <Aviso tipo="erro" mensagem={mensagem} />
+        <Link className="casca-botao" href={semPermissao ? "/" : "/estoque"}>
+          {semPermissao ? "Voltar" : "Tentar de novo"}
+        </Link>
+      </div>
+    </div>
   );
 }
 
 export default async function Page() {
-  const sessao = await sessaoAtual();
+  let sessao;
+  try {
+    sessao = await sessaoAtual();
+  } catch (erro) {
+    return <Erro mensagem={falha(erro).mensagem} />;
+  }
   if (!sessao) {
     return (
-      <main>
+      <CascaAberta>
         <h1>Estoque</h1>
-        <p>Nenhuma sessão aberta.</p>
-      </main>
+        <p className="casca-texto">Nenhuma sessão aberta.</p>
+        <Link className="casca-botao" href="/login">
+          Entrar
+        </Link>
+      </CascaAberta>
     );
   }
 
@@ -55,6 +66,7 @@ export default async function Page() {
         id: material.id,
         nome: material.nome,
         quantidade: material.quantidade,
+        quantidadeMinima: material.quantidadeMinima,
         historico: movimentos.valor.map((item) => ({
           id: item.id,
           tipo: item.tipo,
@@ -69,12 +81,9 @@ export default async function Page() {
   }
 
   return (
-    <main>
+    <div className="estoque-tela">
       <h1>Estoque</h1>
       <Estoque materiais={materiais} procedimentos={procedimentos} />
-      <p className="nav">
-        <Link href="/">Voltar</Link>
-      </p>
-    </main>
+    </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   criarBloqueio,
   iniciarAtendimento,
   marcarChegada,
+  registrarEmergencia,
 } from "../../domain/agendamento/casos";
 import { dependencias, dependenciasAgendamento } from "../dependencias";
 import { falha } from "../falha";
@@ -60,6 +61,26 @@ export async function criar(
     if (!resultado.ok) return estado("erro", resultado.mensagem);
     revalidatePath("/agendamentos");
     return estado("sucesso", "Agendamento criado", resultado.valor.id);
+  } catch (causa) {
+    return estado("erro", falha(causa).mensagem);
+  }
+}
+
+export async function emergencia(
+  _estado: EstadoFormulario,
+  formData: FormData,
+): Promise<EstadoFormulario> {
+  const validado = validarAgendamento(camposAgendamento(formData));
+  if (!validado.ok) return estado("erro", validado.mensagem);
+
+  try {
+    const sessao = await obterSessao(dependencias());
+    if (!sessao) return estado("erro", SEM_SESSAO);
+    const resultado = await registrarEmergencia(dependenciasAgendamento(), sessao, validado.valor);
+    if (!resultado.ok) return estado("erro", resultado.mensagem);
+    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
+    return estado("sucesso", "Emergência registrada");
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
   }

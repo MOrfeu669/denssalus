@@ -1,0 +1,218 @@
+.casca .usuarios-alerta {
+  max-width: 640px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 14px;
+}
+
+.casca .usuarios-alerta:focus {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .usuarios-alerta strong {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.casca .usuarios-alerta-erro {
+  background: #fef0ef;
+  border-color: #d4372c;
+}
+
+.casca .usuarios-alerta-erro strong {
+  color: #ad2a21;
+}
+
+.casca .usuarios-alerta-sucesso {
+  background: #ecfdf3;
+  border-color: #178a4c;
+}
+
+.casca .usuarios-alerta-sucesso strong {
+  color: #146c3e;
+}
+
+.casca .usuarios-cartao {
+  max-width: 640px;
+  margin: 0 0 24px;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.casca .usuarios-subtitulo {
+  margin: 0 0 16px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #0f1a20;
+}
+
+.casca .usuarios-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+}
+
+.casca .usuarios-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #0f1a20;
+}
+
+.casca .usuarios-campo input,
+.casca .usuarios-campo select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.casca .usuarios-acoes {
+  display: flex;
+}
+
+.casca button.usuarios-botao {
+  width: fit-content;
+  height: 44px;
+  margin: 0;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #158172;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca button.usuarios-botao:hover:not(:disabled) {
+  background: #0f433d;
+}
+
+.casca button.usuarios-botao:disabled {
+  background: #158172;
+  opacity: 0.7;
+  cursor: default;
+}
+
+.casca button.usuarios-botao-sec {
+  width: fit-content;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid #158172;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f433d;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca button.usuarios-botao-sec:hover:not(:disabled) {
+  background: #f6f8f9;
+}
+
+.casca button.usuarios-botao-sec:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.casca .usuarios-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.casca .usuarios-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e8eef0;
+}
+
+.casca .usuarios-linha:last-child {
+  border-bottom: 0;
+}
+
+.casca .usuarios-pessoa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-width: 0;
+}
+
+.casca .usuarios-nome {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.casca .usuarios-papel {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #d3f3ec;
+  color: #0f433d;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.casca .usuarios-removido {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #ad2a21;
+}
+
+.casca .usuarios-remover {
+  display: block;
+  margin: 0;
+  flex: none;
+}
+
+.casca .usuarios-vazio {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: #475760;
+}
+
+.casca .usuarios-nota {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #475760;
+}
+
+.casca .usuarios-voltar {
+  margin: 8px 0 0;
+}

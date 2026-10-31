@@ -1,0 +1,278 @@
+.casca .clinica-alerta {
+  max-width: 640px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 14px;
+}
+
+.casca .clinica-alerta:focus {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .clinica-alerta strong {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.casca .clinica-alerta-erro {
+  background: #fef0ef;
+  border-color: #d4372c;
+}
+
+.casca .clinica-alerta-erro strong {
+  color: #ad2a21;
+}
+
+.casca .clinica-alerta-sucesso {
+  background: #ecfdf3;
+  border-color: #178a4c;
+}
+
+.casca .clinica-alerta-sucesso strong {
+  color: #146c3e;
+}
+
+.casca .clinica-cartao {
+  max-width: 640px;
+  margin: 0 0 24px;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.casca .clinica-subtitulo {
+  margin: 0 0 16px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #0f1a20;
+  overflow-wrap: anywhere;
+}
+
+.casca .clinica-intro {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 22px;
+  color: #0f1a20;
+}
+
+.casca .clinica-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+}
+
+.casca .clinica-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #0f1a20;
+}
+
+.casca .clinica-campo input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.casca .clinica-dias {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.casca .clinica-dias legend {
+  padding: 0;
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #0f1a20;
+}
+
+.casca .clinica-dias-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.casca .clinica-dia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #0f1a20;
+  cursor: pointer;
+}
+
+.casca .clinica-dia input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #158172;
+}
+
+.casca .clinica-dia:has(input:checked) {
+  border-color: #158172;
+  background: #d3f3ec;
+}
+
+.casca .clinica-horarios {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.casca .clinica-sugestao {
+  margin: -8px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #475760;
+}
+
+.casca .clinica-acoes {
+  display: flex;
+}
+
+.casca button.clinica-botao {
+  width: fit-content;
+  height: 44px;
+  margin: 0;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #158172;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca button.clinica-botao:hover:not(:disabled) {
+  background: #0f433d;
+}
+
+.casca button.clinica-botao:disabled {
+  background: #158172;
+  opacity: 0.7;
+  cursor: default;
+}
+
+.casca button.clinica-botao-sec {
+  width: fit-content;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid #158172;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f433d;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca button.clinica-botao-sec:hover:not(:disabled) {
+  background: #f6f8f9;
+}
+
+.casca button.clinica-botao-sec:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.casca .clinica-lista {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.casca .clinica-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e8eef0;
+}
+
+.casca .clinica-linha:last-child {
+  border-bottom: 0;
+}
+
+.casca .clinica-cadeira {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.casca .clinica-nome {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.casca .clinica-inativa {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fef0ef;
+  color: #ad2a21;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.casca .clinica-desativar {
+  display: block;
+  margin: 0;
+  flex: none;
+}
+
+.casca .clinica-vazio {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #475760;
+}
+
+.casca .clinica-voltar {
+  margin: 8px 0 0;
+}
+
+@media (max-width: 560px) {
+  .casca .clinica-horarios {
+    grid-template-columns: 1fr;
+  }
+}

@@ -100,14 +100,14 @@ export function Odontograma({
     <>
       <div role="group" aria-label="Dentes">
         <Fileira
-          titulo="Arcada superior"
+          titulo="superior direito e superior esquerdo"
           dentes={superior}
           selecionado={selecionado}
           comRegistro={comRegistro}
           aoEscolher={setSelecionado}
         />
         <Fileira
-          titulo="Arcada inferior"
+          titulo="inferior direito e inferior esquerdo"
           dentes={inferior}
           selecionado={selecionado}
           comRegistro={comRegistro}

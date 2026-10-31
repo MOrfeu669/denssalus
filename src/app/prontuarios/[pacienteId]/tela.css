@@ -1,0 +1,32 @@
+.casca .prontuario-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 24px;
+}
+
+.casca .prontuario-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #cbd4d9;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f433d;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.casca .prontuario-secao {
+  margin: 0 0 20px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8ec;
+  border-radius: 16px;
+}
+
+.casca .prontuario-secao h2 {
+  margin: 0 0 12px;
+}

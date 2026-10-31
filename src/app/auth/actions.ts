@@ -3,9 +3,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { definirNovaSenha, login, solicitarRecuperacao } from "../../domain/auth/casos";
+import { MENSAGEM_CREDENCIAIS } from "../../domain/auth/tipos";
 import { estado, type EstadoFormulario } from "../formulario";
 import { dependencias } from "../dependencias";
 import { falha } from "../falha";
+import { DETALHE_CREDENCIAIS, detalheSessaoAberta } from "../login/texto";
 
 async function origem(): Promise<string> {
   const cabecalhos = await headers();
@@ -22,12 +24,15 @@ export async function entrar(
   const senha = String(formData.get("senha") ?? "");
   try {
     const resultado = await login(dependencias(), email, senha);
-    if (!resultado.ok) return estado("erro", resultado.mensagem);
-    return estado(
-      "sucesso",
-      "Sessão aberta",
-      `Papel ${resultado.valor.usuario.papel}. Clínica ${resultado.valor.usuario.clinicaId}.`,
-    );
+    if (!resultado.ok) {
+      return estado(
+        "erro",
+        resultado.mensagem,
+        resultado.mensagem === MENSAGEM_CREDENCIAIS ? DETALHE_CREDENCIAIS : "",
+      );
+    }
+    const { nome, papel } = resultado.valor.usuario;
+    return estado("sucesso", "Sessão aberta", detalheSessaoAberta(nome, papel));
   } catch (erro) {
     const resultado = falha(erro);
     return estado("erro", resultado.mensagem);

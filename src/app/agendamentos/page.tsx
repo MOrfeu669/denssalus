@@ -1,11 +1,17 @@
-import Link from "next/link";
 import { listarAgendamentos, listarOpcoesAgendamento } from "../../domain/agendamento/casos";
+import type { Sessao } from "../../domain/auth/tipos";
+import { CascaAberta } from "../casca";
 import { dependenciasAgendamento } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
+import { TelaFalha, TelaSemSessao } from "./estados";
 import { Agendamentos } from "./form";
+import "./tela.css";
 
 export const dynamic = "force-dynamic";
+
+const TITULO = "Agendamentos";
+const CAMINHO = "/agendamentos";
 
 type Query = Record<string, string | string[] | undefined>;
 
@@ -21,13 +27,16 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
   const sessao = await sessaoAtual();
   if (!sessao) {
     return (
-      <main>
-        <h1>Agendamentos</h1>
-        <p>Nenhuma sessão aberta.</p>
-      </main>
+      <CascaAberta>
+        <TelaSemSessao titulo={TITULO} />
+      </CascaAberta>
     );
   }
 
+  return <>{await conteudo(query, sessao)}</>;
+}
+
+async function conteudo(query: Query, sessao: Sessao) {
   try {
     const deps = dependenciasAgendamento();
     const agendamentos = await listarAgendamentos(deps, sessao);
@@ -51,8 +60,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
     };
 
     return (
-      <main>
-        <h1>Agendamentos</h1>
+      <>
+        <h1>{TITULO}</h1>
         <Agendamentos
           agendamentos={agendamentos.valor}
           opcoes={opcoes.valor}
@@ -60,10 +69,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
           usuarioId={sessao.usuario.id}
           inicial={inicial}
         />
-        <p className="nav">
-          <Link href="/">Voltar</Link>
-        </p>
-      </main>
+      </>
     );
   } catch (erro) {
     return erroDeCarregamento(falha(erro).mensagem);
@@ -71,17 +77,5 @@ export default async function Page({ searchParams }: { searchParams: Promise<Que
 }
 
 function erroDeCarregamento(mensagem: string) {
-  return (
-    <main>
-      <h1>Agendamentos</h1>
-      <p role="alert" tabIndex={-1}>
-        {mensagem}
-      </p>
-      <p className="nav">
-        <Link href="/agendamentos">Tentar de novo</Link>
-        {" · "}
-        <Link href="/">Voltar</Link>
-      </p>
-    </main>
-  );
+  return <TelaFalha titulo={TITULO} mensagem={mensagem} href={CAMINHO} />;
 }
