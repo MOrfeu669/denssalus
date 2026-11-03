@@ -6,6 +6,7 @@ import { nomeDaClinica } from "./casca-clinica";
 import { telaSemCasca } from "./casca-publico";
 import "./globals.css";
 import { sessaoAtual } from "./sessao";
+import { BotaoVoz } from "./voz/botao-voz";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
         <Casca sessao={sessao} clinicaNome={clinicaNome}>
           {children}
         </Casca>
+        <BotaoVoz nomeUsuario={sessao.usuario.nome} papel={sessao.usuario.papel} />
       </body>
     </html>
   );
