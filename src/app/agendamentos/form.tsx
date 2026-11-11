@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import type { Papel } from "../../domain/auth/tipos";
 import { sugerirFim } from "../../domain/agendamento/regras";
 import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/tipos";
@@ -72,6 +72,55 @@ export function Agendamentos({
       : []),
   );
   const podeBloquear = papel === "admin" || papel === "dentista";
+  const ocupado =
+    pendenteCriar ||
+    pendenteEmergencia ||
+    pendenteIniciar ||
+    pendenteChegar ||
+    pendenteBloquear ||
+    pendenteCancelar ||
+    pendenteRetorno ||
+    pendenteEvolucao;
+  const [aberto, setAberto] = useState(false);
+  const botaoRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const preenchido = Boolean(inicial.pacienteId || inicial.dentistaId || inicial.procedimentoId);
+    if (preenchido || window.location.hash.length > 1) setAberto(true);
+    function aoHash() {
+      if (window.location.hash.length > 1) setAberto(true);
+    }
+    window.addEventListener("hashchange", aoHash);
+    return () => window.removeEventListener("hashchange", aoHash);
+  }, [inicial]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: "nearest" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [aberto, agendamentos]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    function tecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !ocupado) {
+        setAberto(false);
+        botaoRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", tecla);
+    return () => document.removeEventListener("keydown", tecla);
+  }, [aberto, ocupado]);
+
+  function fechar() {
+    if (ocupado) return;
+    setAberto(false);
+    botaoRef.current?.focus();
+  }
 
   useEffect(() => {
     if (
@@ -84,6 +133,26 @@ export function Agendamentos({
   }, [criacao, emergenciaEstado, atendimento, chegada, bloqueio, cancelamento, retorno, evolucao, roteador]);
 
   return (
+    <>
+    <button ref={botaoRef} type="button" className="agendamentos-abrir" onClick={() => setAberto(true)}>
+      Agendamentos
+    </button>
+    {aberto ? (
+    <div className="agendamentos-overlay">
+      <div className="agendamentos-overlay-fundo" onClick={fechar} />
+      <div
+        className="agendamentos-painel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="agendamentos-titulo"
+        tabIndex={-1}
+      >
+        <div className="agendamentos-painel-topo">
+          <h2 id="agendamentos-titulo">Agendamentos</h2>
+          <button type="button" className="agendamentos-fechar" onClick={fechar}>
+            Fechar
+          </button>
+        </div>
     <div className="agendamentos-tela">
       <Alerta
         tipo={aviso.status === "sucesso" ? "sucesso" : "erro"}
@@ -203,6 +272,10 @@ export function Agendamentos({
         )}
       </section>
     </div>
+      </div>
+    </div>
+    ) : null}
+    </>
   );
 }
 

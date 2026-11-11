@@ -82,7 +82,6 @@ export default async function Page() {
 
   return (
     <div className="estoque-tela">
-      <h1>Estoque</h1>
       <Estoque materiais={materiais} procedimentos={procedimentos} />
     </div>
   );

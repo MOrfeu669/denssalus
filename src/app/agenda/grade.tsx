@@ -178,10 +178,10 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, opcoes }: Pro
                                 a.alerta ? " agenda-com-alerta" : ""
                               }`}
                             >
-                              <Link className="agenda-abrir" href={`/agendamentos#${a.id}`}>
+                              <Link className="agenda-abrir" href={`/agenda#${a.id}`}>
                                 <SinalDeAlerta item={a} />
                               <Link
-                                href={`/agendamentos#${a.id}`}
+                                href={`/agenda#${a.id}`}
                                 className="agenda-hora agenda-abrir"
                                 aria-label={`${horarioDoDia(a.inicio, a.fim)}, abrir detalhe de ${nome(nomes.pacientes, a.pacienteId)}`}
                               >

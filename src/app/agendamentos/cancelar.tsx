@@ -88,7 +88,7 @@ export function caminhoDeReagendar(agendamento: Agendamento): string {
     dentista: agendamento.dentistaId,
     procedimento: agendamento.procedimentoId ?? "",
   });
-  return `/agendamentos?${params.toString()}`;
+  return `/agenda?${params.toString()}`;
 }
 
 // "nao" não abre fluxo nem cria consulta; "sim" leva ao fluxo de novo agendamento.

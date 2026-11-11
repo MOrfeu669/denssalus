@@ -1,10 +1,71 @@
 /* Agendamentos e bloqueio. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
 
+.casca .agenda-pagina .agendamentos-abrir {
+  align-self: flex-end;
+}
+
+.casca button.agendamentos-fechar {
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid #158172;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f433d;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca .agendamentos-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.casca .agendamentos-overlay-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 26 32 / 32%);
+}
+
+.casca .agendamentos-painel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
+}
+
+.casca .agendamentos-painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.casca .agendamentos-painel-topo h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+}
+
 .casca .agendamentos-tela {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 960px;
+  max-width: none;
 }
 
 .casca .agendamentos-bloco {

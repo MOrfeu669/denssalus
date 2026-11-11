@@ -9,7 +9,7 @@ export type PassoGuia = { rotulo: string; href: string };
 const CONFIGURAR_CLINICA: PassoGuia = { rotulo: "Configurar a clínica", href: "/clinica" };
 const CADASTRAR_DENTISTA: PassoGuia = { rotulo: "Cadastrar dentista", href: "/dentistas" };
 const CADASTRAR_PACIENTE: PassoGuia = { rotulo: "Cadastrar paciente", href: "/pacientes" };
-const CRIAR_AGENDAMENTO: PassoGuia = { rotulo: "Criar agendamento", href: "/agendamentos" };
+const CRIAR_AGENDAMENTO: PassoGuia = { rotulo: "Criar agendamento", href: "/agenda" };
 const VER_NA_AGENDA: PassoGuia = { rotulo: "Ver na agenda", href: "/agenda" };
 
 const PASSOS_ADMIN: PassoGuia[] = [

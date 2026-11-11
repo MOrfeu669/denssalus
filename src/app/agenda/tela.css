@@ -6,6 +6,12 @@
   gap: 20px;
 }
 
+.casca .agenda-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .casca .agenda-barra {
   display: flex;
   flex-wrap: wrap;

@@ -9,13 +9,66 @@
   color: #475760;
 }
 
-.casca .pacientes-voltar {
-  margin: 8px 0 0;
+.casca .pacientes-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 24px;
+}
+
+.casca .pacientes-topo h1,
+.casca .pacientes-topo .pacientes-nota {
+  margin: 0;
+}
+
+.casca .pacientes-topo .pacientes-nota {
+  margin-top: 4px;
+}
+
+.casca .pacientes-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.casca .pacientes-overlay-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 26 32 / 32%);
+}
+
+.casca .pacientes-painel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
+}
+
+.casca .pacientes-painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.casca .pacientes-painel-topo h2 {
+  margin: 0;
 }
 
 .casca .pacientes-colunas {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -339,9 +392,9 @@
   color: #ad2a21;
 }
 
-@media (max-width: 1100px) {
-  .casca .pacientes-colunas {
-    grid-template-columns: 1fr;
+@media (max-width: 640px) {
+  .casca .pacientes-topo {
+    flex-direction: column;
   }
 }
 

@@ -114,12 +114,11 @@ export async function adicionarCadeira(
   return { ok: true, valor: cadeira };
 }
 
-export async function desativarCadeira(
+async function cadeiraDoAdmin(
   deps: Dependencias,
   ator: Sessao,
   cadeiraId: string,
-  agora: Date,
-): Promise<Resultado<Cadeira>> {
+): Promise<Resultado<{ clinica: Clinica; cadeira: Cadeira }>> {
   const permitido = autorizarAcao(ator, "clinica:configurar");
   if (!permitido.ok) return permitido;
 
@@ -129,15 +128,49 @@ export async function desativarCadeira(
   const cadeiras = await deps.cadeiras.listar(clinica.id);
   const cadeira = cadeiras.find((item) => item.id === cadeiraId);
   if (!cadeira) return { ok: false, mensagem: MENSAGEM_CADEIRA_NAO_ENCONTRADA };
+  return { ok: true, valor: { clinica, cadeira } };
+}
 
-  const inativa: Cadeira = { ...cadeira, ativa: false };
-  await deps.cadeiras.salvar(inativa);
-
-  const futuros = await deps.agenda.listarAgendadosFuturos(clinica.id, agora);
+async function marcarAlertaDaCadeira(
+  deps: Dependencias,
+  clinicaId: string,
+  cadeiraId: string,
+  agora: Date,
+  alerta: boolean,
+) {
+  const futuros = await deps.agenda.listarAgendadosFuturos(clinicaId, agora);
   const alterados = futuros
-    .filter((item) => item.cadeiraId === cadeira.id && !item.alertaCadeira)
-    .map((item) => ({ ...item, alertaCadeira: true }));
+    .filter((item) => item.cadeiraId === cadeiraId && item.alertaCadeira !== alerta)
+    .map((item) => ({ ...item, alertaCadeira: alerta }));
   if (alterados.length > 0) await deps.agenda.salvarAlertas(alterados);
+}
 
+export async function desativarCadeira(
+  deps: Dependencias,
+  ator: Sessao,
+  cadeiraId: string,
+  agora: Date,
+): Promise<Resultado<Cadeira>> {
+  const achado = await cadeiraDoAdmin(deps, ator, cadeiraId);
+  if (!achado.ok) return achado;
+
+  const inativa: Cadeira = { ...achado.valor.cadeira, ativa: false };
+  await deps.cadeiras.salvar(inativa);
+  await marcarAlertaDaCadeira(deps, achado.valor.clinica.id, inativa.id, agora, true);
   return { ok: true, valor: inativa };
+}
+
+export async function reativarCadeira(
+  deps: Dependencias,
+  ator: Sessao,
+  cadeiraId: string,
+  agora: Date,
+): Promise<Resultado<Cadeira>> {
+  const achado = await cadeiraDoAdmin(deps, ator, cadeiraId);
+  if (!achado.ok) return achado;
+
+  const ativa: Cadeira = { ...achado.valor.cadeira, ativa: true };
+  await deps.cadeiras.salvar(ativa);
+  await marcarAlertaDaCadeira(deps, achado.valor.clinica.id, ativa.id, agora, false);
+  return { ok: true, valor: ativa };
 }

@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { useFormStatus } from "react-dom";
 import type { DetalheClinica } from "../../domain/clinica/tipos";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
-import { adicionar, criar, desativar, salvarHorario } from "./actions";
+import { adicionar, alternar, criar, salvarHorario } from "./actions";
 import { Alerta, BotaoAcao } from "./alerta";
 import { Funcionamento, type CamposFuncionamento } from "./funcionamento";
 import { CLINICA_CADEIRAS_VAZIO, CLINICA_SEM_CLINICA, mensagemComDetalhe } from "./texto";
@@ -16,13 +17,13 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
   const [criacao, acaoCriar, pendenteCriar] = useActionState(criar, estadoVazio);
   const [horario, acaoHorario, pendenteHorario] = useActionState(salvarHorario, estadoVazio);
   const [inclusao, acaoAdicionar, pendenteAdicionar] = useActionState(adicionar, estadoVazio);
-  const [desativacao, acaoDesativar] = useActionState(desativar, estadoVazio);
-  const aviso = avisoVisivel(criacao, horario, inclusao, desativacao);
+  const [ativacao, acaoAlternar] = useActionState(alternar, estadoVazio);
+  const aviso = avisoVisivel(criacao, horario, inclusao, ativacao);
 
   useEffect(() => {
-    const estados = [criacao, horario, inclusao, desativacao];
+    const estados = [criacao, horario, inclusao, ativacao];
     if (estados.some((item) => item.status === "sucesso")) roteador.refresh();
-  }, [criacao, horario, inclusao, desativacao, roteador]);
+  }, [criacao, horario, inclusao, ativacao, roteador]);
 
   if (!detalhe) {
     return (
@@ -97,17 +98,11 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
                     <span className="clinica-inativa">! Desativada</span>
                   )}
                 </span>
-                {cadeira.ativa ? (
-                  <form action={acaoDesativar} className="clinica-desativar">
-                    <input type="hidden" name="id" value={cadeira.id} />
-                    <BotaoAcao
-                      rotulo="Desativar"
-                      pendente="Desativando…"
-                      className="clinica-botao-sec"
-                      nomeAcessivel={`Desativar cadeira ${cadeira.identificacao}`}
-                    />
-                  </form>
-                ) : null}
+                <form action={acaoAlternar} className="clinica-desativar">
+                  <input type="hidden" name="id" value={cadeira.id} />
+                  <input type="hidden" name="ligar" value={cadeira.ativa ? "false" : "true"} />
+                  <Interruptor ligado={cadeira.ativa} nome={cadeira.identificacao} />
+                </form>
               </li>
             ))}
           </ul>
@@ -123,6 +118,25 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
         </form>
       </section>
     </>
+  );
+}
+
+function Interruptor({ ligado, nome }: { ligado: boolean; nome: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className="clinica-interruptor"
+      role="switch"
+      aria-checked={ligado}
+      aria-label={nome}
+      disabled={pending}
+    >
+      <span className="clinica-interruptor-trilho" aria-hidden="true">
+        <span className="clinica-interruptor-bolinha" />
+      </span>
+      {ligado ? "ON" : "OFF"}
+    </button>
   );
 }
 

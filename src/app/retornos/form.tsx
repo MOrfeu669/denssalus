@@ -62,7 +62,7 @@ export function RegiaoMarcar() {
     <section className="retornos-secao" aria-labelledby="retornos-marcar-titulo">
       <h2 id="retornos-marcar-titulo">{TITULO_MARCAR}</h2>
       <p className="retornos-nota">{TEXTO_MARCAR}</p>
-      <Link className="casca-botao" href="/agendamentos">
+      <Link className="casca-botao" href="/agenda">
         {ROTULO_IR_AGENDAMENTOS}
       </Link>
     </section>

@@ -13,7 +13,6 @@ const CLINICA: ItemMenu = { href: "/clinica", rotulo: "Clínica" };
 const DENTISTAS: ItemMenu = { href: "/dentistas", rotulo: "Dentistas" };
 const PROCEDIMENTOS: ItemMenu = { href: "/procedimentos", rotulo: "Procedimentos" };
 const PACIENTES: ItemMenu = { href: "/pacientes", rotulo: "Pacientes" };
-const AGENDAMENTOS: ItemMenu = { href: "/agendamentos", rotulo: "Agendamentos" };
 const AGENDA: ItemMenu = { href: "/agenda", rotulo: "Agenda" };
 const RETORNOS: ItemMenu = { href: "/retornos", rotulo: "Retornos" };
 const ESTOQUE: ItemMenu = { href: "/estoque", rotulo: "Estoque" };
@@ -21,9 +20,9 @@ const DASHBOARD: ItemMenu = { href: "/dashboard", rotulo: "Dashboard" };
 const MENSAGENS: ItemMenu = { href: "/mensagens", rotulo: "Mensagens" };
 
 const MENU: Record<Papel, ItemMenu[]> = {
-  admin: [USUARIOS, CLINICA, DENTISTAS, PROCEDIMENTOS, PACIENTES, AGENDAMENTOS, AGENDA],
-  dentista: [PROCEDIMENTOS, PACIENTES, AGENDAMENTOS, AGENDA],
-  recepcionista: [PACIENTES, AGENDAMENTOS, AGENDA],
+  admin: [USUARIOS, CLINICA, DENTISTAS, PROCEDIMENTOS, PACIENTES, AGENDA],
+  dentista: [PROCEDIMENTOS, PACIENTES, AGENDA],
+  recepcionista: [PACIENTES, AGENDA],
 };
 
 const ETAPA_2: Record<Papel, ItemMenu[]> = {

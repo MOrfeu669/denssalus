@@ -38,5 +38,5 @@ export function textoPrevisto(dataPrevista: string): string {
 
 // Com id do paciente, o agendamento novo abre pré-preenchido; sem id, abre a tela sem query.
 export function hrefReagendar(pacienteId?: string): string {
-  return pacienteId ? `/agendamentos?paciente=${encodeURIComponent(pacienteId)}` : "/agendamentos";
+  return pacienteId ? `/agenda?paciente=${encodeURIComponent(pacienteId)}` : "/agenda";
 }

@@ -59,7 +59,7 @@ export async function criar(
     if (!sessao) return estado("erro", SEM_SESSAO);
     const resultado = await criarAgendamento(dependenciasAgendamento(), sessao, validado.valor);
     if (!resultado.ok) return estado("erro", resultado.mensagem);
-    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
     return estado("sucesso", "Agendamento criado", resultado.valor.id);
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
@@ -78,7 +78,6 @@ export async function emergencia(
     if (!sessao) return estado("erro", SEM_SESSAO);
     const resultado = await registrarEmergencia(dependenciasAgendamento(), sessao, validado.valor);
     if (!resultado.ok) return estado("erro", resultado.mensagem);
-    revalidatePath("/agendamentos");
     revalidatePath("/agenda");
     return estado("sucesso", "Emergência registrada");
   } catch (causa) {
@@ -99,7 +98,7 @@ export async function iniciar(
       texto(formData, "id"),
     );
     if (!resultado.ok) return estado("erro", resultado.mensagem);
-    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
     return estado("sucesso", "Atendimento iniciado");
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
@@ -119,7 +118,7 @@ export async function chegar(
       texto(formData, "id"),
     );
     if (!resultado.ok) return estado("erro", resultado.mensagem);
-    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
     return estado("sucesso", "Chegada marcada");
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
@@ -138,7 +137,7 @@ export async function bloquear(
     if (!sessao) return estado("erro", SEM_SESSAO);
     const resultado = await criarBloqueio(dependenciasAgendamento(), sessao, validado.valor);
     if (!resultado.ok) return estado("erro", resultado.mensagem);
-    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
     return estado("sucesso", "Agenda bloqueada");
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
@@ -164,7 +163,7 @@ export async function cancelar(
       texto(formData, "confirmouReversao") === "sim",
     );
     if (!resultado.ok) return estado("erro", resultado.mensagem, texto(formData, "id"));
-    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
     return estado("sucesso", "Deseja reagendar?", resultado.valor.id);
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);

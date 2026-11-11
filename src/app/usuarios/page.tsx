@@ -52,7 +52,6 @@ export default async function Page() {
 
   return (
     <>
-      <h1>Usuários</h1>
       <Painel usuarios={lista.valor} atualId={sessao.usuario.id} />
       <p className="usuarios-voltar">
         <Link className="casca-link" href="/">

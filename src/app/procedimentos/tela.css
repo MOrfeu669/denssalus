@@ -9,6 +9,80 @@
   color: #475760;
 }
 
+.casca .procedimentos-cabeca {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 24px;
+}
+
+.casca .procedimentos-cabeca h1,
+.casca .procedimentos-cabeca .procedimentos-nota {
+  margin: 0;
+}
+
+.casca .procedimentos-cabeca .procedimentos-nota {
+  margin-top: 4px;
+}
+
+.casca .casca-miolo .procedimentos-cabeca > button.procedimentos-botao {
+  flex: none;
+  background: #158172;
+  color: #fff;
+  border: 0;
+}
+
+.casca .procedimentos-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.casca .procedimentos-overlay-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 26 32 / 32%);
+}
+
+.casca .procedimentos-painel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
+}
+
+.casca .procedimentos-painel:focus {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .procedimentos-painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.casca .procedimentos-painel-topo h2 {
+  margin: 0;
+}
+
+.casca .procedimentos-painel .procedimentos-form {
+  margin-top: 0;
+}
+
 .casca .procedimentos-secao {
   margin: 0 0 24px;
   padding: 20px;
@@ -237,5 +311,10 @@
 @media (max-width: 640px) {
   .casca .procedimentos-campos {
     grid-template-columns: 1fr;
+  }
+
+  .casca .procedimentos-cabeca {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

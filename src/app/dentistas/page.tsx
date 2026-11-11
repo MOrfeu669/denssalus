@@ -52,7 +52,6 @@ export default async function Page() {
 
   return (
     <>
-      <h1>Dentistas</h1>
       <Dentistas dentistas={resultado.valor} />
       <p className="dentistas-voltar">
         <Link className="casca-link" href="/">

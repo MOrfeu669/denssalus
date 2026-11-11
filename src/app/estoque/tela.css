@@ -7,9 +7,69 @@
   max-width: 880px;
 }
 
-.casca .estoque-tela > h1 {
+.casca .estoque-tela > h1,
+.casca .estoque-cabeca h1 {
   margin: 0;
   color: #0f433d;
+}
+
+.casca .estoque-cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.casca .casca-miolo .estoque-cabeca > button.estoque-botao {
+  flex: none;
+  background: #158172;
+  color: #fff;
+  border: 0;
+}
+
+.casca .estoque-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.casca .estoque-overlay-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 26 32 / 32%);
+}
+
+.casca .estoque-painel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
+}
+
+.casca .estoque-painel:focus {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .estoque-painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.casca .estoque-painel-topo h2 {
+  margin: 0;
 }
 
 .casca .estoque-secao {
@@ -281,6 +341,11 @@
 @media (max-width: 640px) {
   .casca .estoque-secao {
     padding: 16px;
+  }
+
+  .casca .estoque-cabeca {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .casca .estoque-tela form.estoque-form-linha {

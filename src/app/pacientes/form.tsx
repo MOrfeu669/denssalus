@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { dataValida, menorDeIdade } from "../../domain/paciente/regras";
 import type { Canal, CanalComunicacao, Paciente } from "../../domain/paciente/tipos";
 import { estadoVazio } from "../formulario";
@@ -20,11 +20,33 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
   const [cadastro, acaoCadastrar, pendenteCadastrar] = useActionState(cadastrar, estadoVazio);
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [aberto, setAberto] = useState(false);
+  const botaoRef = useRef<HTMLButtonElement>(null);
   const aviso = cadastro.quando >= edicao.quando ? cadastro : edicao;
+  const erroNoPainel = aberto && aviso === cadastro && cadastro.status === "erro";
 
   useEffect(() => {
     if (edicao.status === "sucesso") setEditandoId(null);
-  }, [edicao]);
+    if (cadastro.status === "sucesso") setAberto(false);
+  }, [edicao, cadastro]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    function tecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !pendenteCadastrar) {
+        setAberto(false);
+        botaoRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", tecla);
+    return () => document.removeEventListener("keydown", tecla);
+  }, [aberto, pendenteCadastrar]);
+
+  function fechar() {
+    if (pendenteCadastrar) return;
+    setAberto(false);
+    botaoRef.current?.focus();
+  }
 
   useEffect(() => {
     if (cadastro.status === "sucesso" || edicao.status === "sucesso") roteador.refresh();
@@ -32,7 +54,25 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
 
   return (
     <>
-      <Alerta estado={aviso} />
+      <div className="pacientes-topo">
+        <div>
+          <h1>Pacientes</h1>
+          <p className="pacientes-nota">
+            Nome completo e ao menos um canal de comunicação são obrigatórios.
+          </p>
+        </div>
+        <button
+          ref={botaoRef}
+          type="button"
+          className="pacientes-botao"
+          aria-haspopup="dialog"
+          aria-expanded={aberto}
+          onClick={() => setAberto(true)}
+        >
+          Novo paciente
+        </button>
+      </div>
+      {erroNoPainel ? null : <Alerta estado={aviso} />}
       <div className="pacientes-colunas">
         <section className="pacientes-secao" aria-labelledby="pacientes-lista-titulo">
           <h2 id="pacientes-lista-titulo">Pacientes da clínica</h2>
@@ -75,19 +115,36 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
             </ul>
           )}
         </section>
-        <section className="pacientes-secao" aria-labelledby="pacientes-novo-titulo">
-          <h2 id="pacientes-novo-titulo">Novo paciente</h2>
-          <form
-            className="pacientes-form"
-            key={cadastro.status === "sucesso" ? cadastro.quando : 0}
-            action={acaoCadastrar}
-            aria-busy={pendenteCadastrar}
-          >
-            <Campos />
-            <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" />
-          </form>
-        </section>
       </div>
+      {aberto ? (
+        <div className="pacientes-overlay">
+          <div className="pacientes-overlay-fundo" onClick={fechar} />
+          <div
+            className="pacientes-painel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pacientes-novo-titulo"
+            tabIndex={-1}
+          >
+            <div className="pacientes-painel-topo">
+              <h2 id="pacientes-novo-titulo">Novo paciente</h2>
+              <button type="button" className="pacientes-botao pacientes-botao-secundario" onClick={fechar}>
+                Fechar
+              </button>
+            </div>
+            {erroNoPainel ? <Alerta estado={cadastro} /> : null}
+            <form
+              className="pacientes-form"
+              key={cadastro.status === "sucesso" ? cadastro.quando : 0}
+              action={acaoCadastrar}
+              aria-busy={pendenteCadastrar}
+            >
+              <Campos />
+              <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" />
+            </form>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

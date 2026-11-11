@@ -38,6 +38,61 @@
   color: #146c3e;
 }
 
+.casca .usuarios-cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 24px;
+}
+
+.casca .usuarios-cabeca h1 {
+  margin: 0;
+}
+
+.casca .usuarios-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.casca .usuarios-overlay-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 26 32 / 32%);
+}
+
+.casca .usuarios-painel {
+  position: absolute;
+  top: 72px;
+  right: 24px;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
+}
+
+.casca .usuarios-painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.casca .usuarios-painel-topo .usuarios-subtitulo {
+  margin: 0;
+}
+
+.casca .usuarios-painel .usuarios-alerta {
+  max-width: none;
+}
+
 .casca .usuarios-cartao {
   max-width: 640px;
   margin: 0 0 24px;

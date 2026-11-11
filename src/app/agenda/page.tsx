@@ -1,4 +1,4 @@
-import { listarOpcoesAgendamento, verAgenda } from "../../domain/agendamento/casos";
+import { listarAgendamentos, listarOpcoesAgendamento, verAgenda } from "../../domain/agendamento/casos";
 import type { FiltroAgenda } from "../../domain/agendamento/tipos";
 import type { Sessao } from "../../domain/auth/tipos";
 import { enviarPendentes, reenviarFalhas } from "../../domain/mensagem/casos";
@@ -7,6 +7,8 @@ import { CascaAberta } from "../casca";
 import { dependenciasAgendamento, dependenciasMensagem } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
+import { Agendamentos } from "../agendamentos/form";
+import "../agendamentos/tela.css";
 import { Grade } from "./grade";
 import { TempoReal } from "./tempo-real";
 import "./tela.css";
@@ -83,27 +85,51 @@ async function conteudo(query: Query, sessao: Sessao) {
     const opcoes = await listarOpcoesAgendamento(deps, sessao);
     if (!opcoes.ok) return erroDeCarregamento(opcoes.mensagem, query);
 
-    const { pacientes, dentistas, cadeiras } = opcoes.valor;
+    const lista = await listarAgendamentos(deps, sessao);
+    if (!lista.ok) return erroDeCarregamento(lista.mensagem, query);
+
+    const { pacientes, dentistas, cadeiras, procedimentos } = opcoes.valor;
     const nomes = {
       pacientes: Object.fromEntries(pacientes.map((p) => [p.id, p.nome])),
       dentistas: Object.fromEntries(dentistas.map((d) => [d.id, d.nome])),
       cadeiras: Object.fromEntries(cadeiras.map((c) => [c.id, c.identificacao])),
     };
+    const conhecido = (valor: string | undefined, ids: string[]) =>
+      valor && ids.includes(valor) ? valor : "";
 
     return (
       <>
         <h1>{TITULO}</h1>
-        <Grade
-          grade={grade.valor}
-          data={filtro.data}
-          dentistaId={filtro.dentistaId}
-          cadeiraId={filtro.cadeiraId}
-          nomes={nomes}
-          opcoes={{
-            dentistas: dentistas.map(({ id, nome }) => ({ id, nome })),
-            cadeiras,
-          }}
-        />
+        <div className="agenda-pagina">
+          <Agendamentos
+            agendamentos={lista.valor}
+            opcoes={opcoes.valor}
+            papel={sessao.usuario.papel}
+            usuarioId={sessao.usuario.id}
+            inicial={{
+              pacienteId: conhecido(primeiro(query.paciente), pacientes.map((item) => item.id)),
+              dentistaId: conhecido(
+                primeiro(query.dentista),
+                dentistas.map((item) => item.id),
+              ),
+              procedimentoId: conhecido(
+                primeiro(query.procedimento),
+                procedimentos.map((item) => item.id),
+              ),
+            }}
+          />
+          <Grade
+            grade={grade.valor}
+            data={filtro.data}
+            dentistaId={filtro.dentistaId}
+            cadeiraId={filtro.cadeiraId}
+            nomes={nomes}
+            opcoes={{
+              dentistas: dentistas.map(({ id, nome }) => ({ id, nome })),
+              cadeiras,
+            }}
+          />
+        </div>
         <TempoReal />
       </>
     );

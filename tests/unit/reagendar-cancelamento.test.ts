@@ -32,11 +32,11 @@ function parametros(caminho: string) {
 }
 
 describe("reagendar após cancelamento", () => {
-  it("Sim abre /agendamentos com paciente, dentista e procedimento", () => {
+  it("Sim abre a agenda com paciente, dentista e procedimento", () => {
     const caminho = respostaReagendar(agendamento(), "sim");
     expect(caminho).toBe(caminhoDeReagendar(agendamento()));
     const { rota, params } = parametros(caminho as string);
-    expect(rota).toBe("/agendamentos");
+    expect(rota).toBe("/agenda");
     expect(params.get("paciente")).toBe("pac-1");
     expect(params.get("dentista")).toBe("den-1");
     expect(params.get("procedimento")).toBe("proc-1");
