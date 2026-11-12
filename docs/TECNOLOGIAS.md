@@ -33,9 +33,17 @@ Decisão [stated] em 24/10/2026, para o scaffold da Feature 001:
 | Item | Decisão |
 |---|---|
 | Runner de teste | Vitest. Arquivos em `tests/`, comando `npm test` |
-| Biblioteca de UI | Nenhuma. Telas em HTML e React |
+| Biblioteca de UI | shadcn/ui com Tailwind. Decisão de 09/11/2026, abaixo |
 
 A criação de usuário pelo Admin e a leitura de `usuarios` usam a chave secreta só no servidor (`SUPABASE_SECRET_KEY`). Ela não leva o prefixo `NEXT_PUBLIC_`.
+
+Decisão [stated] em 09/11/2026. Substitui a linha antiga «nenhuma biblioteca de UI».
+
+| Item | Decisão |
+|---|---|
+| Coleção de interface | **shadcn/ui**. Um componente por vez, em `src/components/ui`. Sem segundo kit |
+| Estilo | **Tailwind** na composição do componente. O CSS já escrito numa tela permanece até essa tela ser alterada |
+| Como usar | Skill `ui`, em `.cursor/skills/ui/SKILL.md` |
 
 ## Árvore prevista de `supabase/`
 

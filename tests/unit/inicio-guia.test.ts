@@ -34,7 +34,7 @@ describe("passos do guia", () => {
       { rotulo: "Configurar a clínica", href: "/clinica" },
       { rotulo: "Cadastrar dentista", href: "/dentistas" },
       { rotulo: "Cadastrar paciente", href: "/pacientes" },
-      { rotulo: "Criar agendamento", href: "/agendamentos" },
+      { rotulo: "Criar agendamento", href: "/agenda" },
       { rotulo: "Ver na agenda", href: "/agenda" },
     ]);
   });
@@ -127,7 +127,7 @@ describe("guia do Início", () => {
     if (guia.tipo !== "passos") return;
     expect(guia.atual).toBe(1);
     const hrefs = guia.passos.map((passo) => passo.href);
-    expect(hrefs).toEqual(["/pacientes", "/agendamentos", "/agenda"]);
+    expect(hrefs).toEqual(["/pacientes", "/agenda", "/agenda"]);
   });
 
   it("Admin sem base ainda recebe o guia, começando em Configurar a clínica", () => {

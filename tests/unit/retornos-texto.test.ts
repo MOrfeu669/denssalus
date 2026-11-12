@@ -29,7 +29,7 @@ describe("textos da tela Retornos", () => {
   });
 
   it("dado o id do paciente, então o link abre o agendamento com ele; sem id, sem query", () => {
-    expect(hrefReagendar("p 1")).toBe("/agendamentos?paciente=p%201");
-    expect(hrefReagendar()).toBe("/agendamentos");
+    expect(hrefReagendar("p 1")).toBe("/agenda?paciente=p%201");
+    expect(hrefReagendar()).toBe("/agenda");
   });
 });

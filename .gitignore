@@ -13,3 +13,5 @@ supabase/.env
 .next-build.log
 .next-dev.log
 copia-gitignore
+dev-out.txt
+.next-dev-run.log

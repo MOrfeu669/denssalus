@@ -6,6 +6,7 @@ import {
   criarClinica,
   desativarCadeira,
   obterClinica,
+  reativarCadeira,
 } from "../../src/domain/clinica/casos";
 import type { Dependencias } from "../../src/domain/clinica/portas";
 import { bloqueiaNovoAgendamento } from "../../src/domain/clinica/regras";
@@ -231,6 +232,7 @@ describe("criar e configurar clínica", () => {
         ),
         await adicionarCadeira(deps, ator),
         await desativarCadeira(deps, ator, "id-3", AGORA),
+        await reativarCadeira(deps, ator, "id-3", AGORA),
       ];
 
       for (const resultado of resultados) {
@@ -262,6 +264,38 @@ describe("criar e configurar clínica", () => {
     expect(memoria.agendamentos.get("a2")?.alertaCadeira).toBe(false);
     expect(memoria.agendamentos.get("a3")?.alertaCadeira).toBe(false);
     expect(memoria.agendamentos.get("a4")?.alertaCadeira).toBe(false);
+  });
+
+  it("dado a Cadeira 2 desativada com alerta, quando o admin a reativa, então ela volta a receber agendamento e o alerta some", async () => {
+    const { clinica, cadeiras } = await criarComTresCadeiras();
+    const cadeira2 = cadeiras[1];
+    const horario = ["2026-10-26T10:00:00", "2026-10-26T10:30:00"] as const;
+    memoria.agendar({ id: "a1", cadeiraId: cadeira2.id, inicio: horario[0], fim: horario[1] });
+    memoria.agendar({ id: "passado", cadeiraId: cadeira2.id, inicio: "2026-10-20T10:00:00", fim: "2026-10-20T10:30:00" });
+    await desativarCadeira(memoria.deps(), admin, cadeira2.id, AGORA);
+
+    const resultado = await reativarCadeira(memoria.deps(), admin, cadeira2.id, AGORA);
+
+    expect(resultado.ok && resultado.valor.ativa).toBe(true);
+    expect(memoria.cadeiras.get(cadeira2.id)?.ativa).toBe(true);
+    expect(memoria.agendamentos.get("a1")).toMatchObject({ alertaCadeira: false, status: "agendado" });
+    expect(memoria.agendamentos.get("passado")?.alertaCadeira).toBe(false);
+    expect(bloqueiaNovoAgendamento(clinica, resultado.ok ? resultado.valor : cadeira2, ...horario)).toBe(false);
+  });
+
+  it("dado uma cadeira de outra clínica, quando o admin tenta reativá-la, então a cadeira não é encontrada", async () => {
+    await criarComTresCadeiras();
+    memoria.cadeiras.set("alheia", {
+      id: "alheia",
+      clinicaId: "outra-clinica",
+      identificacao: "Cadeira 1",
+      ativa: false,
+    });
+
+    const resultado = await reativarCadeira(memoria.deps(), admin, "alheia", AGORA);
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_CADEIRA_NAO_ENCONTRADA });
+    expect(memoria.cadeiras.get("alheia")?.ativa).toBe(false);
   });
 
   it("dado uma cadeira desativada, quando um novo agendamento a escolhe, então bloqueiaNovoAgendamento recusa", async () => {

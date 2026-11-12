@@ -7,7 +7,6 @@ import { dependenciasProcedimento } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
 import { Procedimentos } from "./form";
-import { NOTA_ESTIMATIVA } from "./texto";
 import "./tela.css";
 
 export const dynamic = "force-dynamic";
@@ -100,8 +99,6 @@ export default async function Page() {
 
   return (
     <Moldura>
-      <h1>Procedimentos</h1>
-      <p className="procedimentos-nota">{NOTA_ESTIMATIVA}</p>
       <Procedimentos
         procedimentos={resultado.valor}
         podeExcluir={sessao.usuario.papel === "admin"}

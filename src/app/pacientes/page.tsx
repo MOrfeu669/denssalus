@@ -124,14 +124,7 @@ export default async function Page() {
 
   return (
     <Moldura>
-      <h1>Pacientes</h1>
-      <p className="pacientes-nota">Nome completo e ao menos um canal de comunicação são obrigatórios.</p>
       <Pacientes pacientes={pacientes} />
-      <p className="pacientes-voltar">
-        <Link className="casca-link" href="/">
-          Voltar
-        </Link>
-      </p>
     </Moldura>
   );
 }

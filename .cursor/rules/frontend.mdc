@@ -1,11 +1,13 @@
 ---
-description: Convenções de interface
-globs: src/app/**/*
+description: Convenções de interface com shadcn/ui e Tailwind
+globs: src/{app,components}/**/*
 alwaysApply: false
 ---
 
 # Front
 
-- Componente funcional, um arquivo por tela ou bloco.
-- Estado de vazio, erro e carregamento existem na mesma tela.
-- Sem regra de endpoint nesta área. A tela chama Server Actions.
+- Tela em `src/app/`. Componente da coleção shadcn/ui em `src/components/ui`. Estilo com Tailwind.
+- Antes de criar botão, diálogo, campo, interruptor, select ou aba, use o que já está em `src/components/ui`. Falta o bloco: invoque a skill `ui` e adicione só esse componente.
+- Não instale outro kit de interface. Não reescreva o CSS de uma tela que a tarefa não abriu.
+- A página permanece Server Component. `"use client"` fica no bloco que abre, fecha ou guarda estado.
+- O formulário envia pela Server Action. O componente não acessa o banco.

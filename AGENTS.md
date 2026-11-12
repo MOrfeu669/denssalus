@@ -12,6 +12,7 @@ As specs estão em definição. Regra marcada como pendente na spec não vira de
 
 - `specs/` — o quê e o critério de parada; ver `specs/AGENTS.md`
 - `src/app/` — telas e Server Actions; ver `src/app/AGENTS.md`
+- `src/components/ui/` — componentes da coleção shadcn/ui, quando existirem
 - `src/domain/` — regras de negócio; ver `src/domain/AGENTS.md`
 - `src/lib/supabase/` — clientes de browser e de servidor, quando o scaffold existir
 - `src/middleware.ts` — renovação da sessão, quando o scaffold existir
@@ -22,7 +23,7 @@ O índice do código (`.codebase.mcp`) é gerado pela CLI e não é versionado. 
 
 ## Stack
 
-[stated] em `docs/TECNOLOGIAS.md`: Next.js 15 com App Router (`src/app/`, sem pasta `pages/`), React 19, mutações por Server Actions e um único Route Handler (`GET` do callback de recuperação). A sessão é cookie, renovada em `src/middleware.ts`. Os clientes ficam em `src/lib/supabase/`. PostgreSQL 17, sem ORM. Autenticação é Supabase Auth. A agenda em tempo real usa Supabase Realtime.
+[stated] em `docs/TECNOLOGIAS.md`: Next.js 15 com App Router (`src/app/`, sem pasta `pages/`), React 19, mutações por Server Actions e um único Route Handler (`GET` do callback de recuperação). A interface usa Tailwind e a coleção shadcn/ui em `src/components/ui`. A sessão é cookie, renovada em `src/middleware.ts`. Os clientes ficam em `src/lib/supabase/`. PostgreSQL 17, sem ORM. Autenticação é Supabase Auth. A agenda em tempo real usa Supabase Realtime.
 
 O scaffold ainda não está neste repositório.
 

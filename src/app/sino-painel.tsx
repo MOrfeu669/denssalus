@@ -25,10 +25,10 @@ export function SinoPainel({
       : "Notificações";
 
   return (
-    <div className="sino">
+    <div className="sino static top-auto right-auto z-auto">
       <button
         type="button"
-        className="sino-botao"
+        className="relative grid size-11 cursor-pointer place-items-center rounded-xl border border-linha bg-white p-0 text-marca"
         aria-expanded={aberto}
         aria-controls="sino-painel"
         aria-label={rotulo}
@@ -51,7 +51,9 @@ export function SinoPainel({
           />
         </svg>
         {notificacoes.length > 0 ? (
-          <span className="sino-contagem">{notificacoes.length}</span>
+          <span className="absolute -top-1.5 -right-1.5 h-[18px] min-w-[18px] rounded-full bg-perigo px-1 text-center text-[11px] leading-[18px] font-bold text-white">
+            {notificacoes.length}
+          </span>
         ) : null}
       </button>
       {aberto ? (

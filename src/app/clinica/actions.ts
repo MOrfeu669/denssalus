@@ -7,6 +7,7 @@ import {
   configurarFuncionamento,
   criarClinica,
   desativarCadeira,
+  reativarCadeira,
 } from "../../domain/clinica/casos";
 import { dependencias, dependenciasClinica } from "../dependencias";
 import { falha } from "../falha";
@@ -84,23 +85,27 @@ export async function adicionar(
   }
 }
 
-export async function desativar(
+export async function alternar(
   _estado: EstadoFormulario,
   formData: FormData,
 ): Promise<EstadoFormulario> {
   const cadeiraId = String(formData.get("id") ?? "");
+  const ligar = formData.get("ligar") === "true";
   try {
     const sessao = await obterSessao(dependencias());
     if (!sessao) return estado("erro", SEM_SESSAO);
-    const resultado = await desativarCadeira(
-      dependenciasClinica(),
-      sessao,
-      cadeiraId,
-      new Date(),
-    );
+    const deps = dependenciasClinica();
+    const agora = new Date();
+    const resultado = ligar
+      ? await reativarCadeira(deps, sessao, cadeiraId, agora)
+      : await desativarCadeira(deps, sessao, cadeiraId, agora);
     if (!resultado.ok) return estado("erro", resultado.mensagem);
     revalidatePath("/clinica");
-    return estado("sucesso", "Cadeira desativada", resultado.valor.identificacao);
+    return estado(
+      "sucesso",
+      ligar ? "Cadeira reativada" : "Cadeira desativada",
+      resultado.valor.identificacao,
+    );
   } catch (erro) {
     return estado("erro", falha(erro).mensagem);
   }

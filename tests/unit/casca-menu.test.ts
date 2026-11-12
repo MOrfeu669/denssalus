@@ -8,14 +8,13 @@ describe("menu da casca (etapa 1)", () => {
     expect(rotuloPapel("recepcionista")).toBe("Recepcionista");
   });
 
-  it("Dado o Admin, Então o menu tem as sete áreas na ordem", () => {
+  it("Dado o Admin, Então o menu tem as seis áreas na ordem", () => {
     expect(itensMenu("admin")).toEqual([
       { href: "/usuarios", rotulo: "Usuários" },
       { href: "/clinica", rotulo: "Clínica" },
       { href: "/dentistas", rotulo: "Dentistas" },
       { href: "/procedimentos", rotulo: "Procedimentos" },
       { href: "/pacientes", rotulo: "Pacientes" },
-      { href: "/agendamentos", rotulo: "Agendamentos" },
       { href: "/agenda", rotulo: "Agenda" },
     ]);
   });
@@ -24,17 +23,12 @@ describe("menu da casca (etapa 1)", () => {
     expect(itensMenu("dentista").map((item) => item.rotulo)).toEqual([
       "Procedimentos",
       "Pacientes",
-      "Agendamentos",
       "Agenda",
     ]);
   });
 
   it("Dado a Recepcionista, Então não vê Procedimentos", () => {
-    expect(itensMenu("recepcionista").map((item) => item.rotulo)).toEqual([
-      "Pacientes",
-      "Agendamentos",
-      "Agenda",
-    ]);
+    expect(itensMenu("recepcionista").map((item) => item.rotulo)).toEqual(["Pacientes", "Agenda"]);
   });
 
   it("Dado qualquer papel, Então o menu não traz área da etapa 2", () => {
@@ -47,7 +41,7 @@ describe("menu da casca (etapa 1)", () => {
 
   it("Dado o menu devolvido, Quando é alterado, Então a lista original não muda", () => {
     itensMenu("admin").pop();
-    expect(itensMenu("admin")).toHaveLength(7);
+    expect(itensMenu("admin")).toHaveLength(6);
   });
 });
 
@@ -59,7 +53,6 @@ describe("menu da casca (etapa 2)", () => {
       "Dentistas",
       "Procedimentos",
       "Pacientes",
-      "Agendamentos",
       "Agenda",
       "Retornos",
       "Estoque",
@@ -72,7 +65,6 @@ describe("menu da casca (etapa 2)", () => {
     expect(menuDaCasca("dentista").map((item) => item.href)).not.toContain("/mensagens");
     expect(menuDaCasca("recepcionista").map((item) => item.rotulo)).toEqual([
       "Pacientes",
-      "Agendamentos",
       "Agenda",
       "Retornos",
       "Estoque",

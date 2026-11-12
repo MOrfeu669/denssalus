@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Inter, Geist } from "next/font/google";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { Casca } from "./casca";
@@ -7,6 +7,9 @@ import { telaSemCasca } from "./casca-publico";
 import "./globals.css";
 import { sessaoAtual } from "./sessao";
 import { BotaoVoz } from "./voz/botao-voz";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +26,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const caminho = (await headers()).get("x-denssalus-caminho") ?? "";
   if (!caminho || telaSemCasca(caminho)) {
     return (
-      <html lang="pt-BR">
+      <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
         <body className={inter.className}>{children}</body>
       </html>
     );
@@ -38,7 +41,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   if (!sessao) {
     return (
-      <html lang="pt-BR">
+      <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
         <body className={inter.className}>{children}</body>
       </html>
     );
@@ -46,7 +49,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   const clinicaNome = await nomeDaClinica(sessao);
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
       <body className={inter.className}>
         <Casca sessao={sessao} clinicaNome={clinicaNome}>
           {children}

@@ -5,6 +5,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import type { Procedimento } from "../../domain/procedimento/tipos";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrar, editar, excluir } from "./actions";
+import { NOTA_ESTIMATIVA } from "./texto";
 
 export function Procedimentos({
   procedimentos,
@@ -14,23 +15,108 @@ export function Procedimentos({
   podeExcluir: boolean;
 }) {
   const roteador = useRouter();
+  const botaoRef = useRef<HTMLButtonElement>(null);
+  const painelRef = useRef<HTMLElement>(null);
   const [cadastro, acaoCadastrar, pendenteCadastrar] = useActionState(cadastrar, estadoVazio);
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [exclusao, acaoExcluir, pendenteExcluir] = useActionState(excluir, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [aberto, setAberto] = useState(false);
   const aviso = avisoVisivel(cadastro, edicao, exclusao);
+  const erroNoPainel = aberto && aviso.status === "erro" && aviso.quando === cadastro.quando;
 
   useEffect(() => {
     if (edicao.status === "sucesso") setEditandoId(null);
-  }, [edicao]);
+    if (cadastro.status === "sucesso") setAberto(false);
+  }, [edicao, cadastro]);
 
   useEffect(() => {
     if ([cadastro, edicao, exclusao].some((item) => item.status === "sucesso")) roteador.refresh();
   }, [cadastro, edicao, exclusao, roteador]);
 
+  useEffect(() => {
+    if (aberto) painelRef.current?.focus();
+  }, [aberto]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    function tecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !pendenteCadastrar) {
+        setAberto(false);
+        botaoRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", tecla);
+    return () => document.removeEventListener("keydown", tecla);
+  }, [aberto, pendenteCadastrar]);
+
+  function fechar() {
+    if (pendenteCadastrar) return;
+    setAberto(false);
+    botaoRef.current?.focus();
+  }
+
   return (
     <>
-      <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+      <div className="procedimentos-cabeca">
+        <div>
+          <h1>Procedimentos</h1>
+          <p className="procedimentos-nota">{NOTA_ESTIMATIVA}</p>
+        </div>
+        <button
+          ref={botaoRef}
+          type="button"
+          className="procedimentos-botao"
+          aria-haspopup="dialog"
+          aria-expanded={aberto}
+          aria-controls={aberto ? "procedimentos-cadastro" : undefined}
+          onClick={() => setAberto(true)}
+        >
+          Novo procedimento
+        </button>
+      </div>
+      {erroNoPainel ? null : (
+        <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+      )}
+      {aberto ? (
+        <div className="procedimentos-overlay">
+          <div className="procedimentos-overlay-fundo" onClick={fechar} />
+          <section
+            ref={painelRef}
+            id="procedimentos-cadastro"
+            className="procedimentos-painel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="procedimentos-titulo-novo"
+            tabIndex={-1}
+          >
+            <div className="procedimentos-painel-topo">
+              <h2 id="procedimentos-titulo-novo">Novo procedimento</h2>
+              <button
+                type="button"
+                className="procedimentos-botao procedimentos-botao-secundario"
+                onClick={fechar}
+              >
+                Fechar
+              </button>
+            </div>
+            {erroNoPainel ? (
+              <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+            ) : null}
+            <form
+              className="procedimentos-form"
+              key={cadastro.status === "sucesso" ? cadastro.quando : 0}
+              action={acaoCadastrar}
+              aria-busy={pendenteCadastrar}
+            >
+              <Campos />
+              <button type="submit" className="procedimentos-botao" disabled={pendenteCadastrar}>
+                {pendenteCadastrar ? "Salvando…" : "Criar procedimento"}
+              </button>
+            </form>
+          </section>
+        </div>
+      ) : null}
       <section className="procedimentos-secao" aria-labelledby="procedimentos-titulo-lista">
         <h2 id="procedimentos-titulo-lista">Procedimentos da clínica</h2>
         {procedimentos.length === 0 ? (
@@ -90,24 +176,6 @@ export function Procedimentos({
             ))}
           </ul>
         )}
-      </section>
-      <section className="procedimentos-secao" aria-labelledby="procedimentos-titulo-novo">
-        <h2 id="procedimentos-titulo-novo">Novo procedimento</h2>
-        <form
-          className="procedimentos-form"
-          key={cadastro.status === "sucesso" ? cadastro.quando : 0}
-          action={acaoCadastrar}
-          aria-busy={pendenteCadastrar}
-        >
-          <Campos />
-          <button
-            type="submit"
-            className="procedimentos-botao"
-            disabled={pendenteCadastrar}
-          >
-            {pendenteCadastrar ? "Salvando…" : "Criar procedimento"}
-          </button>
-        </form>
       </section>
     </>
   );

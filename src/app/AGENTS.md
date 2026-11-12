@@ -46,6 +46,14 @@ Fluxos visíveis, na ordem das fases: login, configuração da clínica, cadastr
 - Evolução = texto do atendimento. Salvar conclui a consulta.
 - Débito = valor a receber nascido do item concluído. Só o Admin vê a ação de quitar.
 
+## Componentes
+
+A coleção aceita é shadcn/ui, estilizada com Tailwind. O componente fica em `src/components/ui`. Não há segundo kit.
+
+- Invoque a skill `ui` ao criar ou alterar um bloco visual.
+- Use o componente que já está na coleção. Falta o bloco: entre só esse.
+- A tela que já tem CSS próprio conserva esse CSS até a tarefa mudar o visual dela.
+
 ## Como implementar
 
 1. Ler a tela e a Server Action antes de criar componente. Não abra feature de fase posterior.

@@ -38,6 +38,71 @@
   color: #146c3e;
 }
 
+.casca .dentistas-cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 640px;
+  margin: 0 0 24px;
+}
+
+.casca .dentistas-cabeca h1 {
+  margin: 0;
+}
+
+.casca .casca-miolo .dentistas-cabeca > button.dentistas-botao {
+  background: #158172;
+  color: #fff;
+  border: 0;
+}
+
+.casca .dentistas-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.casca .dentistas-overlay-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 26 32 / 32%);
+}
+
+.casca .dentistas-painel {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #cbd4d9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
+}
+
+.casca .dentistas-painel:focus {
+  outline: 3px solid #0f433d;
+  outline-offset: 2px;
+}
+
+.casca .dentistas-painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.casca .dentistas-painel-topo .dentistas-subtitulo {
+  margin: 0;
+}
+
 .casca .dentistas-cartao {
   max-width: 640px;
   margin: 0 0 24px;
@@ -260,7 +325,8 @@
     grid-template-columns: 1fr;
   }
 
-  .casca .dentistas-topo {
+  .casca .dentistas-topo,
+  .casca .dentistas-cabeca {
     flex-direction: column;
     align-items: flex-start;
   }

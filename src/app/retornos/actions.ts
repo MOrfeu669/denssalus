@@ -30,7 +30,7 @@ export async function marcar(
       new Date(),
     );
     if (!resultado.ok) return estado("erro", resultado.mensagem);
-    revalidatePath("/agendamentos");
+    revalidatePath("/agenda");
     revalidatePath("/retornos");
     return estado("sucesso", "Retorno marcado");
   } catch (causa) {
