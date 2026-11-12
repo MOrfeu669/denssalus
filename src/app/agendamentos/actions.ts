@@ -8,6 +8,7 @@ import {
   criarBloqueio,
   iniciarAtendimento,
   marcarChegada,
+  moverAgendamento,
   registrarEmergencia,
 } from "../../domain/agendamento/casos";
 import { dependencias, dependenciasAgendamento } from "../dependencias";
@@ -167,5 +168,28 @@ export async function cancelar(
     return estado("sucesso", "Deseja reagendar?", resultado.valor.id);
   } catch (causa) {
     return estado("erro", falha(causa).mensagem);
+  }
+}
+
+export async function mover(
+  id: string,
+  inicio: string,
+  fim: string,
+  dentistaId: string,
+): Promise<{ ok: true } | { ok: false; mensagem: string }> {
+  try {
+    const sessao = await obterSessao(dependencias());
+    if (!sessao) return { ok: false, mensagem: SEM_SESSAO };
+    const resultado = await moverAgendamento(dependenciasAgendamento(), sessao, {
+      id,
+      inicio,
+      fim,
+      dentistaId,
+    });
+    if (!resultado.ok) return resultado;
+    revalidatePath("/agenda");
+    return { ok: true };
+  } catch (causa) {
+    return { ok: false, mensagem: falha(causa).mensagem };
   }
 }

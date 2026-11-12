@@ -12,14 +12,14 @@
   color-scheme: light;
   font-family: Inter, "Segoe UI", sans-serif;
   line-height: 1.5;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: #f6f8f9;
+  --foreground: #0f1a20;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: #158172;
+  --primary-foreground: #fff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -29,17 +29,17 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: #0f433d;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar: #0f433d;
+  --sidebar-foreground: #fff;
+  --sidebar-primary: #158172;
+  --sidebar-primary-foreground: #fff;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
@@ -52,6 +52,7 @@ body {
   color: var(--cor-texto);
 }
 
+@layer base {
 main {
   max-width: 36rem;
   margin: 2rem auto;
@@ -240,8 +241,25 @@ main.largura {
   padding-left: 0.5rem;
   font-weight: 600;
 }
+}
 
 @theme inline {
+  --color-marca: #0f433d;
+  --color-acao: #158172;
+  --color-nevoa: #d3f3ec;
+  --color-destaque: #3fbba8;
+  --color-fundo: #f6f8f9;
+  --color-tinta: #0f1a20;
+  --color-apagado: #475760;
+  --color-linha: #cbd4d9;
+  --color-link: #14665b;
+  --color-placeholder: #64747e;
+  --color-perigo: #d4372c;
+  --color-perigo-fundo: #fef0ef;
+  --color-perigo-tinta: #ad2a21;
+  --color-ok: #178a4c;
+  --color-ok-fundo: #ecfdf3;
+  --color-ok-tinta: #146c3e;
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);

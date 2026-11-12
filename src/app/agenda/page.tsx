@@ -11,7 +11,6 @@ import { Agendamentos } from "../agendamentos/form";
 import "../agendamentos/tela.css";
 import { Grade } from "./grade";
 import { TempoReal } from "./tempo-real";
-import "./tela.css";
 
 export const dynamic = "force-dynamic";
 
@@ -100,7 +99,7 @@ async function conteudo(query: Query, sessao: Sessao) {
     return (
       <>
         <h1>{TITULO}</h1>
-        <div className="agenda-pagina">
+        <div className="flex flex-col gap-4">
           <Agendamentos
             agendamentos={lista.valor}
             opcoes={opcoes.valor}
@@ -124,6 +123,7 @@ async function conteudo(query: Query, sessao: Sessao) {
             dentistaId={filtro.dentistaId}
             cadeiraId={filtro.cadeiraId}
             nomes={nomes}
+            papel={sessao.usuario.papel}
             opcoes={{
               dentistas: dentistas.map(({ id, nome }) => ({ id, nome })),
               cadeiras,

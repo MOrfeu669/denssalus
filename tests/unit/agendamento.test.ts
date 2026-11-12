@@ -5,6 +5,7 @@ import {
   iniciarAtendimento,
   listarAgendamentos,
   listarOpcoesAgendamento,
+  moverAgendamento,
   registrarEmergencia,
 } from "../../src/domain/agendamento/casos";
 import type { Dependencias } from "../../src/domain/agendamento/portas";
@@ -20,6 +21,7 @@ import {
   MENSAGEM_FORA_DO_HORARIO,
   MENSAGEM_HORARIO_INVALIDO,
   MENSAGEM_PACIENTE_OCUPADO,
+  MENSAGEM_SO_AGENDADO,
   type Agendamento,
   type BloqueioAgenda,
   type ConflitoAgenda,
@@ -863,6 +865,82 @@ describe("criar agendamento", () => {
   it("dado 2026-10-15T14:00 e 30 minutos, quando sugere o fim, então devolve 2026-10-15T14:30 no fuso do processo", () => {
     expect(sugerirFim("2026-10-15T14:00", 30)).toBe("2026-10-15T14:30");
     expect(sugerirFim("2026-10-15T23:40", 30)).toBe("2026-10-16T00:10");
+  });
+
+  it("dado um agendamento agendado, quando o horário é arrastado, então a data muda e o paciente permanece", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("recepcionista"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("recepcionista"), {
+      id: criado.valor.id,
+      inicio: "2026-10-15T10:00",
+      fim: "2026-10-15T10:30",
+      dentistaId: DENTISTA_ANA,
+    });
+
+    expect(resultado).toEqual({
+      ok: true,
+      valor: {
+        ...criado.valor,
+        dentistaId: DENTISTA_ANA,
+        inicio: "2026-10-15T10:00",
+        fim: "2026-10-15T10:30",
+      },
+    });
+  });
+
+  it("dado o mesmo agendamento, quando a duração aumenta, então só o fim muda", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("admin"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("admin"), {
+      id: criado.valor.id,
+      inicio: INICIO,
+      fim: "2026-10-15T15:00",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado.ok).toBe(true);
+    if (!resultado.ok) return;
+    expect(resultado.valor.fim).toBe("2026-10-15T15:00");
+    expect(resultado.valor.inicio).toBe(INICIO);
+  });
+
+  it("dado a cadeira ocupada no destino, quando arrasta, então o horário original permanece", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("admin"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+    await criarAgendamento(memoria.deps(), sessao("admin"), {
+      ...ENTRADA,
+      pacienteId: PACIENTE_MARIA,
+      dentistaId: DENTISTA_ANA,
+      inicio: "2026-10-15T16:00",
+      fim: "2026-10-15T16:30",
+    });
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("recepcionista"), {
+      id: criado.valor.id,
+      inicio: "2026-10-15T16:00",
+      fim: "2026-10-15T16:30",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_CADEIRA_OCUPADA });
+    expect(memoria.agendamentos.get(criado.valor.id)?.inicio).toBe(INICIO);
+  });
+
+  it("dado um atendimento já iniciado, quando tenta arrastar, então o horário não muda", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("admin"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+    memoria.agendamentos.set(criado.valor.id, { ...criado.valor, status: "iniciado" });
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("admin"), {
+      id: criado.valor.id,
+      inicio: "2026-10-15T10:00",
+      fim: "2026-10-15T10:30",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_SO_AGENDADO });
   });
 
   it.todo("Feature 010: concluir o agendamento ao salvar a evolução");

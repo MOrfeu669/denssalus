@@ -93,3 +93,4 @@ export const MENSAGEM_PACIENTE_OCUPADO = "Paciente já possui agendamento nesse 
 export const MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO = "Agendamento não encontrado";
 export const MENSAGEM_MOTIVO_OBRIGATORIO = "Informe o motivo";
 export const MENSAGEM_JA_CONCLUIDO = "Agendamento já concluído não pode ser cancelado";
+export const MENSAGEM_SO_AGENDADO = "Só é possível alterar o horário de um agendamento que ainda está agendado";

@@ -1,9 +1,5 @@
 /* Agendamentos e bloqueio. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
 
-.casca .agenda-pagina .agendamentos-abrir {
-  align-self: flex-end;
-}
-
 .casca button.agendamentos-fechar {
   height: 36px;
   margin: 0;

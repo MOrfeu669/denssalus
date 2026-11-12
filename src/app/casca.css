@@ -1,159 +1,10 @@
-.casca {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 264px 1fr;
-  background: #f6f8f9;
-  color: #0f1a20;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.casca,
-.casca *,
-.casca *::before,
-.casca *::after {
-  box-sizing: border-box;
-}
-
-.casca.casca-aberta {
-  grid-template-columns: 1fr;
-}
-
 .casca :focus-visible {
   outline: 3px solid #0f433d;
   outline-offset: 2px;
 }
 
-.casca-lateral {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 28px 16px 20px;
-  background: #0f433d;
-  color: #fff;
-}
-
 .casca .casca-lateral :focus-visible {
   outline-color: #fff;
-}
-
-.casca .casca-lateral p {
-  margin: 0;
-}
-
-.casca a.casca-marca,
-.casca .casca-marca {
-  padding: 0 12px;
-  font-size: 22px;
-  line-height: 30px;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-}
-
-.casca .casca-clinica {
-  padding: 0 12px 16px;
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: 400;
-  color: #d3f3ec;
-  overflow-wrap: anywhere;
-}
-
-.casca-menu {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.casca .casca-menu ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.casca .casca-menu a {
-  display: block;
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.casca .casca-menu a:hover {
-  background: #158172;
-}
-
-.casca .casca-menu a[aria-current="page"] {
-  background: #158172;
-  box-shadow: inset 3px 0 0 #3fbba8;
-}
-
-.casca-usuario {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 12px 0;
-  border-top: 1px solid #158172;
-}
-
-.casca .casca-usuario .casca-usuario-nome {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.casca .casca-usuario .casca-usuario-papel {
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 400;
-  color: #d3f3ec;
-}
-
-.casca .casca-usuario form {
-  display: block;
-  margin: 12px 0 0;
-}
-
-.casca button.casca-sair {
-  width: 100%;
-  height: 40px;
-  margin: 0;
-  padding: 0 16px;
-  border: 1px solid #158172;
-  border-radius: 10px;
-  background: transparent;
-  color: #fff;
-  font: inherit;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.casca button.casca-sair:hover {
-  background: #158172;
-}
-
-.casca .casca-miolo {
-  max-width: none;
-  margin: 0;
-  padding: 40px 48px;
-  border: 0;
-  border-radius: 0;
-  background: #f6f8f9;
-  color: #0f1a20;
-  min-width: 0;
 }
 
 .casca .casca-miolo h1 {
@@ -317,22 +168,6 @@
   line-height: 24px;
 }
 
-.casca-coluna {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.casca-topo {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px 24px 0;
-}
-
-.casca .sino {
-  position: static;
-}
-
 .casca .casca-atalhos {
   margin-top: 28px;
   max-width: 720px;
@@ -471,58 +306,6 @@
 .casca .dente[aria-pressed="true"] {
   background: #158172;
   color: #fff;
-}
-
-@media (max-width: 960px) {
-  .casca {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .casca-lateral {
-    position: static;
-    height: auto;
-    padding: 20px 16px;
-  }
-
-  .casca .casca-menu ul {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .casca .casca-miolo {
-    padding: 28px 20px;
-  }
-}
-
-.casca .sino-botao {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0;
-  padding: 0;
-  border: 1px solid #cbd4d9;
-  border-radius: 12px;
-  background: #fff;
-  color: #0f433d;
-  cursor: pointer;
-}
-
-.casca .sino-contagem {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: #d4372c;
-  color: #fff;
-  font-size: 11px;
-  line-height: 18px;
-  font-weight: 700;
 }
 
 .casca .prontuario-nav {

@@ -15,6 +15,7 @@ import {
   MENSAGEM_HORARIO_INVALIDO,
   MENSAGEM_JA_CONCLUIDO,
   MENSAGEM_MOTIVO_OBRIGATORIO,
+  MENSAGEM_SO_AGENDADO,
   type Agendamento,
   type BloqueioAgenda,
   type EntradaAgendamento,
@@ -149,6 +150,56 @@ export async function criarAgendamento(
     await notificarCriado(deps, gravado.valor);
   }
   return gravado;
+}
+
+export async function moverAgendamento(
+  deps: Dependencias,
+  ator: Sessao,
+  entrada: { id: string; inicio: string; fim: string; dentistaId: string },
+): Promise<Resultado<Agendamento>> {
+  const contexto = await clinicaAutorizada(deps, ator, "agendamento:criar");
+  if (!contexto.ok) return contexto;
+
+  const atual = await deps.agendamentos.buscarPorId(entrada.id);
+  if (!atual || atual.clinicaId !== contexto.clinica.id) {
+    return { ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO };
+  }
+  if (atual.status !== "agendado") return { ok: false, mensagem: MENSAGEM_SO_AGENDADO };
+
+  const proxima: EntradaAgendamento = {
+    pacienteId: atual.pacienteId,
+    dentistaId: entrada.dentistaId,
+    cadeiraId: atual.cadeiraId,
+    procedimentoId: atual.procedimentoId,
+    inicio: entrada.inicio,
+    fim: entrada.fim,
+  };
+  const entidades = await validarEntidades(deps, contexto.clinica.id, proxima);
+  if (!entidades.ok) return entidades;
+
+  const [agendamentos, bloqueios] = await Promise.all([
+    deps.agendamentos.listar(contexto.clinica.id),
+    deps.bloqueios.listar(contexto.clinica.id),
+  ]);
+  const mensagem = mensagemDosSetePassos(
+    contexto.clinica,
+    entidades.cadeira,
+    entidades.dentista,
+    proxima,
+    agendamentos.filter((item) => item.id !== atual.id),
+    bloqueios,
+  );
+  if (mensagem) return { ok: false, mensagem };
+
+  const movido: Agendamento = {
+    ...atual,
+    dentistaId: proxima.dentistaId,
+    inicio: proxima.inicio,
+    fim: proxima.fim,
+  };
+  const conflito = await deps.agendamentos.salvar(movido);
+  if (conflito) return { ok: false, mensagem: mensagemDeConflito(conflito) };
+  return { ok: true, valor: movido };
 }
 
 export async function registrarEmergencia(

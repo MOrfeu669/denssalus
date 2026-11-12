@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { ouvirOverlay, type DestinoOverlay, type SlotNovo } from "./pedido";
 import type { Papel } from "../../domain/auth/tipos";
 import { sugerirFim } from "../../domain/agendamento/regras";
 import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/tipos";
@@ -82,45 +83,78 @@ export function Agendamentos({
     pendenteRetorno ||
     pendenteEvolucao;
   const [aberto, setAberto] = useState(false);
-  const botaoRef = useRef<HTMLButtonElement>(null);
+  const [destino, setDestino] = useState<DestinoOverlay | null>(null);
+  const [slot, setSlot] = useState<SlotNovo | null>(null);
+  const origemRef = useRef<HTMLElement | null>(null);
+  const painelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const preenchido = Boolean(inicial.pacienteId || inicial.dentistaId || inicial.procedimentoId);
+    const preenchido = Boolean(inicial.pacienteId || inicial.procedimentoId);
     if (preenchido || window.location.hash.length > 1) setAberto(true);
     function aoHash() {
-      if (window.location.hash.length > 1) setAberto(true);
+      if (window.location.hash.length <= 1) return;
+      setDestino(null);
+      setSlot(null);
+      setAberto(true);
+      const id = window.location.hash.slice(1);
+      requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({ block: "nearest" });
+      });
     }
     window.addEventListener("hashchange", aoHash);
     return () => window.removeEventListener("hashchange", aoHash);
   }, [inicial]);
 
+  useEffect(() => ouvirOverlay((pedido) => {
+    origemRef.current = pedido.origem;
+    setDestino(pedido.destino);
+    setSlot(pedido.destino === "novo" ? pedido.slot ?? null : null);
+    setAberto(true);
+  }), []);
+
   useEffect(() => {
-    if (!aberto) return;
+    if (!aberto || destino) return;
     const id = window.location.hash.slice(1);
     if (!id) return;
     const frame = requestAnimationFrame(() => {
       document.getElementById(id)?.scrollIntoView({ block: "nearest" });
     });
     return () => cancelAnimationFrame(frame);
-  }, [aberto, agendamentos]);
+  }, [aberto, destino, agendamentos]);
 
   useEffect(() => {
     if (!aberto) return;
-    function tecla(evento: KeyboardEvent) {
-      if (evento.key === "Escape" && !ocupado) {
-        setAberto(false);
-        botaoRef.current?.focus();
+    const id = destino === "novo" ? "agendamentos-novo" : destino === "bloquear" ? "agendamentos-bloqueio" : "";
+    const frame = requestAnimationFrame(() => {
+      const alvo = id ? document.getElementById(id) : null;
+      const painel = painelRef.current;
+      if (alvo && painel) {
+        const topo = alvo.getBoundingClientRect().top - painel.getBoundingClientRect().top + painel.scrollTop;
+        painel.scrollTo({ top: Math.max(topo - 8, 0) });
       }
-    }
-    document.addEventListener("keydown", tecla);
-    return () => document.removeEventListener("keydown", tecla);
-  }, [aberto, ocupado]);
+      painel?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [aberto, destino]);
 
   function fechar() {
     if (ocupado) return;
     setAberto(false);
-    botaoRef.current?.focus();
+    setDestino(null);
+    setSlot(null);
+    const origem = origemRef.current;
+    origemRef.current = null;
+    origem?.focus();
   }
+
+  useEffect(() => {
+    if (!aberto) return;
+    function tecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !ocupado) fechar();
+    }
+    document.addEventListener("keydown", tecla);
+    return () => document.removeEventListener("keydown", tecla);
+  }, [aberto, ocupado]);
 
   useEffect(() => {
     if (
@@ -132,15 +166,13 @@ export function Agendamentos({
     }
   }, [criacao, emergenciaEstado, atendimento, chegada, bloqueio, cancelamento, retorno, evolucao, roteador]);
 
+  if (!aberto) return null;
+
   return (
-    <>
-    <button ref={botaoRef} type="button" className="agendamentos-abrir" onClick={() => setAberto(true)}>
-      Agendamentos
-    </button>
-    {aberto ? (
     <div className="agendamentos-overlay">
       <div className="agendamentos-overlay-fundo" onClick={fechar} />
       <div
+        ref={painelRef}
         className="agendamentos-painel"
         role="dialog"
         aria-modal="true"
@@ -166,11 +198,11 @@ export function Agendamentos({
         <h2 id="agendamentos-novo">Novo agendamento</h2>
         <form
           className="agendamentos-form"
-          key={`${criacao.status === "sucesso" ? criacao.quando : 0}|${inicial.pacienteId}|${inicial.dentistaId}|${inicial.procedimentoId}`}
+          key={`${criacao.status === "sucesso" ? criacao.quando : 0}|${inicial.pacienteId}|${inicial.dentistaId}|${inicial.procedimentoId}|${slot?.inicio ?? ""}|${slot?.dentistaId ?? ""}|${slot?.cadeiraId ?? ""}`}
           action={acaoCriar}
           aria-busy={pendenteCriar || pendenteEmergencia}
         >
-          <CamposCriar opcoes={opcoes} inicial={inicial} />
+          <CamposCriar opcoes={opcoes} inicial={inicial} slot={slot} />
           <div className="agendamentos-botoes">
             <button type="submit" disabled={pendenteCriar || pendenteEmergencia}>
               {rotuloDoBotao(ROTULO_CRIAR, PENDENTE_CRIAR, pendenteCriar)}
@@ -274,8 +306,6 @@ export function Agendamentos({
     </div>
       </div>
     </div>
-    ) : null}
-    </>
   );
 }
 
@@ -325,12 +355,14 @@ function ResumoAgendamento({
 function CamposCriar({
   opcoes,
   inicial,
+  slot,
 }: {
   opcoes: OpcoesAgendamento;
   inicial: ValoresIniciais;
+  slot: SlotNovo | null;
 }) {
-  const [inicio, setInicio] = useState("");
-  const [fim, setFim] = useState("");
+  const [inicio, setInicio] = useState(slot?.inicio ?? "");
+  const [fim, setFim] = useState(slot?.fim ?? "");
   const [procedimentoId, setProcedimentoId] = useState(inicial.procedimentoId);
 
   function aoEscolherProcedimento(valor: string) {
@@ -357,7 +389,7 @@ function CamposCriar({
       </label>
       <label className="agendamentos-campo">
         Dentista
-        <select name="dentistaId" defaultValue={inicial.dentistaId} required>
+        <select name="dentistaId" defaultValue={slot?.dentistaId || inicial.dentistaId} required>
           <option value="">Selecione</option>
           {opcoes.dentistas.map((dentista) => (
             <option key={dentista.id} value={dentista.id}>
@@ -368,7 +400,7 @@ function CamposCriar({
       </label>
       <label className="agendamentos-campo">
         Cadeira
-        <select name="cadeiraId" defaultValue="" required>
+        <select name="cadeiraId" defaultValue={slot?.cadeiraId ?? ""} required>
           <option value="">Selecione</option>
           {opcoes.cadeiras.map((cadeira) => (
             <option key={cadeira.id} value={cadeira.id}>
