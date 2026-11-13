@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { cn } from "@/lib/utils";
 import type { Papel } from "../../domain/auth/tipos";
 import type { AgendamentoNaGrade, BloqueioAgenda, Grade as GradeAgenda } from "../../domain/agendamento/tipos";
@@ -68,6 +68,7 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
   const vazio = agendamentos.length === 0 && bloqueios.length === 0;
   const agora = minutosDeAgora(visao, data, grade.dias, horas);
   const hoje = diaDeHoje();
+  const rolagem = useRolagemHorizontal();
 
   function filtrar(proximoDentista: string, proximaCadeira: string, proximaData = data) {
     const query = new URLSearchParams({ data: proximaData });
@@ -108,7 +109,18 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
         </p>
       ) : null}
       {horas.length > 0 ? (
-        <div ref={arraste.gradeRef} className="overflow-x-auto rounded-[14px] border border-linha bg-white">
+        <div
+          ref={arraste.gradeRef}
+          className={cn(
+            "cursor-grab overflow-x-auto rounded-[14px] border border-linha bg-white touch-pan-y",
+            rolagem.arrastando && "cursor-grabbing [&_*]:cursor-grabbing",
+          )}
+          onPointerDown={rolagem.pointerDown}
+          onPointerMove={rolagem.pointerMove}
+          onPointerUp={rolagem.pointerUp}
+          onPointerCancel={rolagem.pointerUp}
+          onClickCapture={rolagem.clique}
+        >
           <div
             className="grid"
             style={{
@@ -256,4 +268,56 @@ function colunasDoDia(
     extras.push({ id: item.dentistaId, nome: nomes[item.dentistaId] ?? item.dentistaId });
   }
   return [...base.map((item) => ({ id: item.id, nome: item.nome })), ...extras];
+}
+
+const LIMIAR_ROLAGEM = 4;
+
+export function scrollDoArraste(inicio: number, origemX: number, x: number) {
+  return inicio - (x - origemX);
+}
+
+function useRolagemHorizontal() {
+  const origem = useRef<{ x: number; scroll: number; id: number; el: HTMLDivElement } | null>(null);
+  const moveu = useRef(false);
+  const [arrastando, setArrastando] = useState(false);
+
+  function pointerDown(evento: ReactPointerEvent<HTMLDivElement>) {
+    if (evento.button !== 0) return;
+    const alvo = evento.target as HTMLElement;
+    if (alvo.closest("a, [data-alca]")) return;
+    origem.current = {
+      x: evento.clientX,
+      scroll: evento.currentTarget.scrollLeft,
+      id: evento.pointerId,
+      el: evento.currentTarget,
+    };
+    moveu.current = false;
+  }
+
+  function pointerMove(evento: ReactPointerEvent<HTMLDivElement>) {
+    const gesto = origem.current;
+    if (!gesto) return;
+    const dx = evento.clientX - gesto.x;
+    if (Math.abs(dx) < LIMIAR_ROLAGEM) return;
+    if (!moveu.current) {
+      moveu.current = true;
+      gesto.el.setPointerCapture(gesto.id);
+      setArrastando(true);
+    }
+    gesto.el.scrollLeft = scrollDoArraste(gesto.scroll, gesto.x, evento.clientX);
+  }
+
+  function pointerUp() {
+    origem.current = null;
+    setArrastando(false);
+  }
+
+  function clique(evento: ReactMouseEvent<HTMLDivElement>) {
+    if (!moveu.current) return;
+    evento.preventDefault();
+    evento.stopPropagation();
+    moveu.current = false;
+  }
+
+  return { arrastando, pointerDown, pointerMove, pointerUp, clique };
 }
