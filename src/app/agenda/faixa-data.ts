@@ -43,6 +43,13 @@ export function hojeIso(agora = new Date()) {
   return iso(agora.getFullYear(), agora.getMonth() + 1, agora.getDate());
 }
 
+export function dataNoAno(data: string, anos: number) {
+  const { ano, mes, dia } = partes(data);
+  const alvo = ano + anos;
+  const ultimo = new Date(alvo, mes, 0).getDate();
+  return iso(alvo, mes, Math.min(dia, ultimo));
+}
+
 export function dataNoMes(data: string, meses: number) {
   const { ano, mes, dia } = partes(data);
   const primeiro = new Date(ano, mes - 1 + meses, 1);

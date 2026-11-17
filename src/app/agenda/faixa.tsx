@@ -3,6 +3,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import {
   CENTRO,
+  dataNoAno,
   dataNoMes,
   deslocarDia,
   distanciaVisual,
@@ -17,7 +18,19 @@ const LIMIAR = 6;
 
 export function FaixaDatas({ data, onEscolher }: { data: string; onEscolher: (data: string) => void }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col items-center gap-1.5">
+      <Trilho
+        rotulo="Ano"
+        itens={faixa(data, dataNoAno, CENTRO + 4)}
+        centro={4 + CENTRO}
+        passoPx={72}
+        onEscolher={(passos) => onEscolher(dataNoAno(data, passos))}
+        render={(item, selecionado) => (
+          <span className={`text-sm leading-5 font-semibold ${selecionado ? "text-white" : "text-tinta"}`}>
+            {item.slice(0, 4)}
+          </span>
+        )}
+      />
       <Trilho
         rotulo="Meses"
         itens={faixa(data, dataNoMes, CENTRO + 4)}
@@ -123,13 +136,15 @@ function Trilho({
               key={item}
               type="button"
               aria-pressed={selecionado}
-              aria-label={rotulo === "Meses" ? nomeMes(item) : `${rotuloDia(item).semana} ${rotuloDia(item).numero}`}
+              aria-label={
+                rotulo === "Ano" ? item.slice(0, 4) : rotulo === "Meses" ? nomeMes(item) : `${rotuloDia(item).semana} ${rotuloDia(item).numero}`
+              }
               className={`grid shrink-0 place-items-center rounded-xl border ${
                 selecionado
                   ? "border-acao! bg-acao! text-white!"
                   : "border-linha! bg-white! text-tinta!"
               } ${papel === "amostra" ? "opacity-100" : papel === "lado" ? "opacity-40" : "opacity-0"}`}
-              style={{ width: passoPx - 8, height: rotulo === "Meses" ? 36 : 52 }}
+              style={{ width: passoPx - 8, height: rotulo === "Ano" ? 40 : rotulo === "Meses" ? 36 : 52 }}
               onClick={() => {
                 if (moveu.current) return;
                 onEscolher(indice - centro);

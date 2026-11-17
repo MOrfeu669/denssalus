@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
-import { cadastrarMaterial, reabastecerMaterial, vincular } from "./actions";
+import { cadastrarMaterial, reabastecerMaterial } from "./actions";
 import { Historico } from "./historico";
 
 export type MovimentoTela = {
@@ -23,13 +23,7 @@ export type MaterialTela = {
   historico: MovimentoTela[];
 };
 
-export function Estoque({
-  materiais,
-  procedimentos,
-}: {
-  materiais: MaterialTela[];
-  procedimentos: { id: string; nome: string }[];
-}) {
+export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
   const roteador = useRouter();
   const botaoRef = useRef<HTMLButtonElement>(null);
   const painelRef = useRef<HTMLElement>(null);
@@ -39,8 +33,7 @@ export function Estoque({
     reabastecerMaterial,
     estadoVazio,
   );
-  const [vinculo, acaoVincular, pendenteVincular] = useActionState(vincular, estadoVazio);
-  const aviso = avisoVisivel(cadastro, reposicao, vinculo);
+  const aviso = avisoVisivel(cadastro, reposicao);
   const erroNoPainel = aberto && aviso.status === "erro" && aviso.quando === cadastro.quando;
 
   useEffect(() => {
@@ -48,8 +41,8 @@ export function Estoque({
   }, [cadastro]);
 
   useEffect(() => {
-    if ([cadastro, reposicao, vinculo].some((item) => item.status === "sucesso")) roteador.refresh();
-  }, [cadastro, reposicao, vinculo, roteador]);
+    if ([cadastro, reposicao].some((item) => item.status === "sucesso")) roteador.refresh();
+  }, [cadastro, reposicao, roteador]);
 
   useEffect(() => {
     if (aberto) painelRef.current?.focus();
@@ -188,51 +181,6 @@ export function Estoque({
             })}
           </ul>
         )}
-      </section>
-      <section className="estoque-secao" aria-labelledby="estoque-titulo-vinculo">
-        <h2 id="estoque-titulo-vinculo">Material de cada procedimento</h2>
-        <form
-          className="estoque-form"
-          key={vinculo.status === "sucesso" ? vinculo.quando : 1}
-          action={acaoVincular}
-          aria-busy={pendenteVincular}
-        >
-          <div className="estoque-campos">
-            <label className="estoque-campo">
-              Procedimento
-              <select name="procedimentoId" required defaultValue="">
-                <option value="" disabled>
-                  Selecione
-                </option>
-                {procedimentos.map((procedimento) => (
-                  <option key={procedimento.id} value={procedimento.id}>
-                    {procedimento.nome}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="estoque-campo">
-              Material
-              <select name="materialId" required defaultValue="">
-                <option value="" disabled>
-                  Selecione
-                </option>
-                {materiais.map((material) => (
-                  <option key={material.id} value={material.id}>
-                    {material.nome}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="estoque-campo">
-              Quantidade por consulta
-              <input name="quantidade" type="number" min={1} step={1} required />
-            </label>
-          </div>
-          <button type="submit" className="estoque-botao" disabled={pendenteVincular}>
-            {pendenteVincular ? "Salvando…" : "Vincular material"}
-          </button>
-        </form>
       </section>
     </>
   );

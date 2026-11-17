@@ -1,10 +1,13 @@
 import type { Resultado } from "../../domain/auth/tipos";
+import { MENSAGEM_QUANTIDADE } from "../../domain/estoque/tipos";
 import {
   MENSAGEM_NOME,
   MENSAGEM_TEMPO,
   MENSAGEM_VALOR,
   type EntradaProcedimento,
 } from "../../domain/procedimento/tipos";
+
+export type MaterialInformado = { materialId: string; quantidade: number };
 
 export type CamposProcedimento = {
   nome: string;
@@ -39,4 +42,28 @@ export function validarProcedimento(campos: CamposProcedimento): Resultado<Entra
   if (valorMedio === null) return { ok: false, mensagem: MENSAGEM_VALOR };
 
   return { ok: true, valor: { nome, tempoMedioMinutos, valorMedio } };
+}
+
+function lerPositivo(texto: string): number | null {
+  const limpo = texto.trim();
+  if (!/^\d+$/.test(limpo)) return null;
+  const numero = Number(limpo);
+  return Number.isSafeInteger(numero) && numero > 0 ? numero : null;
+}
+
+export function validarMateriais(formData: FormData): Resultado<MaterialInformado[]> {
+  const ids = formData
+    .getAll("materialId")
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+  const vistos = new Set<string>();
+  const vinculos: MaterialInformado[] = [];
+  for (const materialId of ids) {
+    if (vistos.has(materialId)) continue;
+    vistos.add(materialId);
+    const quantidade = lerPositivo(String(formData.get(`quantidade-${materialId}`) ?? ""));
+    if (quantidade === null) return { ok: false, mensagem: MENSAGEM_QUANTIDADE };
+    vinculos.push({ materialId, quantidade });
+  }
+  return { ok: true, valor: vinculos };
 }

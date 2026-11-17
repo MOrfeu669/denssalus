@@ -5,14 +5,23 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import type { Procedimento } from "../../domain/procedimento/tipos";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrar, editar, excluir } from "./actions";
+import { VinculoMateriais, type MaterialOpcao } from "./materiais";
 import { NOTA_ESTIMATIVA } from "./texto";
+
+function parcial(item: EstadoFormulario) {
+  return item.detalhe === "parcial";
+}
 
 export function Procedimentos({
   procedimentos,
   podeExcluir,
+  materiais,
+  cadastroAberto = false,
 }: {
   procedimentos: Procedimento[];
   podeExcluir: boolean;
+  materiais: MaterialOpcao[];
+  cadastroAberto?: boolean;
 }) {
   const roteador = useRouter();
   const botaoRef = useRef<HTMLButtonElement>(null);
@@ -21,17 +30,19 @@ export function Procedimentos({
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [exclusao, acaoExcluir, pendenteExcluir] = useActionState(excluir, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
-  const [aberto, setAberto] = useState(false);
+  const [aberto, setAberto] = useState(cadastroAberto);
   const aviso = avisoVisivel(cadastro, edicao, exclusao);
   const erroNoPainel = aberto && aviso.status === "erro" && aviso.quando === cadastro.quando;
 
   useEffect(() => {
-    if (edicao.status === "sucesso") setEditandoId(null);
-    if (cadastro.status === "sucesso") setAberto(false);
+    if (edicao.status === "sucesso" || parcial(edicao)) setEditandoId(null);
+    if (cadastro.status === "sucesso" || parcial(cadastro)) setAberto(false);
   }, [edicao, cadastro]);
 
   useEffect(() => {
-    if ([cadastro, edicao, exclusao].some((item) => item.status === "sucesso")) roteador.refresh();
+    if ([cadastro, edicao, exclusao].some((item) => item.status === "sucesso" || parcial(item))) {
+      roteador.refresh();
+    }
   }, [cadastro, edicao, exclusao, roteador]);
 
   useEffect(() => {
@@ -109,7 +120,9 @@ export function Procedimentos({
               action={acaoCadastrar}
               aria-busy={pendenteCadastrar}
             >
-              <Campos />
+              <VinculoMateriais materiais={materiais}>
+                <Campos />
+              </VinculoMateriais>
               <button type="submit" className="procedimentos-botao" disabled={pendenteCadastrar}>
                 {pendenteCadastrar ? "Salvando…" : "Criar procedimento"}
               </button>
@@ -162,7 +175,9 @@ export function Procedimentos({
                     aria-busy={pendenteEditar}
                   >
                     <input type="hidden" name="id" value={procedimento.id} />
-                    <Campos procedimento={procedimento} />
+                    <VinculoMateriais materiais={materiais}>
+                      <Campos procedimento={procedimento} />
+                    </VinculoMateriais>
                     <button
                       type="submit"
                       className="procedimentos-botao"
@@ -250,6 +265,9 @@ function Campos({ procedimento }: { procedimento?: Procedimento }) {
 
 function avisoVisivel(...estados: EstadoFormulario[]) {
   const escolhido = estados.reduce((atual, item) => (item.quando > atual.quando ? item : atual));
-  const mensagem = escolhido.detalhe ? `${escolhido.mensagem}: ${escolhido.detalhe}` : escolhido.mensagem;
+  const mensagem =
+    escolhido.detalhe && escolhido.detalhe !== "parcial"
+      ? `${escolhido.mensagem}: ${escolhido.detalhe}`
+      : escolhido.mensagem;
   return { status: escolhido.status, mensagem, quando: escolhido.quando };
 }

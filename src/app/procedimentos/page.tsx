@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { MENSAGEM_PAPEL, type Sessao } from "../../domain/auth/tipos";
+import { listarMateriais } from "../../domain/estoque/casos";
 import { listarProcedimentos } from "../../domain/procedimento/casos";
 import { CascaAberta } from "../casca";
-import { dependenciasProcedimento } from "../dependencias";
+import { dependenciasEstoque, dependenciasProcedimento } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
 import { Procedimentos } from "./form";
+import type { MaterialOpcao } from "./materiais";
 import "./tela.css";
 
 export const dynamic = "force-dynamic";
@@ -97,11 +99,31 @@ export default async function Page() {
     );
   }
 
+  let materiais: MaterialOpcao[];
+  try {
+    const lista = await listarMateriais(dependenciasEstoque(), sessao, new Date());
+    if (!lista.ok) {
+      return (
+        <Moldura>
+          {lista.mensagem === MENSAGEM_PAPEL ? <SemPermissao /> : <Falha mensagem={lista.mensagem} />}
+        </Moldura>
+      );
+    }
+    materiais = lista.valor.map(({ id, nome }) => ({ id, nome }));
+  } catch (erro) {
+    return (
+      <Moldura>
+        <Falha mensagem={falha(erro).mensagem} />
+      </Moldura>
+    );
+  }
+
   return (
     <Moldura>
       <Procedimentos
         procedimentos={resultado.valor}
         podeExcluir={sessao.usuario.papel === "admin"}
+        materiais={materiais}
       />
     </Moldura>
   );

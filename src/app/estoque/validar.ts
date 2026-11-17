@@ -6,11 +6,7 @@ import {
   MENSAGEM_VALIDADE,
   type EntradaLote,
   type EntradaMaterial,
-  type EntradaVinculo,
 } from "../../domain/estoque/tipos";
-
-export const MENSAGEM_PROCEDIMENTO = "Informe o procedimento";
-export const MENSAGEM_MATERIAL = "Informe o material";
 
 const DATA = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -59,18 +55,4 @@ export function validarReabastecimento(campos: {
   const validade = lerValidade(campos.validade);
   if (validade === null) return { ok: false, mensagem: MENSAGEM_VALIDADE };
   return { ok: true, valor: { quantidade, validade } };
-}
-
-export function validarVinculo(campos: {
-  procedimentoId: string;
-  materialId: string;
-  quantidade: string;
-}): Resultado<EntradaVinculo> {
-  const procedimentoId = campos.procedimentoId.trim();
-  if (!procedimentoId) return { ok: false, mensagem: MENSAGEM_PROCEDIMENTO };
-  const materialId = campos.materialId.trim();
-  if (!materialId) return { ok: false, mensagem: MENSAGEM_MATERIAL };
-  const quantidade = lerPositivo(campos.quantidade);
-  if (quantidade === null) return { ok: false, mensagem: MENSAGEM_QUANTIDADE };
-  return { ok: true, valor: { procedimentoId, materialId, quantidade } };
 }

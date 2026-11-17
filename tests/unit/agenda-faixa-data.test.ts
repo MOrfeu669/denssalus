@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CENTRO,
+  dataNoAno,
   dataNoMes,
   deslocarDia,
   distanciaVisual,
@@ -40,6 +41,18 @@ describe("faixa de datas da agenda", () => {
   it("ao soltar sem movimento, a distância visual continua no centro", () => {
     expect(distanciaVisual(CENTRO, CENTRO, 0, 56)).toBe(0);
     expect(passosDoArraste(4, 56)).toBe(0);
+  });
+
+  it("centra o ano e deixa o anterior e o seguinte ao lado", () => {
+    const anos = faixa("2026-11-16", dataNoAno);
+    expect(anos[CENTRO].slice(0, 4)).toBe("2026");
+    expect(anos[CENTRO - 1].slice(0, 4)).toBe("2025");
+    expect(anos[CENTRO + 1].slice(0, 4)).toBe("2027");
+  });
+
+  it("ao escolher o ano seguinte a partir de 29 de fevereiro, fica em 28 de fevereiro", () => {
+    expect(dataNoAno("2024-02-29", 1)).toBe("2025-02-28");
+    expect(dataNoAno("2026-11-13", 1)).toBe("2027-11-13");
   });
 
   it("ao escolher fevereiro a partir do dia 31, fica no último dia do mês", () => {
