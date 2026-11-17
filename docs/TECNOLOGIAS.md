@@ -1,4 +1,4 @@
-# Tecnologias
+d# Tecnologias
 
 Decisão [stated] em 23/10/2026. O detalhe de área está nos `AGENTS.md`. Este repositório ainda não tem o scaffold: não há `package.json`, `src/lib/supabase/`, `src/middleware.ts` nem `supabase/`. Os caminhos abaixo são o alvo.
 
@@ -29,7 +29,7 @@ Decisão [stated] em 28/10/2026, Features 015 e 020:
 | WhatsApp / SMS (Feature 020) | WhatsApp é o canal externo principal a suportar, junto de SMS e e-mail conforme o cadastro do paciente. A marca do provedor de WhatsApp/SMS **não** fica travada na spec |
 
 Decisão [stated] em 24/10/2026, para o scaffold da Feature 001:
-
+d
 | Item | Decisão |
 |---|---|
 | Runner de teste | Vitest. Arquivos em `tests/`, comando `npm test` |

@@ -17,7 +17,6 @@ vi.mock("../../src/app/procedimentos/actions", () => ({
 vi.mock("../../src/app/estoque/actions", () => ({
   cadastrarMaterial: vi.fn(),
   reabastecerMaterial: vi.fn(),
-  vincular: vi.fn(),
 }));
 
 import { Estoque } from "../../src/app/estoque/form";
@@ -42,7 +41,7 @@ const luva: MaterialTela = {
 describe("cadastro de procedimento na tela", () => {
   it("dado a lista, quando a tela abre, então o formulário fica atrás do botão", () => {
     const html = renderToStaticMarkup(
-      createElement(Procedimentos, { procedimentos: [limpeza], podeExcluir: false }),
+      createElement(Procedimentos, { procedimentos: [limpeza], podeExcluir: false, materiais: [] }),
     );
 
     expect(html).toContain("Novo procedimento");
@@ -50,15 +49,33 @@ describe("cadastro de procedimento na tela", () => {
     expect(html).toContain('aria-expanded="false"');
     expect(html).not.toContain('role="dialog"');
     expect(html).not.toContain("Criar procedimento");
+    expect(html).not.toContain("Vincular material");
     expect(html).toContain("Limpeza");
     expect(html).toContain("Procedimentos da clínica");
+  });
+
+  it("dado o diálogo de novo procedimento, quando ele abre, então o vínculo fica no formulário", () => {
+    const html = renderToStaticMarkup(
+      createElement(Procedimentos, {
+        procedimentos: [limpeza],
+        podeExcluir: false,
+        materiais: [{ id: "m1", nome: "Luva" }],
+        cadastroAberto: true,
+      }),
+    );
+
+    expect(html).toContain('id="procedimentos-cadastro"');
+    expect(html).toContain("Criar procedimento");
+    expect(html).toContain("Vincular material");
+    expect(html).not.toContain("Luva");
+    expect(html).not.toContain("Quantidade por consulta");
   });
 });
 
 describe("cadastro de material na tela", () => {
   it("dado a lista, quando a tela abre, então o formulário fica atrás do botão", () => {
     const html = renderToStaticMarkup(
-      createElement(Estoque, { materiais: [luva], procedimentos: [limpeza] }),
+      createElement(Estoque, { materiais: [luva] }),
     );
 
     expect(html).toContain("Novo material");
@@ -69,6 +86,6 @@ describe("cadastro de material na tela", () => {
     expect(html).not.toContain('name="quantidadeMinima"');
     expect(html).toContain("Luva");
     expect(html).toContain("Materiais da clínica");
-    expect(html).toContain("Material de cada procedimento");
+    expect(html).not.toContain("Material de cada procedimento");
   });
 });

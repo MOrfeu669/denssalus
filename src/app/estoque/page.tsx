@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { MENSAGEM_PAPEL } from "../../domain/auth/tipos";
 import { historico, listarMateriais } from "../../domain/estoque/casos";
-import { listarProcedimentos } from "../../domain/procedimento/casos";
 import { Aviso } from "../aviso";
 import { CascaAberta } from "../casca";
-import { dependenciasEstoque, dependenciasProcedimento } from "../dependencias";
+import { dependenciasEstoque } from "../dependencias";
 import { falha } from "../falha";
 import { instante } from "../prontuarios/[pacienteId]/formato";
 import { sessaoAtual } from "../sessao";
@@ -49,15 +48,10 @@ export default async function Page() {
 
   const hoje = new Date();
   let materiais: MaterialTela[];
-  let procedimentos: { id: string; nome: string }[] = [];
   try {
     const deps = dependenciasEstoque();
     const lista = await listarMateriais(deps, sessao, hoje);
     if (!lista.ok) return <Erro mensagem={lista.mensagem} />;
-    const procedimentosLidos = await listarProcedimentos(dependenciasProcedimento(), sessao);
-    if (procedimentosLidos.ok) {
-      procedimentos = procedimentosLidos.valor.map(({ id, nome }) => ({ id, nome }));
-    }
     materiais = [];
     for (const material of lista.valor) {
       const movimentos = await historico(deps, sessao, material.id, hoje);
@@ -82,7 +76,7 @@ export default async function Page() {
 
   return (
     <div className="estoque-tela">
-      <Estoque materiais={materiais} procedimentos={procedimentos} />
+      <Estoque materiais={materiais} />
     </div>
   );
 }

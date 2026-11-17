@@ -7,7 +7,7 @@ import { MENSAGEM_CREDENCIAIS } from "../../domain/auth/tipos";
 import { estado, type EstadoFormulario } from "../formulario";
 import { dependencias } from "../dependencias";
 import { falha } from "../falha";
-import { DETALHE_CREDENCIAIS, detalheSessaoAberta } from "../login/texto";
+import { DETALHE_CREDENCIAIS } from "../login/texto";
 
 async function origem(): Promise<string> {
   const cabecalhos = await headers();
@@ -31,12 +31,11 @@ export async function entrar(
         resultado.mensagem === MENSAGEM_CREDENCIAIS ? DETALHE_CREDENCIAIS : "",
       );
     }
-    const { nome, papel } = resultado.valor.usuario;
-    return estado("sucesso", "Sessão aberta", detalheSessaoAberta(nome, papel));
   } catch (erro) {
     const resultado = falha(erro);
     return estado("erro", resultado.mensagem);
   }
+  redirect("/");
 }
 
 export async function pedirRecuperacao(

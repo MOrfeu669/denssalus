@@ -8,6 +8,10 @@ function continuar(request: NextRequest) {
 }
 
 export async function updateSession(request: NextRequest) {
+  // Na tela pública o cookie velho não pode ser renovado: o refresh falho
+  // apaga a sessão que o login acabou de gravar.
+  if (caminhoPublico(request.nextUrl.pathname)) return continuar(request);
+
   let supabaseResponse = continuar(request);
 
   const supabase = createServerClient(supabaseUrl(), supabasePublishableKey(), {

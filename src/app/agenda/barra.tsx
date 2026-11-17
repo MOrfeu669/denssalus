@@ -6,6 +6,8 @@ import type { StatusAgendamento } from "../../domain/agendamento/tipos";
 import { pedirOverlay, type DestinoOverlay } from "../agendamentos/pedido";
 import { TEXTO_GRADE_ATUALIZA } from "../agendamentos/texto";
 import { rotuloStatus } from "./rotulo";
+import { FaixaDatas } from "./faixa";
+import { hojeIso } from "./faixa-data";
 import type { VisaoGrade } from "./posicao";
 
 type Opcao = { id: string; rotulo: string };
@@ -22,9 +24,6 @@ const contorno =
   "h-10 cursor-pointer rounded-[10px]! border! border-linha! bg-white! px-3.5! text-sm font-semibold! text-tinta! shadow-none hover:bg-fundo!";
 const cheio =
   "h-10 cursor-pointer rounded-[10px]! border-0! bg-acao! px-3.5! text-sm font-semibold! text-white! shadow-none hover:bg-marca!";
-const nav =
-  "size-10! h-10! w-10! cursor-pointer rounded-[10px]! border! border-linha! bg-white! p-0! text-tinta! shadow-none hover:bg-fundo!";
-
 export function BarraAgenda({
   data,
   visao,
@@ -32,7 +31,6 @@ export function BarraAgenda({
   cadeiraId,
   dentistas,
   cadeiras,
-  papel,
   onVisao,
   onFiltrar,
 }: {
@@ -46,7 +44,6 @@ export function BarraAgenda({
   onVisao: (visao: VisaoGrade) => void;
   onFiltrar: (dentista: string, cadeira: string, data?: string) => void;
 }) {
-  const podeBloquear = papel === "admin" || papel === "dentista";
   const filtrado = Boolean(dentistaId || cadeiraId);
 
   function abrir(destino: DestinoOverlay, origem: HTMLElement) {
@@ -56,28 +53,9 @@ export function BarraAgenda({
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex flex-wrap items-center gap-2.5">
-        <Button type="button" variant="outline" className={contorno} onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", hojeLocal())}>
+        <Button type="button" variant="outline" className={contorno} onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", hojeIso())}>
           Hoje
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className={nav}
-          aria-label="Dia anterior"
-          onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", deslocarDia(data, -1))}
-        >
-          <IconeSeta sentido="anterior" />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className={nav}
-          aria-label="Dia seguinte"
-          onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", deslocarDia(data, 1))}
-        >
-          <IconeSeta sentido="seguinte" />
-        </Button>
-        <p className="m-0 text-lg leading-6 font-bold text-tinta">{dataPorExtenso(data)}</p>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Visualização" className="inline-flex h-10 items-center rounded-[10px] border border-linha bg-white p-1">
             <BotaoVisao ativo={visao === "dia"} onClick={() => onVisao("dia")}>
@@ -87,39 +65,33 @@ export function BarraAgenda({
               Semana
             </BotaoVisao>
           </div>
-          {podeBloquear ? (
-            <Button
-              type="button"
-              variant="outline"
-              className={contorno}
-              onClick={(evento) => abrir("bloquear", evento.currentTarget)}
-            >
-              Bloquear
-            </Button>
-          ) : null}
-          <Button
-            type="button"
-            className={cheio}
-            onClick={(evento) => abrir("novo", evento.currentTarget)}
-          >
-            Novo agendamento
-          </Button>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Chips
-          rotulo="Dentistas"
-          opcoes={dentistas}
-          ativo={dentistaId}
-          onEscolher={(id) => onFiltrar(id, cadeiraId ?? "")}
-        />
-        <Chips
-          rotulo="Cadeiras"
-          opcoes={cadeiras}
-          ativo={cadeiraId}
-          onEscolher={(id) => onFiltrar(dentistaId ?? "", id)}
-        />
+      <FaixaDatas data={data} onEscolher={(proxima) => onFiltrar(dentistaId ?? "", cadeiraId ?? "", proxima)} />
+
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-col items-start gap-2">
+          <Chips
+            rotulo="Dentistas"
+            opcoes={dentistas}
+            ativo={dentistaId}
+            onEscolher={(id) => onFiltrar(id, cadeiraId ?? "")}
+          />
+          <Chips
+            rotulo="Cadeiras"
+            opcoes={cadeiras}
+            ativo={cadeiraId}
+            onEscolher={(id) => onFiltrar(dentistaId ?? "", id)}
+          />
+        </div>
+        <Button
+          type="button"
+          className={`${cheio} ml-auto`}
+          onClick={(evento) => abrir("novo", evento.currentTarget)}
+        >
+          Novo agendamento
+        </Button>
         {filtrado ? (
           <Button
             type="button"
@@ -214,37 +186,3 @@ function BotaoVisao({
   );
 }
 
-function IconeSeta({ sentido }: { sentido: "anterior" | "seguinte" }) {
-  const caminho = sentido === "anterior" ? "M11 4 L6 9 L11 14" : "M7 4 L12 9 L7 14";
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-      <path d={caminho} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function hojeLocal() {
-  const agora = new Date();
-  return deslocarDia(`${agora.getFullYear()}-${par(agora.getMonth() + 1)}-${par(agora.getDate())}`, 0);
-}
-
-function deslocarDia(data: string, dias: number) {
-  const [ano, mes, dia] = data.split("-").map(Number);
-  const alvo = new Date(ano, mes - 1, dia + dias);
-  return `${alvo.getFullYear()}-${par(alvo.getMonth() + 1)}-${par(alvo.getDate())}`;
-}
-
-function dataPorExtenso(data: string) {
-  const [ano, mes, dia] = data.split("-").map(Number);
-  const texto = new Date(ano, mes - 1, dia).toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-}
-
-function par(n: number) {
-  return String(n).padStart(2, "0");
-}
