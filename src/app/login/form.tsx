@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
@@ -8,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { entrar } from "../auth/actions";
 import { estadoVazio } from "../formulario";
 import { IconeCadeado, IconeEmail, IconeErro, IconeEscudo, IconeOk, IconeOlho } from "./icones";
+import logoDenssalus from "./logo-denssalus.png";
 
 const botaoEntrar =
   "h-12 w-full rounded-[10px] border-0 bg-acao text-base leading-6 font-semibold text-white shadow-none hover:bg-marca active:translate-y-0 disabled:bg-acao disabled:opacity-100";
@@ -25,11 +27,25 @@ export function FormLogin() {
 
   return (
     <form className="flex w-full max-w-[400px] flex-col gap-6" action={acao} aria-busy={pendente}>
-      <header className="flex flex-col gap-1.5">
-        <h1 className="m-0 text-[28px] leading-9 font-bold tracking-[-0.005em] text-tinta">Entrar</h1>
-        <p className="m-0 text-sm leading-5 font-normal text-apagado">
-          Acesse com o e-mail e a senha cadastrados pela clínica.
-        </p>
+      <header className="flex flex-col gap-3">
+        <span
+          aria-hidden="true"
+          className="flex size-10 shrink-0 items-center justify-center rounded-[12.32px] border border-linha bg-white"
+        >
+          <Image
+            src={logoDenssalus}
+            alt=""
+            width={24}
+            height={24}
+            className="h-6 w-6 object-contain"
+          />
+        </span>
+        <div className="flex flex-col gap-1.5">
+          <h1 className="m-0 text-[28px] leading-9 font-bold tracking-[-0.005em] text-tinta">Entrar</h1>
+          <p className="m-0 text-sm leading-5 font-normal text-apagado">
+            Acesse com o e-mail e a senha cadastrados pela clínica.
+          </p>
+        </div>
       </header>
 
       {mostrarAviso ? (
@@ -133,7 +149,7 @@ export function FormLogin() {
       )}
 
       {sucesso ? null : (
-        <p className="m-0 flex items-center justify-center gap-2 text-xs leading-4 font-normal text-placeholder">
+        <p className="m-0 flex items-center justify-center gap-2 border-t border-linha pt-5 text-xs leading-4 font-normal text-placeholder">
           <IconeEscudo />
           <span>Você continuará conectado até sair.</span>
         </p>

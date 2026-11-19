@@ -1,4 +1,6 @@
-import { IconeDente, IconeOk } from "./icones";
+import Image from "next/image";
+import { IconeOk } from "./icones";
+import logoDenssalus from "./logo-denssalus.png";
 
 const BENEFICIOS = [
   "Agenda por dentista e por cadeira",
@@ -18,10 +20,15 @@ export function Marca() {
         aria-hidden="true"
       />
       <div className="relative z-[1] flex max-w-[576px] items-center gap-2.5">
-        <span className="relative size-11 shrink-0 rounded-[12.32px] bg-white">
-          <span className="absolute top-[12.79px] left-[13.55px] leading-none">
-            <IconeDente />
-          </span>
+        <span className="relative flex size-11 shrink-0 items-center justify-center rounded-[12.32px] bg-white">
+          <Image
+            src={logoDenssalus}
+            alt="Logo da denssalus: dente estilizado com ícone de agenda e onda sonora"
+            width={30}
+            height={30}
+            className="h-[30px] w-[30px] object-contain"
+            priority
+          />
         </span>
         <span className="text-[22px] leading-[30px] font-bold">denssalus</span>
       </div>
