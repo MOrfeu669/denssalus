@@ -21,14 +21,23 @@ describe("marca e formulário da tela Entrar com a logo da denssalus", () => {
   it("quando o formulário de entrar abre, então o cabeçalho mostra a logo acima do título", () => {
     const html = renderToStaticMarkup(createElement(FormLogin));
 
-    expect(html).toContain("rounded-[12.32px] border border-linha bg-white");
-    expect(html).toContain("Entrar");
+    const indiceLogo = html.indexOf("<img");
+    const indiceTitulo = html.indexOf("<h1");
+
+    expect(indiceLogo).toBeGreaterThanOrEqual(0);
+    expect(indiceTitulo).toBeGreaterThan(indiceLogo);
+    expect(html.slice(indiceTitulo, indiceTitulo + 200)).toContain("Entrar");
   });
 
-  it("quando o formulário de entrar abre, então o aviso final tem a borda que o liga ao botão", () => {
+  it("quando o formulário de entrar abre, então o aviso final aparece depois do botão de entrar", () => {
     const html = renderToStaticMarkup(createElement(FormLogin));
 
-    expect(html).toContain("border-t border-linha pt-5");
-    expect(html).toContain("Você continuará conectado até sair.");
+    const indiceBotao = html.indexOf("Entrar</button>");
+    const indiceEscudo = html.indexOf('viewBox="0 0 16 20"');
+    const indiceAviso = html.indexOf("Você continuará conectado até sair.");
+
+    expect(indiceBotao).toBeGreaterThanOrEqual(0);
+    expect(indiceEscudo).toBeGreaterThan(indiceBotao);
+    expect(indiceAviso).toBeGreaterThan(indiceEscudo);
   });
 });
