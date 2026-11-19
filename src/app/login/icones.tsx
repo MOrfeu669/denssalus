@@ -1,16 +1,5 @@
 type IconeProps = { cor?: string };
 
-export function IconeDente() {
-  return (
-    <svg width="16.9" height="18.96" viewBox="-0.817 -0.812 16.9 18.958" aria-hidden="true">
-      <path
-        fill="#158172"
-        d="M7.633 1.354C6.008-0.271 2.217-0.812 0.592 1.896C-0.817 4.279 0.592 7.313 1.675 10.021C2.758 12.729 2.758 17.062 4.383 17.604C6.008 18.146 6.333 13.813 7.633 13.813C8.933 13.813 9.258 18.146 10.883 17.604C12.508 17.062 12.508 12.729 13.592 10.021C14.675 7.313 16.083 4.279 14.675 1.896C13.05-0.812 9.258-0.271 7.633 1.354Z"
-      />
-    </svg>
-  );
-}
-
 export function IconeOk({ cor = "#3FBBA8" }: IconeProps) {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
