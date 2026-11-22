@@ -10,6 +10,8 @@ const resina = { id: "m2", nome: "Resina" };
 describe("vínculo de material no procedimento", () => {
   it("dado o formulário, quando nenhum material está marcado, então não pede quantidade", () => {
     const html = renderToStaticMarkup(
+      // children é prop obrigatória do componente. O 3º argumento de createElement não satisfaz esse tipo.
+      // eslint-disable-next-line react/no-children-prop
       createElement(VinculoMateriais, {
         materiais: [luva, resina],
         listaInicialAberta: true,
@@ -30,6 +32,8 @@ describe("vínculo de material no procedimento", () => {
 
   it("dado o material marcado, quando a lista abre, então a quantidade aparece embaixo", () => {
     const html = renderToStaticMarkup(
+      // children é prop obrigatória do componente. O 3º argumento de createElement não satisfaz esse tipo.
+      // eslint-disable-next-line react/no-children-prop
       createElement(VinculoMateriais, {
         materiais: [luva, resina],
         listaInicialAberta: true,

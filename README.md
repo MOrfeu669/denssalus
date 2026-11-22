@@ -108,6 +108,7 @@ A recuperação de senha (`/recuperar`) não envia e-mail de verdade. O link apa
 | --- | --- |
 | `npm run dev` | Sobe o Next.js em modo de desenvolvimento |
 | `npm test` | Roda a suíte (Vitest) |
+| `npm run lint` | Roda o ESLint (`eslint.config.mjs`) |
 | `npm run typecheck` | Checa os tipos sem emitir arquivo |
 | `npm run build` | Gera o build de produção |
 | `npm start` | Sobe o build. Rode `npm run build` antes |
