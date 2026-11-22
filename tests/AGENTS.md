@@ -4,9 +4,11 @@ Vale para escrever e rodar teste. O `AGENTS.md` da raiz continua valendo para o 
 
 ## Escopo
 
-Suíte automatizada: unidade, integração e ponta a ponta.
-
 O teste descreve o comportamento da spec. A implementação mora na pasta do código (`src/app/`, `src/domain/`).
+
+O comando da suíte é `npm test` (Vitest, `vitest.config.ts`, inclusão `tests/**/*.test.ts`). O que existe hoje é teste de unidade: `tests/unit/` e `tests/health.test.ts`. Não há pasta `tests/integration` nem `tests/e2e`.
+
+Unidade, integração e ponta a ponta continuam sendo os três tipos previstos. Só o de unidade está no repositório.
 
 ## Mapa
 
@@ -36,7 +38,7 @@ O teste descreve o comportamento da spec. A implementação mora na pasta do có
 
 ## Verificar
 
-Ainda não há comando de suíte nem meta de coverage. Quando existirem, entram aqui. Até lá, pronto é o caso novo passando, a suíte relacionada verde e o coverage medindo o caminho da spec da tarefa.
+O comando é `npm test`. Não há meta de coverage. Pronto é o caso novo passando, a suíte relacionada verde e o coverage medindo o caminho da spec da tarefa.
 
 ## Antes de agir
 

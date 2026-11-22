@@ -12,20 +12,22 @@ As specs estão em definição. Regra marcada como pendente na spec não vira de
 
 - `specs/` — o quê e o critério de parada; ver `specs/AGENTS.md`
 - `src/app/` — telas e Server Actions; ver `src/app/AGENTS.md`
-- `src/components/ui/` — componentes da coleção shadcn/ui, quando existirem
+- `src/components/ui/` — componentes da coleção shadcn/ui já no repositório (`button`, `checkbox`)
 - `src/domain/` — regras de negócio; ver `src/domain/AGENTS.md`
-- `src/lib/supabase/` — clientes de browser e de servidor, quando o scaffold existir
-- `src/middleware.ts` — renovação da sessão, quando o scaffold existir
-- `tests/` — comportamento; ver `tests/AGENTS.md`
+- `src/lib/supabase/` — cliente de browser em `client.ts`, cliente de servidor em `server.ts`, e o acesso ao Postgres por área
+- `src/middleware.ts` — renovação da sessão (cookie)
+- `scripts/criar-admin.mjs` — cria o primeiro Admin (`npm run admin:criar`)
+- `supabase/` — `config.toml`, 20 migrations em `supabase/migrations/` e `seed.sql` (vazio; o seed está ligado no config)
+- `tests/` — comportamento; ver `tests/AGENTS.md`. A suíte que existe é a de unidade
 - `docs/TECNOLOGIAS.md` — stack decidida
 
 O índice do código (`.codebase.mcp`) é gerado pela CLI e não é versionado. Pergunta estrutural ("como funciona X?") passa pelo índice antes de varrer arquivo.
 
 ## Stack
 
-[stated] em `docs/TECNOLOGIAS.md`: Next.js 15 com App Router (`src/app/`, sem pasta `pages/`), React 19, mutações por Server Actions e um único Route Handler (`GET` do callback de recuperação). A interface usa Tailwind e a coleção shadcn/ui em `src/components/ui`. A sessão é cookie, renovada em `src/middleware.ts`. Os clientes ficam em `src/lib/supabase/`. PostgreSQL 17, sem ORM. Autenticação é Supabase Auth. A agenda em tempo real usa Supabase Realtime.
+[stated] em `docs/TECNOLOGIAS.md`: Next.js 15 com App Router (`src/app/`, sem pasta `pages/`), React 19, mutações por Server Actions e um único Route Handler (`GET` em `src/app/auth/callback/route.ts`). A interface usa Tailwind e a coleção shadcn/ui em `src/components/ui`. A sessão é cookie, renovada em `src/middleware.ts`. Os clientes ficam em `src/lib/supabase/`. PostgreSQL 17, sem ORM. Autenticação é Supabase Auth. A agenda em tempo real usa Supabase Realtime.
 
-O scaffold ainda não está neste repositório.
+O scaffold está neste repositório: `package.json`, `src/app/`, `src/lib/supabase/`, `src/middleware.ts` e `supabase/` (config, 20 migrations e `seed.sql` vazio).
 
 ## Regras de negócio
 
@@ -62,7 +64,7 @@ Não abra a feature da fase seguinte ao cumprir o critério da tarefa.
 
 ## Verificar
 
-Ainda não há suíte nem meta de coverage. Quando houver código, pronto é o critério da spec da tarefa com teste verde. Coverage mede o caminho da spec.
+A suíte é Vitest (`npm test`). Os arquivos que existem são `tests/unit/**/*.test.ts` e `tests/health.test.ts`. Não há `tests/integration` nem `tests/e2e`, nem meta de coverage. Pronto é o critério da spec da tarefa com teste verde. Coverage mede o caminho da spec.
 
 ## Convenções
 

@@ -30,18 +30,13 @@ Copy-Item .env.example .env.local
 supabase start
 ```
 
-`supabase start` aplica as migrations em `supabase/migrations/` e imprime as URLs e as chaves. Se o comando reclamar de `supabase/seed.sql`, crie o arquivo vazio e rode de novo. O `config.toml` aponta esse seed, e ele ainda não está no repositório.
-
-```powershell
-New-Item -ItemType File -Path supabase/seed.sql -Force
-supabase start
-```
+`supabase start` aplica as migrations em `supabase/migrations/` e o `supabase/seed.sql`. O seed está ligado em `supabase/config.toml` (`[db.seed]`, `sql_paths = ["./seed.sql"]`) e o arquivo versionado está vazio. O comando imprime as URLs e as chaves.
 
 Copie os valores do `supabase status` para `.env.local`:
 
 | Variável | O que colar |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | API URL, em geral `http://127.0.0.1:54321` |
+| `NEXT_PUBLIC_SUPABASE_URL` | API URL, em geral `http://127.0.0.1:56321` |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key. Em CLI antiga, a anon key |
 | `SUPABASE_SECRET_KEY` | Secret key. Em CLI antiga, a service role key |
 
@@ -71,17 +66,23 @@ O modelo está em `.env.example`.
 | `ADMIN_SENHA` | sim, no script | Senha do primeiro Admin. Mínimo de 6 caracteres |
 | `ADMIN_NOME` | não | Nome exibido. Padrão `Admin` |
 | `ADMIN_CLINICA_ID` | não | Identificador inicial do usuário. Padrão `clinica-001` |
+| `ELEVENLABS_API_KEY` | não | Chave do servidor para a URL assinada do assistente de voz (`src/app/voz/actions.ts`) |
+| `ELEVENLABS_AGENT_ID` | não | Identificador do agente ElevenLabs. Também fica só no servidor |
+
+Sem `ELEVENLABS_API_KEY` e `ELEVENLABS_AGENT_ID`, a action de voz responde `Assistente de voz não configurado`. O app sobe sem as duas.
 
 Exemplo, com chaves fictícias:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:56321
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 SUPABASE_SECRET_KEY=sb_secret_...
 ADMIN_EMAIL=admin@clinica.local
 ADMIN_SENHA=uma-senha
 ADMIN_NOME=Admin
 ADMIN_CLINICA_ID=clinica-001
+ELEVENLABS_API_KEY=
+ELEVENLABS_AGENT_ID=
 ```
 
 `npm run admin:criar` lê o `.env.local`. Se o e-mail já existir no Auth, o script para com o erro do Supabase. Troque o e-mail ou apague o usuário no Studio antes de rodar de novo.
@@ -91,10 +92,13 @@ ADMIN_CLINICA_ID=clinica-001
 | Serviço | Endereço |
 | --- | --- |
 | App | http://127.0.0.1:3000 |
-| API do Supabase | http://127.0.0.1:54321 |
-| Postgres | `127.0.0.1:54322` (usuário `postgres`, senha `postgres`, banco `postgres`) |
-| Studio | http://127.0.0.1:54323 |
-| E-mail local (Mailpit) | http://127.0.0.1:54324 |
+| API do Supabase | http://127.0.0.1:56321 |
+| Postgres | `127.0.0.1:56322` (usuário `postgres`, senha `postgres`, banco `postgres`) |
+| Studio | http://127.0.0.1:56323 |
+| E-mail local (Mailpit) | http://127.0.0.1:56324 |
+| Analytics | http://127.0.0.1:56327 |
+
+Essas portas vêm de `supabase/config.toml`. O `iniciar-denssalus.bat` sobe o stack com `supabase start` e não redefine porta.
 
 A recuperação de senha (`/recuperar`) não envia e-mail de verdade. O link aparece no Mailpit.
 

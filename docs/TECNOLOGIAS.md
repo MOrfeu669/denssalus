@@ -1,6 +1,6 @@
-d# Tecnologias
+# Tecnologias
 
-Decisão [stated] em 23/10/2026. O detalhe de área está nos `AGENTS.md`. Este repositório ainda não tem o scaffold: não há `package.json`, `src/lib/supabase/`, `src/middleware.ts` nem `supabase/`. Os caminhos abaixo são o alvo.
+Decisão [stated] em 23/10/2026. O detalhe de área está nos `AGENTS.md`. O scaffold está neste repositório: `package.json`, `src/app/`, `src/lib/supabase/`, `src/middleware.ts` e `supabase/`.
 
 | Item | Decisão |
 |---|---|
@@ -8,13 +8,13 @@ Decisão [stated] em 23/10/2026. O detalhe de área está nos `AGENTS.md`. Este 
 | Roteador | **App Router** — rotas em `src/app/`. Não há pasta `pages/` |
 | Cliente Supabase | `@supabase/ssr`: `createBrowserClient` em `src/lib/supabase/client.ts` e `createServerClient` em `src/lib/supabase/server.ts` (Server Components, Server Actions, Route Handler e middleware) |
 | Sessão | Cookie. No Next.js 15 a renovação fica em `src/middleware.ts`, função `middleware`. O arquivo `proxy.ts` é do Next.js 16 e não entra |
-| Banco além do Auth | **PostgreSQL 17** (Supabase CLI local, porta `54322`). Sem ORM. O Auth fica em `auth.users`; o domínio fica no schema `public` (`usuarios`, clínica, dentistas, pacientes, procedimentos, agendamentos) |
+| Banco além do Auth | **PostgreSQL 17** (Supabase CLI local, porta `56322` em `supabase/config.toml`). Sem ORM. O Auth fica em `auth.users`; o domínio fica no schema `public`, nas 20 migrations em `supabase/migrations/` |
 | Endpoint HTTP da aplicação | Um único Route Handler: `GET` em `src/app/auth/callback/route.ts` (troca o código do e-mail de recuperação pela sessão). O restante das mutações passa por Server Actions (`src/app/**/actions.ts`), não por rotas HTTP próprias |
 | Variáveis | `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Sem valores neste repositório |
 | Autenticação | [stated] Supabase Auth (senha, sessão e e-mail de recuperação). Spec 001 |
 | Agenda em tempo real | [stated] Supabase Realtime. Spec 007 |
 
-A API local do Supabase (PostgREST) sobe na porta `54321`, e o app fala com ela pelos clientes acima.
+A API local do Supabase (PostgREST) sobe na porta `56321`. O Studio usa `56323`, o Mailpit `56324` e o analytics `56327`, todos em `supabase/config.toml`. O app fala com a API pelos clientes acima. O `supabase/seed.sql` está vazio e o seed está ligado (`[db.seed]`, `sql_paths = ["./seed.sql"]`).
 
 ## Fora desta decisão
 
@@ -29,7 +29,7 @@ Decisão [stated] em 28/10/2026, Features 015 e 020:
 | WhatsApp / SMS (Feature 020) | WhatsApp é o canal externo principal a suportar, junto de SMS e e-mail conforme o cadastro do paciente. A marca do provedor de WhatsApp/SMS **não** fica travada na spec |
 
 Decisão [stated] em 24/10/2026, para o scaffold da Feature 001:
-d
+
 | Item | Decisão |
 |---|---|
 | Runner de teste | Vitest. Arquivos em `tests/`, comando `npm test` |
@@ -45,15 +45,14 @@ Decisão [stated] em 09/11/2026. Substitui a linha antiga «nenhuma biblioteca d
 | Estilo | **Tailwind** na composição do componente. O CSS já escrito numa tela permanece até essa tela ser alterada |
 | Como usar | Skill `ui`, em `.cursor/skills/ui/SKILL.md` |
 
-## Árvore prevista de `supabase/`
-
-Ainda não existe neste repositório.
+## Árvore de `supabase/`
 
 ```
 supabase/
 ├── .gitignore
 ├── config.toml
-└── migrations/
+├── seed.sql
+└── migrations/    # 20 arquivos
 ```
 
-Esta decisão não inclui `functions/` nem policies em arquivos separados.
+Não há `functions/` nem policies em arquivos separados. O primeiro Admin entra por `scripts/criar-admin.mjs` (`npm run admin:criar`), não por seed.
