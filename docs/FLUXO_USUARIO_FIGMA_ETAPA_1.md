@@ -144,11 +144,11 @@ Ordem do Admin no primeiro uso: Usuários, Clínica, Dentistas, Pacientes, Proce
 
 ### 06 — Usuários — admin
 
-Cadastrar Dentista ou Recepcionista: nome, e-mail, senha, papel. A lista mostra nome e papel. Ação por linha: `Remover acesso`. Não há ação de remover a si mesmo.
+Cadastrar Dentista ou Recepcionista: nome, e-mail, senha, papel. Busca por texto; à esquerda, filtro por papel com checkboxes. A lista mostra nome, papel (entre o nome e a ação) e `Remover acesso` com destaque avermelhado. Confirme antes de remover: o acesso sai; agendamento e prontuário permanecem. Não há ação de remover a si mesmo.
 
-Sucesso: a pessoa aparece na lista. Vazio: `Nenhum usuário cadastrado nesta clínica.`
+Sucesso: a pessoa aparece na lista. Vazio: `Nenhum usuário cadastrado nesta clínica.` Sem resultado do filtro: `Nenhum usuário encontrado com esses filtros.`
 
-Anote no frame: remover o acesso não apaga agendamento nem prontuário. Não desenhe tela de confirmação que prometa apagar dado clínico.
+Anote no frame: remover o acesso não apaga agendamento nem prontuário. Não desenhe confirmação que prometa apagar dado clínico.
 
 ### 07 — Clínica — admin — ainda sem clínica
 
@@ -160,7 +160,7 @@ Ação: criar. Sucesso: a clínica salva e as cadeiras listadas (`Cadeira 1`, `C
 
 ### 08 — Clínica — admin — já existe
 
-Mostra nome, dias, horário e a lista de cadeiras. Ações: salvar horário e dias, `Adicionar cadeira`, `Desativar` em cada cadeira ativa.
+Seções: `Dados da clínica` (nome), `Horário de atendimento` (dias e horário) e `Cadeiras`. Ações: `Salvar alterações`, `Adicionar cadeira`; em cada cadeira, interruptor `Ativa` / `Desativada`.
 
 Não desenhe cadeira presa a procedimento ou a dentista.
 
@@ -170,7 +170,7 @@ Anote na margem, sem desenhar a tela: um agendamento futuro em cadeira desativad
 
 Campos: nome, CRO, telefone, CPF, especialidade (texto informativo; pode haver mais de uma). Ações: `Cadastrar dentista`, editar, `Remover`.
 
-Lista com nome, CRO e se está ativo. Vazio: nenhum dentista cadastrado. Sem foto.
+Lista `Dentistas da clínica` com busca por nome; cada linha com nome, CRO e se está ativo. Vazio: nenhum dentista cadastrado. Sem foto.
 
 Anote: o cadastro também cria o acesso de papel Dentista. Remover tira agendamentos novos com ele; os já marcados ficam.
 
@@ -192,7 +192,7 @@ A edição da visão geral fica nesta lista. A linha ainda não abre outra pági
 
 Campos: nome, tempo médio, valor médio. Texto curto de que tempo e valor são estimativas. Ações: criar, editar. `Excluir` só no frame do Admin; no frame do Dentista o controle não existe.
 
-Vazio: nenhum procedimento cadastrado. Não desenhe material neste frame. Não desenhe especialidade exigida.
+Lista com busca por nome. Mostra no máximo 15; se houver mais, controle no rodapé (`Mostrar mais`) revela o próximo lote de até 15. Vazio: nenhum procedimento cadastrado. Não desenhe material neste frame. Não desenhe especialidade exigida.
 
 ---
 

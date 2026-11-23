@@ -1,10 +1,12 @@
 "use client";
 
+import { ChevronDown, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import type { Procedimento } from "../../domain/procedimento/tipos";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrar, editar, excluir } from "./actions";
+import { filtrarProcedimentos, paginaDe } from "./filtrar";
 import { VinculoMateriais, type MaterialOpcao } from "./materiais";
 import { NOTA_ESTIMATIVA } from "./texto";
 
@@ -31,8 +33,19 @@ export function Procedimentos({
   const [exclusao, acaoExcluir, pendenteExcluir] = useActionState(excluir, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [aberto, setAberto] = useState(cadastroAberto);
+  const [busca, setBusca] = useState("");
+  const [pagina, setPagina] = useState(1);
   const aviso = avisoVisivel(cadastro, edicao, exclusao);
   const erroNoPainel = aberto && aviso.status === "erro" && aviso.quando === cadastro.quando;
+  const filtrados = useMemo(
+    () => filtrarProcedimentos(procedimentos, busca),
+    [procedimentos, busca],
+  );
+  const paginaAtual = useMemo(() => paginaDe(filtrados, pagina), [filtrados, pagina]);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [busca]);
 
   useEffect(() => {
     if (edicao.status === "sucesso" || parcial(edicao)) setEditandoId(null);
@@ -131,65 +144,99 @@ export function Procedimentos({
         </div>
       ) : null}
       <section className="procedimentos-secao" aria-labelledby="procedimentos-titulo-lista">
-        <h2 id="procedimentos-titulo-lista">Procedimentos da clínica</h2>
+        <div className="procedimentos-secao-topo">
+          <h2 id="procedimentos-titulo-lista">Procedimentos da clínica</h2>
+          <label className="procedimentos-busca">
+            <Search className="procedimentos-busca-icone" aria-hidden="true" />
+            <span className="sr-only">Buscar procedimentos</span>
+            <input
+              type="search"
+              value={busca}
+              onChange={(evento) => setBusca(evento.target.value)}
+              placeholder="Buscar procedimentos"
+            />
+          </label>
+        </div>
         {procedimentos.length === 0 ? (
           <p className="procedimentos-vazio">Nenhum procedimento cadastrado nesta clínica.</p>
+        ) : paginaAtual.itens.length === 0 ? (
+          <p className="procedimentos-vazio">Nenhum procedimento encontrado com essa busca.</p>
         ) : (
-          <ul className="procedimentos-lista">
-            {procedimentos.map((procedimento) => (
-              <li key={procedimento.id} className="procedimentos-item">
-                <div className="procedimentos-linha">
-                  <div className="procedimentos-resumo">
-                    <span className="procedimentos-nome">{procedimento.nome}</span>
-                    <span className="procedimentos-meta">{meta(procedimento)}</span>
+          <>
+            <ul className="procedimentos-lista">
+              {paginaAtual.itens.map((procedimento) => (
+                <li key={procedimento.id} className="procedimentos-item">
+                  <div className="procedimentos-linha">
+                    <div className="procedimentos-resumo">
+                      <span className="procedimentos-nome">{procedimento.nome}</span>
+                      <span className="procedimentos-meta">{meta(procedimento)}</span>
+                    </div>
+                    <div className="procedimentos-acoes">
+                      <button
+                        type="button"
+                        className="procedimentos-botao procedimentos-botao-secundario"
+                        onClick={() =>
+                          setEditandoId(editandoId === procedimento.id ? null : procedimento.id)
+                        }
+                        aria-label={`Editar procedimento ${procedimento.nome}`}
+                        aria-expanded={editandoId === procedimento.id}
+                      >
+                        Editar
+                      </button>
+                      {podeExcluir ? (
+                        <form action={acaoExcluir} aria-busy={pendenteExcluir}>
+                          <input type="hidden" name="id" value={procedimento.id} />
+                          <button
+                            type="submit"
+                            className="procedimentos-botao procedimentos-botao-perigo"
+                            disabled={pendenteExcluir}
+                            aria-label={`Excluir procedimento ${procedimento.nome}`}
+                          >
+                            Excluir
+                          </button>
+                        </form>
+                      ) : null}
+                    </div>
                   </div>
-                  <div className="procedimentos-acoes">
-                    <button
-                      type="button"
-                      className="procedimentos-botao procedimentos-botao-secundario"
-                      onClick={() => setEditandoId(editandoId === procedimento.id ? null : procedimento.id)}
-                      aria-label={`Editar procedimento ${procedimento.nome}`}
-                      aria-expanded={editandoId === procedimento.id}
+                  {editandoId === procedimento.id ? (
+                    <form
+                      className="procedimentos-form"
+                      action={acaoEditar}
+                      aria-busy={pendenteEditar}
                     >
-                      Editar procedimento
-                    </button>
-                    {podeExcluir ? (
-                      <form action={acaoExcluir} aria-busy={pendenteExcluir}>
-                        <input type="hidden" name="id" value={procedimento.id} />
-                        <button
-                          type="submit"
-                          className="procedimentos-botao procedimentos-botao-perigo"
-                          disabled={pendenteExcluir}
-                          aria-label={`Excluir procedimento ${procedimento.nome}`}
-                        >
-                          Excluir procedimento
-                        </button>
-                      </form>
-                    ) : null}
-                  </div>
-                </div>
-                {editandoId === procedimento.id ? (
-                  <form
-                    className="procedimentos-form"
-                    action={acaoEditar}
-                    aria-busy={pendenteEditar}
-                  >
-                    <input type="hidden" name="id" value={procedimento.id} />
-                    <VinculoMateriais materiais={materiais}>
-                      <Campos procedimento={procedimento} />
-                    </VinculoMateriais>
-                    <button
-                      type="submit"
-                      className="procedimentos-botao"
-                      disabled={pendenteEditar}
-                    >
-                      {pendenteEditar ? "Salvando…" : "Salvar procedimento"}
-                    </button>
-                  </form>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+                      <input type="hidden" name="id" value={procedimento.id} />
+                      <VinculoMateriais materiais={materiais}>
+                        <Campos procedimento={procedimento} />
+                      </VinculoMateriais>
+                      <button
+                        type="submit"
+                        className="procedimentos-botao"
+                        disabled={pendenteEditar}
+                      >
+                        {pendenteEditar ? "Salvando…" : "Salvar procedimento"}
+                      </button>
+                    </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+            <div className="procedimentos-paginacao">
+              <p className="procedimentos-rodape">
+                Mostrando {paginaAtual.itens.length} de {paginaAtual.total}
+              </p>
+              {paginaAtual.temMais ? (
+                <button
+                  type="button"
+                  className="procedimentos-mais"
+                  onClick={() => setPagina((atual) => atual + 1)}
+                  aria-label="Mostrar mais procedimentos"
+                >
+                  <ChevronDown aria-hidden="true" />
+                  Ver mais
+                </button>
+              ) : null}
+            </div>
+          </>
         )}
       </section>
     </>
@@ -233,12 +280,12 @@ function meta(procedimento: Procedimento): string {
 function Campos({ procedimento }: { procedimento?: Procedimento }) {
   return (
     <div className="procedimentos-campos">
-      <label className="procedimentos-campo">
+      <label className="procedimentos-campo procedimentos-campo-nome">
         Nome
         <input name="nome" defaultValue={procedimento?.nome} required />
       </label>
       <label className="procedimentos-campo">
-        Tempo médio (minutos)
+        Tempo médio (min)
         <input
           name="tempoMedioMinutos"
           type="number"

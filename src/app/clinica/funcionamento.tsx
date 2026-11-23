@@ -34,15 +34,17 @@ export function Funcionamento({
       </fieldset>
       <div className="clinica-horarios">
         <label className="clinica-campo">
-          Abertura
+          Horário de abertura
           <input name="abertura" type="time" defaultValue={campos.abertura} required />
         </label>
         <label className="clinica-campo">
-          Fechamento
+          Horário de fechamento
           <input name="fechamento" type="time" defaultValue={campos.fechamento} required />
         </label>
       </div>
-      {sugestao ? <p className="clinica-sugestao">{CLINICA_SUGESTAO_HORARIO}</p> : null}
+      {sugestao ? <p className="clinica-sugestao">{CLINICA_SUGESTAO_HORARIO}</p> : (
+        <p className="clinica-sugestao">Dias desmarcados ficam indisponíveis na agenda.</p>
+      )}
     </>
   );
 }

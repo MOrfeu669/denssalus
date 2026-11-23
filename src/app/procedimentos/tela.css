@@ -1,5 +1,17 @@
 .casca .procedimentos-tela {
-  max-width: 720px;
+  max-width: 880px;
+}
+
+.casca .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .casca .procedimentos-nota {
@@ -91,12 +103,53 @@
   background: #fff;
 }
 
-.casca .procedimentos-secao h2 {
+.casca .procedimentos-secao-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 16px;
+}
+
+.casca .procedimentos-secao h2 {
+  margin: 0;
   font-size: 18px;
   line-height: 26px;
   font-weight: 700;
   color: #0f433d;
+}
+
+.casca .procedimentos-busca {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.casca .procedimentos-busca-icone {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: #475760;
+  pointer-events: none;
+}
+
+.casca .procedimentos-busca input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 40px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .casca .procedimentos-vazio {
@@ -180,8 +233,54 @@
 .casca .procedimentos-campos {
   width: 100%;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
+}
+
+.casca .procedimentos-campo-nome {
+  min-width: 0;
+}
+
+.casca .procedimentos-paginacao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.casca .procedimentos-rodape {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #475760;
+}
+
+.casca .casca-miolo button.procedimentos-mais {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid #cbd4d9;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f433d;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.casca .casca-miolo button.procedimentos-mais:hover {
+  background: #edfaf7;
+  border-color: #158172;
+}
+
+.casca .casca-miolo button.procedimentos-mais svg {
+  width: 18px;
+  height: 18px;
 }
 
 .casca .procedimentos-campo {

@@ -1,6 +1,13 @@
 export const USUARIOS_VAZIO = "Nenhum usuário cadastrado nesta clínica.";
 
+export const USUARIOS_FILTRO_VAZIO = "Nenhum usuário encontrado com esses filtros.";
+
 export const USUARIOS_NOTA_REMOCAO = "Remover o acesso não apaga agendamento nem prontuário.";
+
+export const USUARIOS_CONFIRMAR_REMOCAO =
+  "Remover o acesso deste usuário? Agendamento e prontuário permanecem.";
+
+export const USUARIOS_BUSCA_PLACEHOLDER = "Buscar usuários";
 
 export const USUARIOS_SEM_SESSAO = "Nenhuma sessão aberta.";
 

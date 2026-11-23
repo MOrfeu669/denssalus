@@ -66,57 +66,86 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
   return (
     <>
       <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
-      <section className="clinica-cartao" aria-labelledby="clinica-funcionamento">
-        <h2 id="clinica-funcionamento" className="clinica-subtitulo">
-          {clinica.nome}
-        </h2>
-        <form
-          key={`${campos.dias.join(",")}-${campos.abertura}-${campos.fechamento}`}
-          action={acaoHorario}
-          aria-busy={pendenteHorario}
-          className="clinica-form"
-        >
-          <Funcionamento campos={campos} />
-          <div className="clinica-acoes">
-            <BotaoAcao rotulo="Salvar horário e dias" pendente="Salvando…" className="clinica-botao" />
+      <div className="clinica-grade">
+        <div className="clinica-coluna">
+          <section className="clinica-cartao" aria-labelledby="clinica-dados">
+            <h2 id="clinica-dados" className="clinica-subtitulo">
+              Dados da clínica
+            </h2>
+            <p className="clinica-ajuda">Identificação exibida no sistema.</p>
+            <label className="clinica-campo">
+              Nome da clínica
+              <input value={clinica.nome} readOnly aria-readonly="true" />
+            </label>
+          </section>
+          <section className="clinica-cartao" aria-labelledby="clinica-funcionamento">
+            <h2 id="clinica-funcionamento" className="clinica-subtitulo">
+              Horário de atendimento
+            </h2>
+            <p className="clinica-ajuda">
+              Um único horário de abertura e fechamento para todos os dias.
+            </p>
+            <form
+              key={`${campos.dias.join(",")}-${campos.abertura}-${campos.fechamento}`}
+              action={acaoHorario}
+              aria-busy={pendenteHorario}
+              className="clinica-form"
+            >
+              <Funcionamento campos={campos} />
+              <div className="clinica-acoes clinica-acoes-rodape">
+                <BotaoAcao
+                  rotulo="Salvar alterações"
+                  pendente="Salvando…"
+                  className="clinica-botao"
+                />
+              </div>
+            </form>
+          </section>
+        </div>
+        <section className="clinica-cartao clinica-cartao-cadeiras" aria-labelledby="clinica-cadeiras">
+          <div className="clinica-cadeiras-topo">
+            <div>
+              <h2 id="clinica-cadeiras" className="clinica-subtitulo">
+                Cadeiras
+              </h2>
+              <p className="clinica-ajuda">Cada cadeira pode ser agendada separadamente.</p>
+            </div>
+            <form action={acaoAdicionar} aria-busy={pendenteAdicionar} className="clinica-form-inline">
+              <BotaoAcao
+                rotulo="Adicionar cadeira"
+                pendente="Adicionando…"
+                className="clinica-botao-sec"
+              />
+            </form>
           </div>
-        </form>
-      </section>
-      <section className="clinica-cartao" aria-labelledby="clinica-cadeiras">
-        <h2 id="clinica-cadeiras" className="clinica-subtitulo">
-          Cadeiras
-        </h2>
-        {cadeiras.length === 0 ? (
-          <p className="clinica-vazio">{CLINICA_CADEIRAS_VAZIO}</p>
-        ) : (
-          <ul className="clinica-lista">
-            {cadeiras.map((cadeira) => (
-              <li key={cadeira.id} className="clinica-linha">
-                <span className="clinica-cadeira">
-                  <span className="clinica-nome">{cadeira.identificacao}</span>
-                  {cadeira.ativa ? null : (
-                    <span className="clinica-inativa">! Desativada</span>
-                  )}
-                </span>
-                <form action={acaoAlternar} className="clinica-desativar">
-                  <input type="hidden" name="id" value={cadeira.id} />
-                  <input type="hidden" name="ligar" value={cadeira.ativa ? "false" : "true"} />
-                  <Interruptor ligado={cadeira.ativa} nome={cadeira.identificacao} />
-                </form>
-              </li>
-            ))}
-          </ul>
-        )}
-        <form action={acaoAdicionar} aria-busy={pendenteAdicionar} className="clinica-form">
-          <div className="clinica-acoes">
-            <BotaoAcao
-              rotulo="Adicionar cadeira"
-              pendente="Adicionando…"
-              className="clinica-botao-sec"
-            />
-          </div>
-        </form>
-      </section>
+          {cadeiras.length === 0 ? (
+            <p className="clinica-vazio">{CLINICA_CADEIRAS_VAZIO}</p>
+          ) : (
+            <ul className="clinica-lista">
+              {cadeiras.map((cadeira) => (
+                <li
+                  key={cadeira.id}
+                  className={cadeira.ativa ? "clinica-linha" : "clinica-linha clinica-linha-inativa"}
+                >
+                  <span className="clinica-cadeira">
+                    <span className="clinica-nome">{cadeira.identificacao}</span>
+                    <span className="clinica-cadeira-estado">
+                      {cadeira.ativa
+                        ? "Disponível para agendamento"
+                        : "Indisponível para novos agendamentos"}
+                    </span>
+                  </span>
+                  <form action={acaoAlternar} className="clinica-desativar">
+                    <input type="hidden" name="id" value={cadeira.id} />
+                    <input type="hidden" name="ligar" value={cadeira.ativa ? "false" : "true"} />
+                    <Interruptor ligado={cadeira.ativa} nome={cadeira.identificacao} />
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </>
   );
 }
@@ -135,7 +164,7 @@ function Interruptor({ ligado, nome }: { ligado: boolean; nome: string }) {
       <span className="clinica-interruptor-trilho" aria-hidden="true">
         <span className="clinica-interruptor-bolinha" />
       </span>
-      {ligado ? "ON" : "OFF"}
+      {ligado ? "Ativa" : "Desativada"}
     </button>
   );
 }

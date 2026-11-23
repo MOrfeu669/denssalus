@@ -38,6 +38,22 @@
   color: #146c3e;
 }
 
+.casca .clinica-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 20px;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 0 24px;
+}
+
+.casca .clinica-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
 .casca .clinica-cartao {
   max-width: 640px;
   margin: 0 0 24px;
@@ -47,8 +63,17 @@
   background: #fff;
 }
 
+.casca .clinica-grade .clinica-cartao {
+  max-width: none;
+  margin: 0;
+}
+
+.casca .clinica-cartao-cadeiras {
+  min-height: 100%;
+}
+
 .casca .clinica-subtitulo {
-  margin: 0 0 16px;
+  margin: 0 0 8px;
   font-size: 18px;
   line-height: 24px;
   font-weight: 700;
@@ -56,11 +81,45 @@
   overflow-wrap: anywhere;
 }
 
+.casca .clinica-ajuda {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #475760;
+}
+
 .casca .clinica-intro {
   margin: 0 0 20px;
   font-size: 15px;
   line-height: 22px;
   color: #0f1a20;
+}
+
+.casca .clinica-cadeiras-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+}
+
+.casca .clinica-cadeiras-topo .clinica-ajuda {
+  margin-bottom: 0;
+}
+
+.casca .casca-miolo .clinica-form-inline {
+  display: block;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  flex: none;
+}
+
+.casca .casca-miolo .clinica-form {
+  padding: 0;
+  background: transparent;
+  border: 0;
 }
 
 .casca .clinica-form {
@@ -233,15 +292,25 @@
 
 .casca .clinica-cadeira {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 12px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .casca .clinica-nome {
   font-size: 15px;
   line-height: 22px;
   font-weight: 600;
+}
+
+.casca .clinica-cadeira-estado {
+  font-size: 13px;
+  line-height: 18px;
+  color: #475760;
+}
+
+.casca .clinica-linha-inativa {
+  opacity: 0.72;
 }
 
 .casca .clinica-inativa {
@@ -327,8 +396,19 @@
   margin: 8px 0 0;
 }
 
+@media (max-width: 900px) {
+  .casca .clinica-grade {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 560px) {
   .casca .clinica-horarios {
     grid-template-columns: 1fr;
+  }
+
+  .casca .clinica-cadeiras-topo {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
