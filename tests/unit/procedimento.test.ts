@@ -108,6 +108,7 @@ describe("cadastro de procedimentos", () => {
     expect(salvo).toBeDefined();
     if (!salvo) return;
     expect(Object.keys(salvo).sort()).toEqual([
+      "arquivado",
       "clinicaId",
       "id",
       "nome",
@@ -131,6 +132,7 @@ describe("cadastro de procedimentos", () => {
       nome: "Restauração",
       tempoMedioMinutos: 40,
       valorMedio: 150,
+      arquivado: false,
     });
   });
 
@@ -150,6 +152,7 @@ describe("cadastro de procedimentos", () => {
       nome: "Restauração",
       tempoMedioMinutos: 60,
       valorMedio: 150,
+      arquivado: false,
     });
   });
 
@@ -169,7 +172,7 @@ describe("cadastro de procedimentos", () => {
     expect(excluido).toEqual({ ok: true, valor: undefined });
     const depois = await listarProcedimentos(deps, admin);
     expect(depois.ok && depois.valor).toEqual([]);
-    expect(memoria.procedimentos.has("p1")).toBe(false);
+    expect(memoria.procedimentos.get("p1")?.arquivado).toBe(true);
   });
 
   it("dado um recepcionista, quando cria ou edita, então recebe a mensagem de papel e nada muda", async () => {
@@ -360,7 +363,19 @@ describe("cadastro de procedimentos", () => {
     expect(sugerirFim("2026-10-15T14:00", ENTRADA.tempoMedioMinutos)).toBe("2026-10-15T14:40");
   });
 
-  it.todo("Feature 006: dado um procedimento excluído, então o histórico de agendamentos permanece consistente — PENDENTE se a exclusão apaga o histórico ou arquiva o procedimento");
+  it("dado um procedimento já usado num agendamento, quando o admin exclui, então ele é arquivado, some da escolha e o id do histórico continua o mesmo", async () => {
+    memoria.semear({ id: "p1" });
+    const historico = { procedimentoId: "p1" };
+
+    const excluido = await excluirProcedimento(memoria.deps(), admin, "p1");
+    const ainda = await memoria.deps().procedimentos.buscarPorId("p1");
+    const lista = await listarProcedimentos(memoria.deps(), admin);
+
+    expect(excluido).toEqual({ ok: true, valor: undefined });
+    expect(ainda?.id).toBe(historico.procedimentoId);
+    expect(ainda?.arquivado).toBe(true);
+    expect(lista.ok && lista.valor).toEqual([]);
+  });
 });
 
 function estoqueCom(procedimento: Procedimento): MemoriaEstoque {

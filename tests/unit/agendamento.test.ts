@@ -854,6 +854,7 @@ describe("criar agendamento", () => {
       nome: "Gamma",
       tempoMedioMinutos: 40,
       valorMedio: 200,
+      arquivado: true,
     });
 
     const opcoes = await listarOpcoesAgendamento(memoria.deps(), sessao("recepcionista"));
@@ -869,7 +870,7 @@ describe("criar agendamento", () => {
       "Beta",
       "Cadeira 2",
     ]);
-    expect(opcoes.valor.procedimentos.map((item) => item.nome)).toEqual(["beta", "Gamma", "Limpeza"]);
+    expect(opcoes.valor.procedimentos.map((item) => item.nome)).toEqual(["beta", "Limpeza"]);
     expect(opcoes.valor.procedimentos.find((item) => item.id === PROCEDIMENTO_ID)?.tempoMedioMinutos).toBe(
       30,
     );

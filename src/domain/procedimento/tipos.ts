@@ -4,6 +4,8 @@ export type Procedimento = {
   nome: string;
   tempoMedioMinutos: number;
   valorMedio: number;
+  // Ausente significa ativo. Excluir arquiva e mantém a referência do histórico.
+  arquivado?: boolean;
 };
 
 export type ResultadoProcedimento =

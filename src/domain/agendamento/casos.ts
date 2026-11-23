@@ -443,11 +443,13 @@ export async function listarOpcoesAgendamento(
         .map((item) => ({ id: item.id, identificacao: item.identificacao }))
         .sort((a, b) => a.identificacao.localeCompare(b.identificacao, "pt-BR")),
       procedimentos: porNome(
-        procedimentos.map((item) => ({
-          id: item.id,
-          nome: item.nome,
-          tempoMedioMinutos: item.tempoMedioMinutos,
-        })),
+        procedimentos
+          .filter((item) => item.arquivado !== true)
+          .map((item) => ({
+            id: item.id,
+            nome: item.nome,
+            tempoMedioMinutos: item.tempoMedioMinutos,
+          })),
       ),
     },
   };
