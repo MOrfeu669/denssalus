@@ -34,14 +34,14 @@ const usuarios: Usuario[] = [
 ];
 
 describe("painel de usuários", () => {
-  it("dado a lista, quando a tela abre, então oferece busca, filtro de papel e remoção avermelhada", () => {
+  it("dado a lista, quando a tela abre, então oferece busca, filtro de papel e remoção com confirmação", () => {
     const html = renderToStaticMarkup(
       createElement(Painel, { usuarios, atualId: "u1" }),
     );
 
     expect(html).toContain("Buscar usuários");
     expect(html).toContain("Filtrar por papel");
-    expect(html).toContain("usuarios-botao-remover");
+    expect(html).toContain('aria-label="Remover acesso de Bruno"');
     expect(html).toContain("Remover acesso");
     expect(html).not.toContain('role="alertdialog"');
   });

@@ -23,12 +23,14 @@ export function Painel({ usuarios, atualId }: { usuarios: Usuario[]; atualId: st
   const roteador = useRouter();
   const botaoRef = useRef<HTMLButtonElement>(null);
   const nomeRef = useRef<HTMLInputElement>(null);
+  const confirmarPainelRef = useRef<HTMLElement>(null);
+  const gatilhoRemoverRef = useRef<HTMLButtonElement | null>(null);
   const [aberto, setAberto] = useState(false);
   const [busca, setBusca] = useState("");
   const [papeis, setPapeis] = useState<Papel[]>([...PAPEIS_FILTRO]);
   const [confirmarId, setConfirmarId] = useState<string | null>(null);
   const [cadastro, acaoCadastro, pendenteCadastro] = useActionState(cadastrar, estadoVazio);
-  const [remocao, acaoRemocao] = useActionState(remover, estadoVazio);
+  const [remocao, acaoRemocao, pendenteRemocao] = useActionState(remover, estadoVazio);
   const aviso = avisoVisivel(cadastro, remocao);
   const erroNoPainel = aberto && aviso.status === "erro" && aviso.quando === cadastro.quando;
   const visiveis = useMemo(
@@ -38,16 +40,26 @@ export function Painel({ usuarios, atualId }: { usuarios: Usuario[]; atualId: st
   const confirmando = confirmarId ? usuarios.find((u) => u.id === confirmarId) : null;
 
   useEffect(() => {
-    if (cadastro.status === "sucesso") setAberto(false);
-    if (cadastro.status === "sucesso" || remocao.status === "sucesso") {
+    if (cadastro.status === "sucesso") {
+      setAberto(false);
       setConfirmarId(null);
       roteador.refresh();
     }
-  }, [cadastro, remocao, roteador]);
+  }, [cadastro, roteador]);
+
+  useEffect(() => {
+    if (remocao.status === "vazio") return;
+    setConfirmarId(null);
+    if (remocao.status === "sucesso") roteador.refresh();
+  }, [remocao, roteador]);
 
   useEffect(() => {
     if (aberto) nomeRef.current?.focus();
   }, [aberto]);
+
+  useEffect(() => {
+    if (confirmando) confirmarPainelRef.current?.focus();
+  }, [confirmando]);
 
   useEffect(() => {
     if (!aberto) return;
@@ -61,10 +73,28 @@ export function Painel({ usuarios, atualId }: { usuarios: Usuario[]; atualId: st
     return () => document.removeEventListener("keydown", tecla);
   }, [aberto, pendenteCadastro]);
 
+  useEffect(() => {
+    if (!confirmando) return;
+    function tecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !pendenteRemocao) {
+        setConfirmarId(null);
+        gatilhoRemoverRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", tecla);
+    return () => document.removeEventListener("keydown", tecla);
+  }, [confirmando, pendenteRemocao]);
+
   function fechar() {
     if (pendenteCadastro) return;
     setAberto(false);
     botaoRef.current?.focus();
+  }
+
+  function fecharConfirmacao() {
+    if (pendenteRemocao) return;
+    setConfirmarId(null);
+    gatilhoRemoverRef.current?.focus();
   }
 
   function alternarPapel(papel: Papel, ligado: boolean) {
@@ -143,13 +173,15 @@ export function Painel({ usuarios, atualId }: { usuarios: Usuario[]; atualId: st
       ) : null}
       {confirmando ? (
         <div className="usuarios-overlay">
-          <div className="usuarios-overlay-fundo" onClick={() => setConfirmarId(null)} />
+          <div className="usuarios-overlay-fundo" onClick={fecharConfirmacao} />
           <section
+            ref={confirmarPainelRef}
             className="usuarios-confirmar"
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="usuarios-confirmar-titulo"
             aria-describedby="usuarios-confirmar-texto"
+            tabIndex={-1}
           >
             <h2 id="usuarios-confirmar-titulo" className="usuarios-subtitulo">
               Remover acesso
@@ -159,11 +191,7 @@ export function Painel({ usuarios, atualId }: { usuarios: Usuario[]; atualId: st
             </p>
             <p className="usuarios-confirmar-nome">{confirmando.nome}</p>
             <div className="usuarios-confirmar-acoes">
-              <button
-                type="button"
-                className="usuarios-botao-sec"
-                onClick={() => setConfirmarId(null)}
-              >
+              <button type="button" className="usuarios-botao-sec" onClick={fecharConfirmacao}>
                 Cancelar
               </button>
               <form action={acaoRemocao}>
@@ -234,7 +262,10 @@ export function Painel({ usuarios, atualId }: { usuarios: Usuario[]; atualId: st
                       type="button"
                       className="usuarios-botao-remover"
                       aria-label={`Remover acesso de ${usuario.nome}`}
-                      onClick={() => setConfirmarId(usuario.id)}
+                      onClick={(evento) => {
+                        gatilhoRemoverRef.current = evento.currentTarget;
+                        setConfirmarId(usuario.id);
+                      }}
                     >
                       Remover acesso
                     </button>
