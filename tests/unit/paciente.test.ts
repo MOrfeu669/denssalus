@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import { MENSAGEM_CLINICA_NAO_ENCONTRADA, type Clinica } from "../../src/domain/clinica/tipos";
+import { abrirProntuario } from "../../src/domain/prontuario/casos";
+import type { Dependencias as DependenciasProntuario } from "../../src/domain/prontuario/portas";
 import { cadastrarPaciente, editarPaciente, listarPacientes } from "../../src/domain/paciente/casos";
 import type { Dependencias } from "../../src/domain/paciente/portas";
 import { idadeEm, menorDeIdade, normalizarCanais } from "../../src/domain/paciente/regras";
@@ -449,6 +451,46 @@ describe("cadastro de pacientes", () => {
     ]);
   });
 
-  it.todo("Feature 006: a tela de agendamento permite selecionar o paciente cadastrado na clínica");
-  it.todo("Feature 010: a Visão Geral do prontuário mostra os dados do paciente cadastrado");
+  it("dado um paciente cadastrado na clínica, quando a lista de escolha é montada, então o nome entra e o de outra clínica não", async () => {
+    const criado = await cadastrarPaciente(memoria.deps(), recepcionista, ENTRADA, HOJE);
+    memoria.semear({ id: "alheio", nome: "Fora", clinicaId: "outra-clinica" });
+
+    const lista = await listarPacientes(memoria.deps(), recepcionista);
+
+    expect(criado.ok).toBe(true);
+    expect(lista.ok && lista.valor.map((item) => item.nome)).toEqual(["Maria Oliveira"]);
+  });
+
+  it("dado o paciente cadastrado, quando abre a visão geral do prontuário, então mostra nome e canal", async () => {
+    const criado = await cadastrarPaciente(memoria.deps(), recepcionista, ENTRADA, HOJE);
+    if (!criado.ok) throw new Error(criado.mensagem);
+
+    const aberto = await abrirProntuario(prontuarioDe(memoria), recepcionista, criado.valor.id);
+
+    expect(aberto.ok).toBe(true);
+    if (!aberto.ok) return;
+    expect(aberto.valor.paciente.nome).toBe("Maria Oliveira");
+    expect(aberto.valor.paciente.canais[0]?.canal).toBe("whatsapp");
+    expect(aberto.valor.anamnese).toBeNull();
+    expect(aberto.valor.historico).toEqual([]);
+  });
 });
+
+function prontuarioDe(memoria: { pacientes: Map<string, Paciente> }): DependenciasProntuario {
+  return {
+    anamneses: { buscar: async () => null, salvar: async () => {} },
+    evolucoes: { buscar: async () => null, listar: async () => [], salvar: async () => {} },
+    auditoria: { registrar: async () => {}, listar: async () => [] },
+    referencias: { idsOdontograma: async () => [], idsDocumento: async () => [] },
+    estoque: { baixar: async () => {} },
+    concluirItensDoAgendamento: async () => {},
+    gerarDebitosDoAtendimento: async () => {},
+    agendamentos: {
+      listar: async () => [],
+      buscarPorId: async () => null,
+      salvar: async () => null,
+    },
+    pacientes: { buscarPorId: async (id) => memoria.pacientes.get(id) ?? null },
+    ids: { novo: () => "pront-id" },
+  };
+}

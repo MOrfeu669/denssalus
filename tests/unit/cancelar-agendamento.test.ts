@@ -578,6 +578,7 @@ function depsProntuario(
     anamneses: { buscar: async () => null, salvar: async () => {} },
     evolucoes: { buscar: async () => null, listar: async () => [], salvar: async () => {} },
     auditoria: { registrar: async () => {}, listar: async () => [] },
+    referencias: { idsOdontograma: async () => [], idsDocumento: async () => [] },
     estoque: { baixar: async () => {} },
     concluirItensDoAgendamento: async () => {},
     gerarDebitosDoAtendimento: async () => {},

@@ -20,6 +20,12 @@ export type Auditoria = {
   listar(clinicaId: string): Promise<RegistroAuditoria[]>;
 };
 
+// Ids de odontograma e de documento do paciente, já filtrados pela clínica.
+export type ReferenciasAuditoria = {
+  idsOdontograma(clinicaId: string, pacienteId: string): Promise<string[]>;
+  idsDocumento(clinicaId: string, pacienteId: string): Promise<string[]>;
+};
+
 export type BaixaEstoque = {
   baixar(
     agendamentoId: string,
@@ -33,6 +39,7 @@ export type Dependencias = {
   anamneses: Anamneses;
   evolucoes: Evolucoes;
   auditoria: Auditoria;
+  referencias: ReferenciasAuditoria;
   estoque: BaixaEstoque;
   concluirItensDoAgendamento(
     clinicaId: string,

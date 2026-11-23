@@ -4,6 +4,10 @@ import {
   type Agendamento,
 } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
+import { calcularFaturamento } from "../../src/domain/dashboard/regras";
+import { gerarDebitosDoAtendimento } from "../../src/domain/debito/casos";
+import type { Dependencias as DependenciasDebito } from "../../src/domain/debito/portas";
+import type { Debito } from "../../src/domain/debito/tipos";
 import { MENSAGEM_DENTE_INVALIDO, type RegistroOdontograma } from "../../src/domain/odontograma/tipos";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../../src/domain/paciente/tipos";
 import {
@@ -105,6 +109,7 @@ class Memoria {
         },
       },
       auditoria: this.deps().auditoria,
+      referencias: { idsOdontograma: async () => [], idsDocumento: async () => [] },
       estoque: { baixar: async () => {} },
       concluirItensDoAgendamento: async (clinicaId, agendamentoId, ator, agora) => {
         this.conclusoes += 1;
@@ -522,6 +527,57 @@ describe("plano de tratamento", () => {
     });
   });
 
-  it.todo("Feature 013: o débito nasce do item concluído");
-  it.todo("Feature 019: itens concluídos alimentam o faturamento do dashboard");
+  it("dado um item de R$ 150 na consulta, quando ele é concluído, então nasce o débito em aberto e o valor entra no faturado do período", async () => {
+    const plano = await novoPlano();
+    await novoItem(plano.id, { valor: 150, dentes: [26], agendamentoId: CONSULTA });
+    await concluirItensDoAgendamento(memoria.deps(), CLINICA_ID, CONSULTA, dentista, AGORA);
+    const consulta = memoria.agendamentos.get(CONSULTA);
+    if (!consulta) throw new Error("consulta ausente");
+    consulta.status = "concluido";
+    consulta.concluidoEm = AGORA.toISOString();
+
+    const debitos: Debito[] = [];
+    const gerado = await gerarDebitosDoAtendimento(depsDebito(memoria, debitos), dentista, CONSULTA);
+    const faturado = calcularFaturamento(
+      CLINICA_ID,
+      [...memoria.agendamentos.values()],
+      [...memoria.itens.values()],
+      [...memoria.procedimentos.values()],
+      { inicio: "2026-10-01", fim: "2026-10-31" },
+    );
+
+    expect(gerado.ok && gerado.valor.map((debito) => [debito.origem, debito.valor, debito.status])).toEqual([
+      ["item_plano", 150, "em_aberto"],
+    ]);
+    expect(faturado.faturado).toBe(150);
+  });
 });
+
+function depsDebito(
+  memoria: {
+    itens: Map<string, ItemPlano>;
+    agendamentos: Map<string, Agendamento>;
+  },
+  debitos: Debito[],
+): DependenciasDebito {
+  return {
+    debitos: {
+      listarPorPaciente: async () => debitos,
+      listarPorAgendamento: async (clinicaId, agendamentoId) =>
+        debitos.filter((debito) => debito.clinicaId === clinicaId && debito.agendamentoId === agendamentoId),
+      buscarPorId: async (id) => debitos.find((debito) => debito.id === id) ?? null,
+      salvar: async (debito) => {
+        debitos.push(debito);
+      },
+    },
+    pagamentos: { listarPorDebitos: async () => [], salvar: async () => {} },
+    itens: {
+      listarPorAgendamento: async (_clinicaId, agendamentoId) =>
+        [...memoria.itens.values()].filter((item) => item.agendamentoId === agendamentoId),
+    },
+    agendamentos: { buscarPorId: async (id) => memoria.agendamentos.get(id) ?? null },
+    procedimentos: { buscarPorId: async () => null },
+    pacientes: { buscarPorId: async () => null },
+    ids: { novo: () => "deb-item" },
+  };
+}

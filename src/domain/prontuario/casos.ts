@@ -157,12 +157,20 @@ export async function listarAuditoria(
   const clinicaId = ator.usuario.clinicaId;
   const consultas = await historicoDoPaciente(deps, clinicaId, pacienteId);
   const idsConsultas = new Set(consultas.map((item) => item.id));
+  const [idsOdontograma, idsDocumento] = await Promise.all([
+    deps.referencias.idsOdontograma(clinicaId, pacienteId),
+    deps.referencias.idsDocumento(clinicaId, pacienteId),
+  ]);
+  const dentes = new Set(idsOdontograma);
+  const documentos = new Set(idsDocumento);
   const registros = await deps.auditoria.listar(clinicaId);
   const doPaciente = registros.filter(
     (registro) =>
       registro.clinicaId === clinicaId &&
       ((registro.entidade === "anamnese" && registro.entidadeId === pacienteId) ||
-        (registro.entidade === "evolucao" && idsConsultas.has(registro.entidadeId))),
+        (registro.entidade === "evolucao" && idsConsultas.has(registro.entidadeId)) ||
+        (registro.entidade === "odontograma" && dentes.has(registro.entidadeId)) ||
+        (registro.entidade === "documento" && documentos.has(registro.entidadeId))),
   );
   return { ok: true, valor: doPaciente };
 }

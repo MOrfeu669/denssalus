@@ -5,12 +5,14 @@ import {
 } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../../src/domain/paciente/tipos";
+import { baixarPorAtendimento } from "../../src/domain/estoque/casos";
 import {
   abrirProntuario,
   listarAuditoria,
   salvarAnamnese,
   salvarEvolucao,
 } from "../../src/domain/prontuario/casos";
+import { Memoria as MemoriaEstoque } from "./apoio-estoque";
 import type { Dependencias } from "../../src/domain/prontuario/portas";
 import {
   MENSAGEM_EVOLUCAO_NAO_INICIADA,
@@ -32,6 +34,8 @@ class Memoria {
   anamneses = new Map<string, Anamnese>();
   evolucoes = new Map<string, Evolucao>();
   auditoria: RegistroAuditoria[] = [];
+  idsOdontograma: string[] = [];
+  idsDocumento: string[] = [];
   agendamentos = new Map<string, Agendamento>();
   pacientes = new Map<string, Paciente>();
   baixas: string[] = [];
@@ -58,6 +62,10 @@ class Memoria {
           this.auditoria.push(registro);
         },
         listar: async (clinicaId) => this.auditoria.filter((r) => r.clinicaId === clinicaId),
+      },
+      referencias: {
+        idsOdontograma: async () => this.idsOdontograma,
+        idsDocumento: async () => this.idsDocumento,
       },
       estoque: {
         baixar: async (agendamentoId) => {
@@ -521,8 +529,76 @@ describe("prontuário básico", () => {
     });
   });
 
-  it.todo("Feature 012: concluir itens do plano de tratamento ao salvar a evolução");
-  it.todo("Feature 017: baixa real de estoque quando falta material");
-  it.todo("Feature 011: auditar alteração do odontograma");
-  it.todo("Feature 014: auditar documento");
+  it("dado itens do plano ligados à consulta, quando o dentista salva a evolução, então a conclusão dos itens é chamada uma vez", async () => {
+    memoria.semearConsulta();
+    const chamadas: string[] = [];
+    const deps = memoria.deps();
+    deps.concluirItensDoAgendamento = async (_clinicaId, agendamentoId) => {
+      chamadas.push(agendamentoId);
+    };
+
+    const resultado = await salvarEvolucao(deps, sessao("dentista"), CONSULTA, "Texto", AGORA);
+
+    expect(resultado.ok).toBe(true);
+    expect(chamadas).toEqual([CONSULTA]);
+    expect(memoria.agendamentos.get(CONSULTA)?.status).toBe("concluido");
+  });
+
+  it("dado auditoria de odontograma e de documento do paciente, quando o admin lista, então as duas entram e o registro de outro paciente fica de fora", async () => {
+    memoria.idsOdontograma = ["reg-26"];
+    memoria.idsDocumento = ["doc-1"];
+    const base = {
+      clinicaId: CLINICA_ID,
+      usuarioId: "ator-dentista",
+      acao: "edicao" as const,
+      conteudoAnterior: "antes",
+      registradoEm: AGORA.toISOString(),
+    };
+    memoria.auditoria.push(
+      { ...base, id: "a1", entidade: "odontograma", entidadeId: "reg-26" },
+      { ...base, id: "a2", entidade: "odontograma", entidadeId: "reg-alheio" },
+      { ...base, id: "a3", entidade: "documento", entidadeId: "doc-1", acao: "criacao" },
+      { ...base, id: "a4", entidade: "documento", entidadeId: "doc-alheio", acao: "criacao" },
+    );
+
+    const resultado = await listarAuditoria(memoria.deps(), sessao("admin"), PACIENTE_JOAO);
+
+    expect(resultado.ok).toBe(true);
+    if (!resultado.ok) return;
+    expect(resultado.valor.map((registro) => [registro.entidade, registro.entidadeId])).toEqual([
+      ["odontograma", "reg-26"],
+      ["documento", "doc-1"],
+    ]);
+  });
+
+  it("dado 1 unidade e baixa de 2, quando a evolução salva, então o atendimento conclui, o lote zera e o aviso diz o que faltou", async () => {
+    const estoque = new MemoriaEstoque();
+    estoque.material({ nome: "Resina Composta", quantidadeMinima: 0 });
+    estoque.lote({ quantidade: 1 });
+    estoque.vinculo("proc-1", 2);
+    estoque.agendamento({ id: CONSULTA, pacienteId: PACIENTE_JOAO, procedimentoId: "proc-1", status: "iniciado" });
+    memoria.semearConsulta({ procedimentoId: "proc-1" });
+    const deps = memoria.deps();
+    deps.agendamentos = {
+      listar: async (clinicaId) =>
+        [...memoria.agendamentos.values()].filter((item) => item.clinicaId === clinicaId),
+      buscarPorId: async (id) => estoque.agendamentos.get(id) ?? memoria.agendamentos.get(id) ?? null,
+      salvar: async (agendamento) => {
+        memoria.agendamentos.set(agendamento.id, agendamento);
+        estoque.agendamentos.set(agendamento.id, agendamento);
+        return null;
+      },
+    };
+    deps.estoque = {
+      baixar: (agendamentoId, ajustes, usuarioId, agora) =>
+        baixarPorAtendimento(estoque.deps(), agendamentoId, ajustes, usuarioId, agora),
+    };
+
+    const resultado = await salvarEvolucao(deps, sessao("dentista"), CONSULTA, "Texto", AGORA);
+
+    expect(resultado.ok).toBe(true);
+    expect(memoria.agendamentos.get(CONSULTA)?.status).toBe("concluido");
+    expect(estoque.lotes.get("l1")?.quantidade).toBe(0);
+    expect(estoque.avisos.map((aviso) => aviso.texto)).toEqual(["Resina Composta: faltou 1"]);
+  });
 });
