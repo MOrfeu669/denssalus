@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
+import { imagensDoDente } from "../../../domain/imagem/regras";
 import { Aviso } from "../../aviso";
 import { estadoVazio, type EstadoFormulario } from "../../formulario";
 import { excluirImagem, restaurarImagem } from "./acoes-imagem";
@@ -29,7 +30,7 @@ function Legenda({ dente, tipoCaso }: { dente: number | null; tipoCaso: string }
 }
 
 export function ImagensDoDente({ imagens, dente }: { imagens: ImagemDoDente[]; dente: number }) {
-  const doDente = imagens.filter((imagem) => imagem.dente === dente);
+  const doDente = imagensDoDente(imagens, dente);
   return (
     <section aria-label={`Imagens do dente ${dente}`}>
       <h4>Imagens do dente {dente}</h4>

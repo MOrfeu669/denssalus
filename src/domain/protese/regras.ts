@@ -15,6 +15,10 @@ import {
 type Falha = { mensagem: string } | null;
 
 // Lista sem repetição, na ordem informada.
+export function protesesDoDente<T extends { dentes: number[] }>(proteses: T[], dente: number): T[] {
+  return proteses.filter((protese) => protese.dentes.includes(dente));
+}
+
 export function validarDentes(dentes: number[]): { dentes: number[] } | { mensagem: string } {
   if (dentes.length === 0) return { mensagem: MENSAGEM_DENTE };
   if (dentes.some((dente) => quadranteDe(dente) === null)) return { mensagem: MENSAGEM_DENTE_INVALIDO };

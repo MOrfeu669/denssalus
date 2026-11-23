@@ -488,6 +488,34 @@ describe("regras de notificação", () => {
     expect(destinatarios([ADMIN, DENTISTA, ANA], "paciente_aguardando")).toEqual([]);
   });
 
-  it.todo("Feature 019: widget do dashboard");
-  it.todo("Feature 020: chamar registrarFalhaEnvio");
+  it("dado uma notificação crítica já lida, quando a caixa lista, então ela continua visível", async () => {
+    const caixa = new NotificacoesMemoria();
+    caixa.usuarios = [{ id: "u-admin", papel: "admin", ativo: true }];
+    await publicar(caixa.deps(), {
+      clinicaId: "clinica-001",
+      tipo: "estoque_abaixo_minimo",
+      referenciaId: "m1",
+      mensagem: "Luvas abaixo do mínimo",
+      destinatarioIds: ["u-admin"],
+    });
+    const criada = caixa.doDestinatario("u-admin")[0];
+    await marcarLida(caixa.deps(), "u-admin", criada.id, "clinica-001");
+
+    const visiveis = await listarVisiveis(caixa.deps(), "clinica-001", "u-admin");
+
+    expect(visiveis.map((item) => item.id)).toEqual([criada.id]);
+    expect(visiveis[0].lida).toBe(true);
+  });
+
+  it("dado a segunda tentativa de reenvio que falha, quando registra a falha, então a recepcionista vê falha_envio_mensagem", async () => {
+    const caixa = new NotificacoesMemoria();
+    caixa.usuarios = [{ id: "recep-1", papel: "recepcionista", ativo: true }];
+
+    await registrarFalhaEnvio(caixa.deps(), "clinica-001", "msg-1", "Falha no envio ao paciente");
+    const visiveis = await listarVisiveis(caixa.deps(), "clinica-001", "recep-1");
+
+    expect(visiveis.map((item) => [item.tipo, item.referenciaId, item.urgencia])).toEqual([
+      ["falha_envio_mensagem", "msg-1", "critica"],
+    ]);
+  });
 });

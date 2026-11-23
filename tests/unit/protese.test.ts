@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO, type Agendamento } from "../../src/domain/agendamento/tipos";
+import { calcularDespesaProtese } from "../../src/domain/dashboard/regras";
+import { listarVisiveis, publicarPorRegra } from "../../src/domain/notificacao/casos";
+import { NotificacoesMemoria } from "./apoio-notificacao";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import { MENSAGEM_DENTISTA_NAO_ENCONTRADO, type Dentista } from "../../src/domain/dentista/tipos";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../../src/domain/paciente/tipos";
@@ -620,7 +623,45 @@ describe("protese", () => {
     expect(memoria.proteses.get(base.id)).toEqual(base);
   });
 
-  it.todo("Feature 018: a caixa de notificações substitui avisos_protese");
-  it.todo("Feature 019: a comissão entra como despesa, fora do faturado e do recebido");
+  it("dado uma prótese atrasada, quando a caixa lista, então a notificação crítica de atraso aparece", async () => {
+    const enviada = await semearEnviada("2026-11-01");
+    await listarProteses(memoria.deps(), sessao("dentista"), PACIENTE_JOAO, new Date("2026-11-16T12:00:00.000Z"));
+    const aviso = [...memoria.avisos.values()][0];
+    const caixa = new NotificacoesMemoria();
+    caixa.usuarios = [{ id: "u-admin", papel: "admin", ativo: true }];
+    await publicarPorRegra(caixa.deps(), {
+      clinicaId: CLINICA_ID,
+      tipo: "atraso_protese",
+      referenciaId: aviso.proteseId,
+      mensagem: "Peça de prótese atrasada no laboratório",
+    });
+
+    const visiveis = await listarVisiveis(caixa.deps(), CLINICA_ID, "u-admin");
+
+    expect(enviada.id).toBe(aviso.proteseId);
+    expect(visiveis.map((item) => [item.tipo, item.urgencia, item.referenciaId])).toEqual([
+      ["atraso_protese", "critica", enviada.id],
+    ]);
+  });
+
+  it("dado comissão de R$ 800 na instalação, quando soma a despesa do período, então entra 800 fora do faturamento", async () => {
+    const conferida = await semearConferida();
+    const instalada = await instalarProtese(
+      memoria.deps(),
+      sessao("dentista"),
+      { proteseId: conferida.id, valorComissao: 800 },
+      AGORA,
+    );
+    if (!instalada.ok) throw new Error(instalada.mensagem);
+
+    const despesa = calcularDespesaProtese(CLINICA_ID, [instalada.valor], {
+      inicio: "2026-10-01",
+      fim: "2026-10-31",
+    });
+
+    expect(despesa).toBe(800);
+    expect(instalada.valor.valorComissao).toBe(800);
+  });
+
   it.todo("versão futura: cadastro de laboratórios parceiros");
 });

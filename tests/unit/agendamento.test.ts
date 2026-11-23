@@ -11,6 +11,11 @@ import {
 import type { Dependencias } from "../../src/domain/agendamento/portas";
 import { notificacoesVazias } from "./apoio-notificacao";
 import { filtrarGrade, intervalosSobrepoem, ocupaAgenda, sugerirFim } from "../../src/domain/agendamento/regras";
+import { adicionarItem, criarPlano } from "../../src/domain/plano/casos";
+import type { Dependencias as DependenciasPlano } from "../../src/domain/plano/portas";
+import type { ItemPlano, PlanoTratamento } from "../../src/domain/plano/tipos";
+import { salvarEvolucao } from "../../src/domain/prontuario/casos";
+import type { Dependencias as DependenciasProntuario } from "../../src/domain/prontuario/portas";
 import {
   MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO,
   MENSAGEM_CADEIRA_INDISPONIVEL,
@@ -942,8 +947,71 @@ describe("criar agendamento", () => {
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_SO_AGENDADO });
   });
 
-  it.todo("Feature 010: concluir o agendamento ao salvar a evolução");
-  it.todo("Feature 012: vincular itens de plano de tratamento ao agendamento");
+  it("dado uma consulta iniciada, quando a evolução é salva, então o agendamento fica concluído", async () => {
+    const consulta = memoria.semearAgendamento({ id: "consulta-evo", status: "iniciado" });
+    const resultado = await salvarEvolucao(
+      depsEvolucao(memoria),
+      sessao("dentista"),
+      consulta.id,
+      "Texto clínico",
+      new Date("2026-10-15T15:00:00.000Z"),
+    );
+
+    expect(resultado.ok).toBe(true);
+    expect(memoria.agendamentos.get(consulta.id)?.status).toBe("concluido");
+    expect(memoria.agendamentos.get(consulta.id)?.concluidoEm).toBe("2026-10-15T15:00:00.000Z");
+  });
+  it("dado um agendamento do paciente, quando o dentista vincula um item do plano, então o item guarda esse agendamento", async () => {
+    const consulta = memoria.semearAgendamento({ id: "consulta-plano" });
+    const planos = new Map<string, PlanoTratamento>();
+    const itens = new Map<string, ItemPlano>();
+    let seq = 0;
+    const deps: DependenciasPlano = {
+      planos: {
+        listarPorPaciente: async () => [...planos.values()],
+        buscarPorId: async (id) => planos.get(id) ?? null,
+        salvar: async (plano) => {
+          planos.set(plano.id, plano);
+        },
+      },
+      itens: {
+        listarPorPlano: async (planoId) => [...itens.values()].filter((item) => item.planoId === planoId),
+        listarPorAgendamento: async () => [],
+        buscarPorId: async (id) => itens.get(id) ?? null,
+        salvar: async (item) => {
+          itens.set(item.id, item);
+        },
+      },
+      pacientes: { buscarPorId: async (id) => memoria.pacientes.get(id) ?? null },
+      procedimentos: { buscarPorId: async (id) => memoria.procedimentos.get(id) ?? null },
+      agendamentos: { buscarPorId: async (id) => memoria.agendamentos.get(id) ?? null },
+      registros: {
+        listarPorPaciente: async () => [],
+        listarPorAgendamento: async () => [],
+        buscarPorId: async () => null,
+        salvar: async () => {},
+      },
+      auditoria: { registrar: async () => {}, listar: async () => [] },
+      ids: { novo: () => `plano-${++seq}` },
+    };
+    const agora = new Date("2026-10-15T12:00:00.000Z");
+    const plano = await criarPlano(deps, sessao("dentista"), PACIENTE_JOAO, agora);
+    if (!plano.ok) throw new Error(plano.mensagem);
+    const item = await adicionarItem(
+      deps,
+      sessao("dentista"),
+      {
+        planoId: plano.valor.id,
+        procedimentoId: PROCEDIMENTO_ID,
+        dentes: [26],
+        valor: 150,
+        agendamentoId: consulta.id,
+      },
+      agora,
+    );
+
+    expect(item.ok && item.valor.agendamentoId).toBe(consulta.id);
+  });
   it.todo(
     "Cenário 13: bloqueio recorrente impede o horário da ocorrência — PENDENTE o formato da recorrência",
   );
@@ -982,3 +1050,26 @@ describe("criar agendamento", () => {
   });
   it.todo("PENDENTE: quem pode registrar um atendimento de emergência retroativo");
 });
+
+function depsEvolucao(memoria: { agendamentos: Map<string, Agendamento> }): DependenciasProntuario {
+  return {
+    anamneses: { buscar: async () => null, salvar: async () => {} },
+    evolucoes: { buscar: async () => null, listar: async () => [], salvar: async () => {} },
+    auditoria: { registrar: async () => {}, listar: async () => [] },
+    referencias: { idsOdontograma: async () => [], idsDocumento: async () => [] },
+    estoque: { baixar: async () => {} },
+    concluirItensDoAgendamento: async () => {},
+    gerarDebitosDoAtendimento: async () => {},
+    agendamentos: {
+      listar: async (clinicaId) =>
+        [...memoria.agendamentos.values()].filter((item) => item.clinicaId === clinicaId),
+      buscarPorId: async (id) => memoria.agendamentos.get(id) ?? null,
+      salvar: async (agendamento) => {
+        memoria.agendamentos.set(agendamento.id, agendamento);
+        return null;
+      },
+    },
+    pacientes: { buscarPorId: async () => null },
+    ids: { novo: () => "evo-id" },
+  };
+}
