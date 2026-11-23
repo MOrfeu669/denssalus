@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { caminhoDeReagendar, respostaReagendar } from "../../src/app/agendamentos/cancelar";
+import { PERGUNTA_REAGENDAR } from "../../src/app/agendamentos/texto";
 import { cancelarAgendamento, criarAgendamento } from "../../src/domain/agendamento/casos";
 import type { AvisoRecepcionista, Dependencias } from "../../src/domain/agendamento/portas";
 import { intervalosSobrepoem, ocupaAgenda } from "../../src/domain/agendamento/regras";
@@ -11,7 +13,17 @@ import {
 } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import type { Clinica } from "../../src/domain/clinica/tipos";
-import { notificacoesVazias } from "./apoio-notificacao";
+import { listarVisiveis } from "../../src/domain/notificacao/casos";
+import { MENSAGEM_CANCELAMENTO_COMUNICAR } from "../../src/domain/notificacao/regras";
+import { reverterDoAgendamento } from "../../src/domain/odontograma/casos";
+import type { Dependencias as DependenciasOdontograma } from "../../src/domain/odontograma/portas";
+import {
+  MENSAGEM_REGISTROS_CONFIRMADOS,
+  type RegistroOdontograma,
+} from "../../src/domain/odontograma/tipos";
+import { abrirProntuario } from "../../src/domain/prontuario/casos";
+import type { Dependencias as DependenciasProntuario } from "../../src/domain/prontuario/portas";
+import { NotificacoesMemoria, notificacoesVazias } from "./apoio-notificacao";
 
 const CLINICA_ID = "clinica-001";
 const OUTRA_CLINICA = "clinica-002";
@@ -426,8 +438,151 @@ describe("cancelar agendamento", () => {
     expect(memoria.agendamentos.get("ag-1")?.status).toBe("cancelado");
   });
 
-  it.todo("Feature 011: dado registro confirmado no odontograma, quando cancela, então exige confirmação extra e marca o registro como revertido");
-  it.todo("Feature 010: dado um cancelamento, quando vê o histórico de consultas do paciente, então o cancelamento aparece");
-  it.todo("Feature 009: dado um cancelamento confirmado, quando o sistema pergunta Deseja reagendar?, então o retorno programado é tratado");
-  it.todo("Feature 018: dado um cancelamento, quando a caixa de notificações existir, então ela substitui avisos_recepcao");
+  it("dado registro confirmado no odontograma, quando cancela sem confirmação extra, então bloqueia; com a confirmação, marca o registro como revertido", async () => {
+    memoria.semear({ id: "ag-1", status: "iniciado" });
+    const registros: RegistroOdontograma[] = [
+      {
+        id: "reg-1",
+        clinicaId: CLINICA_ID,
+        pacienteId: PACIENTE_JOAO,
+        dente: 26,
+        quadrante: "superior_esquerdo",
+        procedimentoId: "proc-1",
+        origem: "atendimento",
+        agendamentoId: "ag-1",
+        status: "confirmado",
+        registradoPor: "ator-dentista",
+        registradoEm: AGORA.toISOString(),
+      },
+    ];
+    const deps = memoria.deps();
+    deps.reverterDoAgendamento = (clinicaId, agendamentoId, confirmouReversao) =>
+      reverterDoAgendamento(depsOdontograma(registros), clinicaId, agendamentoId, confirmouReversao);
+
+    const bloqueado = await cancelarAgendamento(deps, sessao("dentista"), "ag-1", MOTIVO, AGORA, false);
+
+    expect(bloqueado).toEqual({ ok: false, mensagem: MENSAGEM_REGISTROS_CONFIRMADOS });
+    expect(registros[0].status).toBe("confirmado");
+    expect(memoria.agendamentos.get("ag-1")?.status).toBe("iniciado");
+
+    const confirmado = await cancelarAgendamento(deps, sessao("dentista"), "ag-1", MOTIVO, AGORA, true);
+
+    expect(confirmado.ok).toBe(true);
+    expect(registros[0].status).toBe("revertido");
+    expect(memoria.agendamentos.get("ag-1")?.status).toBe("cancelado");
+  });
+
+  it("dado um cancelamento, quando abre o prontuário, então o histórico mostra a consulta cancelada com a data", async () => {
+    memoria.semear({ id: "ag-1" });
+    const deps = memoria.deps();
+    const cancelado = await cancelarAgendamento(deps, sessao("recepcionista"), "ag-1", MOTIVO, AGORA, false);
+    expect(cancelado.ok).toBe(true);
+
+    const aberto = await abrirProntuario(depsProntuario(deps), sessao("recepcionista"), PACIENTE_JOAO);
+
+    expect(aberto.ok).toBe(true);
+    if (!aberto.ok) return;
+    expect(aberto.valor.historico.map((item) => [item.id, item.status, item.inicio])).toEqual([
+      ["ag-1", "cancelado", INICIO],
+    ]);
+  });
+
+  it("dado um cancelamento confirmado, quando responde Sim, então reabre o agendamento com paciente, dentista e procedimento; Não não cria consulta", async () => {
+    memoria.semear({ id: "ag-1", procedimentoId: "proc-limpeza" });
+    const resultado = await cancelarAgendamento(
+      memoria.deps(),
+      sessao("recepcionista"),
+      "ag-1",
+      MOTIVO,
+      AGORA,
+      false,
+    );
+    expect(PERGUNTA_REAGENDAR).toBe("Deseja reagendar?");
+    expect(resultado.ok).toBe(true);
+    if (!resultado.ok) return;
+
+    const caminho = respostaReagendar(resultado.valor, "sim");
+    expect(caminho).toBe(caminhoDeReagendar(resultado.valor));
+    const params = new URL(caminho ?? "", "http://localhost").searchParams;
+    expect(params.get("paciente")).toBe(PACIENTE_JOAO);
+    expect(params.get("dentista")).toBe(DENTISTA_CARLOS);
+    expect(params.get("procedimento")).toBe("proc-limpeza");
+    expect(respostaReagendar(resultado.valor, "nao")).toBeNull();
+  });
+
+  it("dado o retorno ainda pendente, quando o novo agendamento do paciente é criado, então o retorno pendente é concluído", async () => {
+    memoria.semear({ id: "ag-1" });
+    const deps = memoria.deps();
+    await cancelarAgendamento(deps, sessao("recepcionista"), "ag-1", MOTIVO, AGORA, false);
+    const chamadas: string[] = [];
+    deps.retornos = {
+      concluirPendentes: async (clinicaId, pacienteId) => {
+        chamadas.push(`${clinicaId}:${pacienteId}`);
+      },
+    };
+
+    const novo = await criarAgendamento(deps, sessao("recepcionista"), {
+      pacienteId: PACIENTE_JOAO,
+      dentistaId: DENTISTA_CARLOS,
+      cadeiraId: CADEIRA_1,
+      procedimentoId: null,
+      inicio: INICIO,
+      fim: FIM,
+    });
+
+    expect(novo.ok).toBe(true);
+    expect(chamadas).toEqual([`${CLINICA_ID}:${PACIENTE_JOAO}`]);
+  });
+
+  it("dado um cancelamento e uma recepcionista na clínica, quando a caixa de notificações lista, então ela vê o aviso de comunicar o paciente", async () => {
+    memoria.semear({ id: "ag-1" });
+    const caixa = new NotificacoesMemoria();
+    caixa.usuarios = [{ id: "recep-1", papel: "recepcionista", ativo: true }];
+    const deps = memoria.deps();
+    deps.notificacoes = caixa.deps();
+
+    const resultado = await cancelarAgendamento(deps, sessao("admin"), "ag-1", MOTIVO, AGORA, false);
+    const visiveis = await listarVisiveis(caixa.deps(), CLINICA_ID, "recep-1");
+
+    expect(resultado.ok).toBe(true);
+    expect(visiveis.map((item) => [item.tipo, item.mensagem])).toEqual([
+      ["cancelamento_comunicar", MENSAGEM_CANCELAMENTO_COMUNICAR],
+    ]);
+  });
 });
+
+function depsOdontograma(lista: RegistroOdontograma[]): DependenciasOdontograma {
+  return {
+    registros: {
+      listarPorPaciente: async (clinicaId) => lista.filter((item) => item.clinicaId === clinicaId),
+      listarPorAgendamento: async (clinicaId, agendamentoId) =>
+        lista.filter((item) => item.clinicaId === clinicaId && item.agendamentoId === agendamentoId),
+      buscarPorId: async (id) => lista.find((item) => item.id === id) ?? null,
+      salvar: async (registro) => {
+        const indice = lista.findIndex((item) => item.id === registro.id);
+        if (indice >= 0) lista[indice] = registro;
+      },
+    },
+    auditoria: { registrar: async () => {}, listar: async () => [] },
+    pacientes: { buscarPorId: async () => null },
+    procedimentos: { buscarPorId: async () => null },
+    agendamentos: { buscarPorId: async () => null },
+    ids: { novo: () => "odo-id" },
+  };
+}
+
+function depsProntuario(
+  agenda: Pick<Dependencias, "agendamentos" | "pacientes">,
+): DependenciasProntuario {
+  return {
+    anamneses: { buscar: async () => null, salvar: async () => {} },
+    evolucoes: { buscar: async () => null, listar: async () => [], salvar: async () => {} },
+    auditoria: { registrar: async () => {}, listar: async () => [] },
+    estoque: { baixar: async () => {} },
+    concluirItensDoAgendamento: async () => {},
+    gerarDebitosDoAtendimento: async () => {},
+    agendamentos: agenda.agendamentos,
+    pacientes: agenda.pacientes,
+    ids: { novo: () => "pront-id" },
+  };
+}
