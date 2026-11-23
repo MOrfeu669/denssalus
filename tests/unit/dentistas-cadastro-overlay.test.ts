@@ -32,6 +32,7 @@ describe("cadastro de dentista na tela", () => {
     const html = renderToStaticMarkup(createElement(Dentistas, { dentistas: [rui] }));
 
     expect(html).toContain("Cadastrar dentista");
+    expect(html).toContain("Buscar por nome");
     expect(html).toContain('aria-haspopup="dialog"');
     expect(html).toContain('aria-expanded="false"');
     expect(html).not.toContain('role="dialog"');

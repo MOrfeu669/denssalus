@@ -1,12 +1,14 @@
 "use client";
 
+import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import type { Dentista } from "../../domain/dentista/tipos";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrar, editar, remover } from "./actions";
 import { Alerta, BotaoAcao } from "./alerta";
 import { Campos } from "./campos";
+import { filtrarDentistas } from "./filtrar";
 import { DENTISTAS_NOTA, DENTISTAS_VAZIO, mensagemComDetalhe } from "./texto";
 
 export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
@@ -18,8 +20,10 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
   const [remocao, acaoRemover] = useActionState(remover, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [aberto, setAberto] = useState(false);
+  const [busca, setBusca] = useState("");
   const aviso = avisoVisivel(cadastro, edicao, remocao);
   const erroNoPainel = aberto && aviso.status === "erro" && aviso.quando === cadastro.quando;
+  const visiveis = useMemo(() => filtrarDentistas(dentistas, busca), [dentistas, busca]);
 
   useEffect(() => {
     if (edicao.status === "sucesso") setEditandoId(null);
@@ -57,6 +61,21 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
     <>
       <div className="dentistas-cabeca">
         <h1>Dentistas</h1>
+      </div>
+      {erroNoPainel ? null : (
+        <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+      )}
+      <div className="dentistas-ferramentas">
+        <label className="dentistas-busca">
+          <Search className="dentistas-busca-icone" aria-hidden="true" />
+          <span className="sr-only">Buscar por nome</span>
+          <input
+            type="search"
+            value={busca}
+            onChange={(evento) => setBusca(evento.target.value)}
+            placeholder="Buscar por nome"
+          />
+        </label>
         <button
           ref={botaoRef}
           type="button"
@@ -69,9 +88,6 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
           Cadastrar dentista
         </button>
       </div>
-      {erroNoPainel ? null : (
-        <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
-      )}
       {aberto ? (
         <div className="dentistas-overlay">
           <div className="dentistas-overlay-fundo" onClick={fechar} />
@@ -123,75 +139,92 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
         </h2>
         {dentistas.length === 0 ? (
           <p className="dentistas-vazio">{DENTISTAS_VAZIO}</p>
+        ) : visiveis.length === 0 ? (
+          <p className="dentistas-vazio">Nenhum dentista encontrado com esse nome.</p>
         ) : (
-          <ul className="dentistas-lista">
-            {dentistas.map((dentista) => (
-              <li key={dentista.id} className="dentistas-linha">
-                <div className="dentistas-topo">
-                  <span className="dentistas-pessoa">
-                    <span className="dentistas-nome">{dentista.nome}</span>
-                    <span className="dentistas-cro">CRO {dentista.cro}</span>
-                    <span
-                      className={dentista.ativo ? "dentistas-ativo" : "dentistas-inativo"}
-                    >
-                      {dentista.ativo ? "Ativo" : "! Removido"}
-                    </span>
-                    <span className="dentistas-detalhe">
-                      {dentista.telefone}
-                      {dentista.especialidades.length > 0
-                        ? ` · ${dentista.especialidades.join(", ")}`
-                        : ""}
-                    </span>
-                  </span>
-                  {dentista.ativo ? (
-                    <span className="dentistas-linha-acoes">
-                      <button
-                        type="button"
-                        className="dentistas-botao-sec"
-                        aria-expanded={editandoId === dentista.id}
-                        aria-label={`Editar dentista ${dentista.nome}`}
-                        onClick={() =>
-                          setEditandoId(editandoId === dentista.id ? null : dentista.id)
-                        }
+          <>
+            <ul className="dentistas-lista">
+              {visiveis.map((dentista) => (
+                <li key={dentista.id} className="dentistas-linha">
+                  <div className="dentistas-topo">
+                    <span className="dentistas-pessoa">
+                      <span className="dentistas-avatar" aria-hidden="true">
+                        {iniciais(dentista.nome)}
+                      </span>
+                      <span className="dentistas-nome">{dentista.nome}</span>
+                      <span className="dentistas-cro">CRO {dentista.cro}</span>
+                      <span
+                        className={dentista.ativo ? "dentistas-ativo" : "dentistas-inativo"}
                       >
-                        Editar
-                      </button>
-                      <form action={acaoRemover} className="dentistas-remover">
-                        <input type="hidden" name="id" value={dentista.id} />
-                        <BotaoAcao
-                          rotulo="Remover"
-                          pendente="Removendo…"
-                          className="dentistas-botao-sec"
-                          nomeAcessivel={`Remover dentista ${dentista.nome}`}
-                        />
-                      </form>
+                        {dentista.ativo ? "Ativo" : "! Removido"}
+                      </span>
+                      <span className="dentistas-detalhe">
+                        {dentista.telefone}
+                        {dentista.especialidades.length > 0
+                          ? ` · ${dentista.especialidades.join(", ")}`
+                          : ""}
+                      </span>
                     </span>
+                    {dentista.ativo ? (
+                      <span className="dentistas-linha-acoes">
+                        <button
+                          type="button"
+                          className="dentistas-botao-sec"
+                          aria-expanded={editandoId === dentista.id}
+                          aria-label={`Editar dentista ${dentista.nome}`}
+                          onClick={() =>
+                            setEditandoId(editandoId === dentista.id ? null : dentista.id)
+                          }
+                        >
+                          Editar
+                        </button>
+                        <form action={acaoRemover} className="dentistas-remover">
+                          <input type="hidden" name="id" value={dentista.id} />
+                          <BotaoAcao
+                            rotulo="Remover"
+                            pendente="Removendo…"
+                            className="dentistas-botao-sec"
+                            nomeAcessivel={`Remover dentista ${dentista.nome}`}
+                          />
+                        </form>
+                      </span>
+                    ) : null}
+                  </div>
+                  {dentista.ativo && editandoId === dentista.id ? (
+                    <form
+                      action={acaoEditar}
+                      aria-busy={pendenteEditar}
+                      className="dentistas-form dentistas-edicao"
+                    >
+                      <input type="hidden" name="id" value={dentista.id} />
+                      <Campos dentista={dentista} />
+                      <div className="dentistas-acoes">
+                        <BotaoAcao
+                          rotulo="Salvar dentista"
+                          pendente="Salvando…"
+                          className="dentistas-botao"
+                        />
+                      </div>
+                    </form>
                   ) : null}
-                </div>
-                {dentista.ativo && editandoId === dentista.id ? (
-                  <form
-                    action={acaoEditar}
-                    aria-busy={pendenteEditar}
-                    className="dentistas-form dentistas-edicao"
-                  >
-                    <input type="hidden" name="id" value={dentista.id} />
-                    <Campos dentista={dentista} />
-                    <div className="dentistas-acoes">
-                      <BotaoAcao
-                        rotulo="Salvar dentista"
-                        pendente="Salvando…"
-                        className="dentistas-botao"
-                      />
-                    </div>
-                  </form>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+            <p className="dentistas-rodape">
+              Mostrando {visiveis.length} de {dentistas.length} dentistas
+            </p>
+          </>
         )}
       </section>
     </>
   );
+}
+
+function iniciais(nome: string): string {
+  const partes = nome.trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return "?";
+  if (partes.length === 1) return partes[0].slice(0, 1).toUpperCase();
+  return `${partes[0].slice(0, 1)}${partes[partes.length - 1].slice(0, 1)}`.toUpperCase();
 }
 
 function avisoVisivel(...estados: EstadoFormulario[]) {

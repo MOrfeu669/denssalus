@@ -43,17 +43,69 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  max-width: 640px;
-  margin: 0 0 24px;
+  max-width: 960px;
+  margin: 0 0 16px;
 }
 
 .casca .dentistas-cabeca h1 {
   margin: 0;
 }
 
-.casca .casca-miolo .dentistas-cabeca > button.dentistas-botao {
+.casca .dentistas-ferramentas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 960px;
+  margin: 0 0 20px;
+}
+
+.casca .dentistas-busca {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.casca .dentistas-busca-icone {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: #475760;
+  pointer-events: none;
+}
+
+.casca .dentistas-busca input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px 0 40px;
+  border: 1px solid #cbd4d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1a20;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.casca .casca-miolo .dentistas-ferramentas > button.dentistas-botao {
+  flex: none;
   background: #158172;
   color: #fff;
+  border: 0;
+}
+
+.casca .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
 }
 
@@ -104,7 +156,7 @@
 }
 
 .casca .dentistas-cartao {
-  max-width: 640px;
+  max-width: 960px;
   margin: 0 0 24px;
   padding: 24px;
   border: 1px solid #cbd4d9;
@@ -244,6 +296,19 @@
   min-width: 0;
 }
 
+.casca .dentistas-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d3f3ec;
+  color: #0f433d;
+  font-size: 12px;
+  font-weight: 700;
+  flex: none;
+}
+
 .casca .dentistas-nome {
   font-size: 15px;
   line-height: 22px;
@@ -309,6 +374,13 @@
   color: #475760;
 }
 
+.casca .dentistas-rodape {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #475760;
+}
+
 .casca .dentistas-nota {
   margin: 16px 0 0;
   font-size: 13px;
@@ -317,6 +389,7 @@
 }
 
 .casca .dentistas-voltar {
+  max-width: 960px;
   margin: 8px 0 0;
 }
 
@@ -326,8 +399,9 @@
   }
 
   .casca .dentistas-topo,
-  .casca .dentistas-cabeca {
+  .casca .dentistas-cabeca,
+  .casca .dentistas-ferramentas {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 }
