@@ -346,7 +346,29 @@ describe("visualizar agenda", () => {
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_CLINICA_NAO_ENCONTRADA });
   });
 
-  it.todo(
-    "Feature 006: bloqueio recorrente na grade — PENDENTE o formato da recorrência, ainda não definido",
-  );
+  it("dado um bloqueio semanal às quintas, quando vê a semana de 2026-10-15, então a ocorrência entra e a exceção de 2026-10-22 não", () => {
+    const serie = bloqueio({
+      id: "serie",
+      inicio: "2026-10-15T09:00",
+      fim: "2026-10-15T10:00",
+      frequencia: "semanal",
+      dataFim: "2026-10-29",
+      excecoes: ["2026-10-22"],
+    });
+
+    const semana = grade("semana", { bloqueios: [serie] });
+    const seguinte = filtrarGrade(
+      { data: "2026-10-22", dentistaId: null, cadeiraId: null, modo: "semana" },
+      { agendamentos: [], bloqueios: [serie], ...CONTEXTO },
+      EXPEDIENTE,
+    );
+
+    expect(semana.bloqueios.map((item) => item.inicio)).toEqual(["2026-10-15T09:00"]);
+    expect(seguinte.bloqueios.map((item) => item.inicio)).toEqual([]);
+    expect(filtrarGrade(
+      { data: "2026-10-29", dentistaId: null, cadeiraId: null, modo: "dia" },
+      { agendamentos: [], bloqueios: [serie], ...CONTEXTO },
+      EXPEDIENTE,
+    ).bloqueios.map((item) => item.id)).toEqual(["serie@2026-10-29"]);
+  });
 });

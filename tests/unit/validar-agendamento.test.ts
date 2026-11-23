@@ -15,6 +15,8 @@ const bloqueio = {
   inicio: "2026-10-26T14:00",
   fim: "2026-10-26T15:00",
   motivo: " ",
+  frequencia: "pontual",
+  dataFim: "",
 };
 
 describe("validar agendamento", () => {
@@ -108,6 +110,8 @@ describe("validar bloqueio", () => {
         inicio: "2026-10-26T14:00",
         fim: "2026-10-26T15:00",
         motivo: null,
+        frequencia: "pontual",
+        dataFim: null,
       },
     });
   });

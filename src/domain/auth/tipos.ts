@@ -33,6 +33,7 @@ export type Acao =
   | "usuario:remover"
   | "agendamento:criar"
   | "agendamento:bloquear"
+  | "agendamento:emergencia"
   | "agendamento:cancelar"
   | "agenda:ver"
   | "retorno:marcar"

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   criarAgendamento,
   criarBloqueio,
+  removerOcorrencia,
   iniciarAtendimento,
   listarAgendamentos,
   listarOpcoesAgendamento,
@@ -596,11 +597,16 @@ describe("criar agendamento", () => {
       fim: "2026-10-18T14:30",
     };
     const deps = memoria.deps();
-    const ator = sessao("recepcionista");
+    const recepcionista = sessao("recepcionista");
+    const ator = sessao("dentista");
 
-    expect(await criarAgendamento(deps, ator, entrada)).toEqual({
+    expect(await criarAgendamento(deps, recepcionista, entrada)).toEqual({
       ok: false,
       mensagem: MENSAGEM_DIA_SEM_ATENDIMENTO,
+    });
+    expect(await registrarEmergencia(deps, recepcionista, entrada)).toEqual({
+      ok: false,
+      mensagem: MENSAGEM_PAPEL,
     });
     const resultado = await registrarEmergencia(deps, ator, entrada);
 
@@ -720,8 +726,11 @@ describe("criar agendamento", () => {
     expect(resultado.ok && Object.keys(resultado.valor).sort()).toEqual([
       "clinicaId",
       "criadoPor",
+      "dataFim",
       "dentistaId",
+      "excecoes",
       "fim",
+      "frequencia",
       "id",
       "inicio",
       "motivo",
@@ -1012,9 +1021,45 @@ describe("criar agendamento", () => {
 
     expect(item.ok && item.valor.agendamentoId).toBe(consulta.id);
   });
-  it.todo(
-    "Cenário 13: bloqueio recorrente impede o horário da ocorrência — PENDENTE o formato da recorrência",
-  );
+  it("dado um bloqueio semanal até 2026-11-05, quando agenda na ocorrência, então a cadeira do dentista fica ocupada; a exceção de 2026-10-22 libera só esse dia", async () => {
+    await criarBloqueio(memoria.deps(), sessao("dentista"), {
+      dentistaId: DENTISTA_CARLOS,
+      inicio: "2026-10-15T14:00",
+      fim: "2026-10-15T14:30",
+      motivo: "Congresso",
+      frequencia: "semanal",
+      dataFim: "2026-11-05",
+    });
+    const deps = memoria.deps();
+    const entrada = (inicio: string): EntradaAgendamento => ({
+      ...ENTRADA,
+      inicio,
+      fim: inicio.replace("T14:00", "T14:30"),
+    });
+
+    expect(await criarAgendamento(deps, sessao("recepcionista"), entrada("2026-10-15T14:00"))).toEqual({
+      ok: false,
+      mensagem: MENSAGEM_DENTISTA_OCUPADO,
+    });
+    expect(await criarAgendamento(deps, sessao("recepcionista"), entrada("2026-10-29T14:00"))).toEqual({
+      ok: false,
+      mensagem: MENSAGEM_DENTISTA_OCUPADO,
+    });
+    expect((await criarAgendamento(deps, sessao("recepcionista"), entrada("2026-10-16T14:00"))).ok).toBe(
+      true,
+    );
+
+    const serie = [...memoria.bloqueios.values()][0];
+    const removida = await removerOcorrencia(deps, sessao("admin"), serie.id, "2026-10-22");
+    expect(removida.ok).toBe(true);
+    expect((await criarAgendamento(deps, sessao("recepcionista"), entrada("2026-10-22T14:00"))).ok).toBe(
+      true,
+    );
+    expect(await criarAgendamento(deps, sessao("recepcionista"), entrada("2026-11-05T14:00"))).toEqual({
+      ok: false,
+      mensagem: MENSAGEM_DENTISTA_OCUPADO,
+    });
+  });
   it("dado agendamentos na quinta e na segunda da mesma semana, quando a grade é de dia, então só entra o dia; na semana, entram os dois", () => {
     const quinta = "2026-10-15T14:00";
     const segunda = "2026-10-12T09:00";
@@ -1048,7 +1093,28 @@ describe("criar agendamento", () => {
     expect(semana.dias[6]).toBe("2026-10-18");
     expect(semana.agendamentos.map((item) => item.id).sort()).toEqual(["quinta", "segunda"]);
   });
-  it.todo("PENDENTE: quem pode registrar um atendimento de emergência retroativo");
+  it("dado uma emergência retroativa, quando a recepcionista registra, então o papel bloqueia; dentista e admin gravam", async () => {
+    const deps = memoria.deps();
+    const entrada: EntradaAgendamento = {
+      ...ENTRADA,
+      inicio: "2026-10-10T14:00",
+      fim: "2026-10-10T14:30",
+    };
+
+    expect(await registrarEmergencia(deps, sessao("recepcionista"), entrada)).toEqual({
+      ok: false,
+      mensagem: MENSAGEM_PAPEL,
+    });
+    const dentista = await registrarEmergencia(deps, sessao("dentista"), entrada);
+    const admin = await registrarEmergencia(deps, sessao("admin"), {
+      ...entrada,
+      inicio: "2026-10-10T15:00",
+      fim: "2026-10-10T15:30",
+    });
+
+    expect(dentista.ok && dentista.valor.emergencia).toBe(true);
+    expect(admin.ok && admin.valor.emergencia).toBe(true);
+  });
 });
 
 function depsEvolucao(memoria: { agendamentos: Map<string, Agendamento> }): DependenciasProntuario {

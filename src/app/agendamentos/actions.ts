@@ -45,6 +45,8 @@ function camposBloqueio(formData: FormData): CamposBloqueio {
     inicio: texto(formData, "inicio"),
     fim: texto(formData, "fim"),
     motivo: texto(formData, "motivo"),
+    frequencia: texto(formData, "frequencia"),
+    dataFim: texto(formData, "dataFim"),
   };
 }
 

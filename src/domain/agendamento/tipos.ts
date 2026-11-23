@@ -27,6 +27,8 @@ export type Agendamento = {
   concluidoEm: string | null;
 };
 
+export type FrequenciaBloqueio = "pontual" | "diaria" | "semanal";
+
 export type BloqueioAgenda = {
   id: string;
   clinicaId: string;
@@ -35,6 +37,10 @@ export type BloqueioAgenda = {
   fim: string;
   motivo: string | null;
   criadoPor: string;
+  // Ausente significa pontual, para os bloqueios gravados antes da recorrência.
+  frequencia?: FrequenciaBloqueio;
+  dataFim?: string | null;
+  excecoes?: string[];
 };
 
 export type EntradaAgendamento = {
@@ -51,6 +57,8 @@ export type EntradaBloqueio = {
   inicio: string;
   fim: string;
   motivo: string | null;
+  frequencia?: FrequenciaBloqueio;
+  dataFim?: string | null;
 };
 
 export type ConflitoAgenda = "cadeira" | "dentista" | "paciente";
@@ -94,3 +102,5 @@ export const MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO = "Agendamento não encontrado"
 export const MENSAGEM_MOTIVO_OBRIGATORIO = "Informe o motivo";
 export const MENSAGEM_JA_CONCLUIDO = "Agendamento já concluído não pode ser cancelado";
 export const MENSAGEM_SO_AGENDADO = "Só é possível alterar o horário de um agendamento que ainda está agendado";
+export const MENSAGEM_RECORRENCIA = "Informe a data de fim da recorrência";
+export const MENSAGEM_OCORRENCIA = "Ocorrência não encontrada";
