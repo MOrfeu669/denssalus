@@ -5,8 +5,10 @@ import { MENSAGEM_PACIENTE_NAO_ENCONTRADO } from "../paciente/tipos";
 import type { Dependencias } from "./portas";
 import { MODELOS_PADRAO, assinaturaDe, pdfDe, preencher } from "./regras";
 import {
+  MENSAGEM_CAMINHO,
   MENSAGEM_DOCUMENTO_NAO_ENCONTRADO,
   MENSAGEM_MODELO_NAO_ENCONTRADO,
+  MENSAGEM_SEM_CRO,
   type DocumentoGerado,
   type ModeloDocumento,
 } from "./tipos";
@@ -117,6 +119,7 @@ export async function gerarDocumento(
   const dentistas = await deps.dentistas.listar(clinicaId);
   const dentista = dentistas.find((d) => d.usuarioId === ator.usuario.id && d.clinicaId === clinicaId);
   if (!dentista) return { ok: false, mensagem: MENSAGEM_DENTISTA_NAO_ENCONTRADO };
+  if (!dentista.cro?.trim()) return { ok: false, mensagem: MENSAGEM_SEM_CRO };
 
   let anterior: DocumentoGerado | null = null;
   if (entrada.anteriorId) {
@@ -132,15 +135,27 @@ export async function gerarDocumento(
     dentista: { nome: dentista.nome, cro: dentista.cro },
     data: instante,
   });
+  const id = deps.ids.novo();
+  const pdf = pdfDe(conteudoFinal);
+  const caminho = await deps.arquivos.guardar(clinicaId, id, pdf);
+  const assinatura = deps.assinatura.configurado()
+    ? await deps.assinatura.assinar({
+        conteudo: conteudoFinal,
+        documentoId: id,
+        dentista: { id: dentista.id, nome: dentista.nome, cro: dentista.cro },
+        instante,
+      })
+    : assinaturaDe(ator.usuario.id, instante, conteudoFinal);
   const documento: DocumentoGerado = {
-    id: deps.ids.novo(),
+    id,
     clinicaId,
     modeloId: modelo.id,
     pacienteId: paciente.id,
     anteriorId: anterior?.id ?? null,
     conteudoFinal,
-    pdf: pdfDe(conteudoFinal),
-    assinatura: assinaturaDe(ator.usuario.id, instante, conteudoFinal),
+    pdf,
+    caminho,
+    assinatura,
     geradoPor: ator.usuario.id,
     geradoEm: instante,
   };
@@ -201,4 +216,39 @@ export async function obterDocumento(
     return { ok: false, mensagem: MENSAGEM_DOCUMENTO_NAO_ENCONTRADO };
   }
   return { ok: true, valor: documento };
+}
+
+export async function urlDoDocumento(
+  deps: Dependencias,
+  ator: Sessao,
+  documentoId: string,
+): Promise<Resultado<string>> {
+  if (!ator.usuario.ativo) return negado;
+  const documento = await deps.documentos.buscarPorId(documentoId);
+  if (!documento || documento.clinicaId !== ator.usuario.clinicaId || !documento.caminho) {
+    return { ok: false, mensagem: MENSAGEM_DOCUMENTO_NAO_ENCONTRADO };
+  }
+  if (!documento.caminho.startsWith(`${documento.clinicaId}/`) || documento.caminho.includes("..")) {
+    return { ok: false, mensagem: MENSAGEM_CAMINHO };
+  }
+  const url = await deps.arquivos.urlAssinada(documento.clinicaId, documento.caminho);
+  return { ok: true, valor: url };
+}
+
+export async function migrarPdfsLegados(
+  deps: Dependencias,
+  ator: Sessao,
+  clinicaId: string,
+): Promise<Resultado<number>> {
+  if (!ator.usuario.ativo || ator.usuario.papel !== "admin" || ator.usuario.clinicaId !== clinicaId) {
+    return negado;
+  }
+  const legados = (await deps.documentos.listarLegados(clinicaId)).filter(
+    (documento) => documento.clinicaId === clinicaId && documento.caminho === null && documento.pdf.length > 0,
+  );
+  for (const documento of legados) {
+    const caminho = await deps.arquivos.guardar(clinicaId, documento.id, documento.pdf);
+    await deps.documentos.registrarCaminho(clinicaId, documento.id, caminho);
+  }
+  return { ok: true, valor: legados.length };
 }
