@@ -10,6 +10,7 @@ import { criarDashboard } from "../lib/supabase/dashboard";
 import { criarDebitos } from "../lib/supabase/debitos";
 import { criarDentistas } from "../lib/supabase/dentistas";
 import { criarDocumentos } from "../lib/supabase/documentos";
+import { criarArquivosDocumento } from "../lib/supabase/documentos-arquivos";
 import { criarEstoque } from "../lib/supabase/estoque";
 import { criarImagens } from "../lib/supabase/imagens";
 import { criarNotificacoes } from "../lib/supabase/notificacoes";
@@ -31,6 +32,7 @@ import type { Dependencias as DependenciasDashboard } from "../domain/dashboard/
 import { gerarDebitosDoAtendimento as gerarDebitosDoAtendimentoCaso } from "../domain/debito/casos";
 import type { Dependencias as DependenciasDebito } from "../domain/debito/portas";
 import type { Dependencias as DependenciasDentista } from "../domain/dentista/portas";
+import { criarProvedorIcpBrasil, lerConfigIcpBrasil, provedorDesligado } from "../domain/documento/icp";
 import type { Dependencias as DependenciasDocumento } from "../domain/documento/portas";
 import { baixarPorAtendimento } from "../domain/estoque/casos";
 import type { Dependencias as DependenciasEstoque } from "../domain/estoque/portas";
@@ -211,6 +213,7 @@ export function dependenciasDebito(): DependenciasDebito {
 
 export function dependenciasDocumento(): DependenciasDocumento {
   const documentos = criarDocumentos();
+  const configIcp = lerConfigIcpBrasil(process.env);
   return {
     modelos: documentos.modelos,
     documentos: documentos.documentos,
@@ -218,6 +221,8 @@ export function dependenciasDocumento(): DependenciasDocumento {
     pacientes: criarPacientes(),
     dentistas: criarDentistas(),
     auditoria: criarProntuario().auditoria,
+    assinatura: configIcp ? criarProvedorIcpBrasil(configIcp, fetch) : provedorDesligado(),
+    arquivos: criarArquivosDocumento(),
     ids: { novo: () => crypto.randomUUID() },
   };
 }

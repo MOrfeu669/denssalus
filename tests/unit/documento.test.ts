@@ -8,13 +8,17 @@ import {
   importarModelo,
   listarDocumentos,
   listarModelos,
+  migrarPdfsLegados,
   obterDocumento,
+  urlDoDocumento,
 } from "../../src/domain/documento/casos";
 import type { Dependencias } from "../../src/domain/documento/portas";
+import { criarProvedorIcpBrasil, lerConfigIcpBrasil, provedorDesligado } from "../../src/domain/documento/icp";
 import { assinaturaDe, pdfDe, preencher } from "../../src/domain/documento/regras";
 import {
   MENSAGEM_DOCUMENTO_NAO_ENCONTRADO,
   MENSAGEM_MODELO_NAO_ENCONTRADO,
+  MENSAGEM_SEM_CRO,
   type DocumentoGerado,
   type ModeloDocumento,
 } from "../../src/domain/documento/tipos";
@@ -75,9 +79,28 @@ class Memoria {
             (d) => d.clinicaId === clinicaId && d.pacienteId === pacienteId,
           ),
         buscarPorId: async (id) => this.documentos.get(id) ?? null,
+        listarLegados: async (clinicaId) =>
+          [...this.documentos.values()].filter(
+            (d) => d.clinicaId === clinicaId && d.caminho === null && d.pdf.length > 0,
+          ),
         salvar: async (d) => {
           this.salvosDocumento += 1;
           this.documentos.set(d.id, d);
+        },
+        registrarCaminho: async (clinicaId, documentoId, caminho) => {
+          const atual = this.documentos.get(documentoId);
+          if (!atual || atual.clinicaId !== clinicaId) return;
+          this.documentos.set(documentoId, { ...atual, caminho, pdf: new Uint8Array() });
+        },
+      },
+      assinatura: provedorDesligado(),
+      arquivos: {
+        guardar: async (clinicaId, documentoId) => `${clinicaId}/${documentoId}.pdf`,
+        urlAssinada: async (clinicaId, caminho) => {
+          if (!caminho.startsWith(`${clinicaId}/`) || caminho.includes("..")) {
+            throw new Error("caminho");
+          }
+          return `https://assinada.local/${caminho}`;
         },
       },
       importacoes: {
@@ -364,7 +387,79 @@ describe("Feature 014 — documentos", () => {
     expect(vistoPorAna.ok && vistoPorAna.valor.modelos.map((m) => m.nome)).not.toContain("Privado");
   });
 
-  it.todo("PENDENTE: o Admin pode gerar e assinar documento?");
-  it.todo("PENDENTE: provedor de assinatura (hoje a assinatura é só texto composto)");
-  it.todo("PENDENTE: storage externo do PDF (hoje o PDF fica no banco como bytea)");
+  it("dado o admin ou um dentista sem CRO, quando gera documento, então ninguém assina", async () => {
+    const atestado = await modeloPadrao(mem, "Atestado");
+    const admin = await gerarDocumento(mem.deps(), ADMIN, { modeloId: atestado.id, pacienteId: "p-joao" }, AGORA);
+    expect(admin).toEqual({ ok: false, mensagem: MENSAGEM_PAPEL });
+
+    const deps = mem.deps();
+    deps.dentistas = {
+      listar: async () => [dentista("d-carlos", CARLOS.usuario.id, "Carlos", "  ")],
+    };
+    const semCro = await gerarDocumento(deps, CARLOS, { modeloId: atestado.id, pacienteId: "p-joao" }, AGORA);
+    expect(semCro).toEqual({ ok: false, mensagem: MENSAGEM_SEM_CRO });
+    expect(mem.salvosDocumento).toBe(0);
+  });
+
+  it("dado o provedor ICP-Brasil desligado, quando gera, então a assinatura continua o texto composto; ligado, usa a resposta do provedor", async () => {
+    expect(lerConfigIcpBrasil({})).toBeNull();
+    const atestado = await modeloPadrao(mem, "Atestado");
+    const composto = await gerarDocumento(mem.deps(), CARLOS, { modeloId: atestado.id, pacienteId: "p-joao" }, AGORA);
+    if (!composto.ok) throw new Error(composto.mensagem);
+    expect(composto.valor.assinatura).toBe(
+      assinaturaDe(CARLOS.usuario.id, AGORA.toISOString(), composto.valor.conteudoFinal),
+    );
+
+    const deps = mem.deps();
+    deps.assinatura = {
+      configurado: () => true,
+      assinar: async (pedido) => `icp:${pedido.dentista.cro}:${pedido.documentoId}`,
+    };
+    const assinado = await gerarDocumento(deps, CARLOS, { modeloId: atestado.id, pacienteId: "p-joao" }, DEPOIS);
+    if (!assinado.ok) throw new Error(assinado.mensagem);
+    expect(assinado.valor.assinatura).toBe(`icp:CRO-1:${assinado.valor.id}`);
+
+    const provedor = criarProvedorIcpBrasil(
+      {
+        url: "https://provedor.exemplo/assinar",
+        credencial: "segredo",
+        certificadoA1Base64: "Y2VydA==",
+        senhaCertificado: "senha",
+      },
+      async () => new Response(JSON.stringify({ assinatura: "cms-falso" }), { status: 200 }),
+    );
+    expect(await provedor.assinar({
+      conteudo: "texto",
+      documentoId: "doc-1",
+      dentista: { id: "d", nome: "Carlos", cro: "CRO-1" },
+      instante: AGORA.toISOString(),
+    })).toBe("cms-falso");
+  });
+
+  it("dado um PDF legado em bytea, quando o admin migra, então o caminho fica prefixado pela clínica e a outra clínica não assina a URL", async () => {
+    const legado: DocumentoGerado = {
+      id: "doc-legado",
+      clinicaId: CLINICA,
+      modeloId: "m",
+      pacienteId: "p-joao",
+      anteriorId: null,
+      conteudoFinal: "Atestado",
+      pdf: pdfDe("Atestado"),
+      caminho: null,
+      assinatura: "texto",
+      geradoPor: CARLOS.usuario.id,
+      geradoEm: AGORA.toISOString(),
+    };
+    mem.documentos.set(legado.id, legado);
+
+    const migrado = await migrarPdfsLegados(mem.deps(), ADMIN, CLINICA);
+    const url = await urlDoDocumento(mem.deps(), CARLOS, legado.id);
+    const alheio = await urlDoDocumento(mem.deps(), sessao("u-fora", "dentista", OUTRA), legado.id);
+
+    expect(migrado).toEqual({ ok: true, valor: 1 });
+    expect(mem.documentos.get(legado.id)?.caminho).toBe(`${CLINICA}/doc-legado.pdf`);
+    expect(mem.documentos.get(legado.id)?.pdf.length).toBe(0);
+    expect(url).toEqual({ ok: true, valor: `https://assinada.local/${CLINICA}/doc-legado.pdf` });
+    expect(alheio).toEqual({ ok: false, mensagem: MENSAGEM_DOCUMENTO_NAO_ENCONTRADO });
+  });
 });

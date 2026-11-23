@@ -9,11 +9,30 @@ export type ModelosDocumento = {
   salvar(modelo: ModeloDocumento): Promise<void>;
 };
 
-// Sem update nem delete: correção é insert com id novo.
+// Sem delete: correção é insert com id novo. O legado em bytea ganha caminho e o pdf zera.
 export type DocumentosGerados = {
   listarPorPaciente(clinicaId: string, pacienteId: string): Promise<DocumentoGerado[]>;
+  listarLegados(clinicaId: string): Promise<DocumentoGerado[]>;
   buscarPorId(id: string): Promise<DocumentoGerado | null>;
   salvar(documento: DocumentoGerado): Promise<void>;
+  registrarCaminho(clinicaId: string, documentoId: string, caminho: string): Promise<void>;
+};
+
+export type PedidoAssinatura = {
+  conteudo: string;
+  documentoId: string;
+  dentista: { id: string; nome: string; cro: string };
+  instante: string;
+};
+
+export type ProvedorAssinatura = {
+  configurado(): boolean;
+  assinar(pedido: PedidoAssinatura): Promise<string>;
+};
+
+export type ArquivosDocumento = {
+  guardar(clinicaId: string, documentoId: string, bytes: Uint8Array): Promise<string>;
+  urlAssinada(clinicaId: string, caminho: string): Promise<string>;
 };
 
 export type ImportacoesModelo = {
@@ -28,5 +47,7 @@ export type Dependencias = {
   pacientes: Pick<Pacientes, "buscarPorId">;
   dentistas: Pick<Dentistas, "listar">;
   auditoria: Auditoria;
+  assinatura: ProvedorAssinatura;
+  arquivos: ArquivosDocumento;
   ids: { novo(): string };
 };

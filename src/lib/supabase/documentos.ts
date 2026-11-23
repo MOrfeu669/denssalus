@@ -25,6 +25,7 @@ type LinhaDocumento = {
   anterior_id: string | null;
   conteudo_final: string;
   pdf: unknown;
+  caminho: string | null;
   assinatura: string;
   gerado_por: string;
   gerado_em: string;
@@ -44,6 +45,7 @@ function hexParaBytes(hex: string): Uint8Array {
 }
 
 function paraBytes(valor: unknown): Uint8Array {
+  if (valor == null) return new Uint8Array();
   if (valor instanceof Uint8Array) return new Uint8Array(valor);
   if (typeof valor === "string") {
     if (valor.startsWith("\\x")) return hexParaBytes(valor.slice(2));
@@ -94,6 +96,7 @@ function paraDocumento(linha: LinhaDocumento): DocumentoGerado {
     anteriorId: linha.anterior_id,
     conteudoFinal: linha.conteudo_final,
     pdf: paraBytes(linha.pdf),
+    caminho: linha.caminho,
     assinatura: linha.assinatura,
     geradoPor: linha.gerado_por,
     geradoEm: new Date(linha.gerado_em).toISOString(),
@@ -108,7 +111,8 @@ function paraLinhaDocumento(documento: DocumentoGerado): LinhaDocumento {
     paciente_id: documento.pacienteId,
     anterior_id: documento.anteriorId,
     conteudo_final: documento.conteudoFinal,
-    pdf: paraHex(documento.pdf),
+    pdf: documento.caminho ? null : paraHex(documento.pdf),
+    caminho: documento.caminho,
     assinatura: documento.assinatura,
     gerado_por: documento.geradoPor,
     gerado_em: documento.geradoEm,
@@ -169,11 +173,32 @@ export function criarDocumentos(): {
       return data ? paraDocumento(data as LinhaDocumento) : null;
     },
 
+    async listarLegados(clinicaId) {
+      const { data, error } = await admin
+        .from("documentos_gerados")
+        .select("*")
+        .eq("clinica_id", clinicaId)
+        .is("caminho", null);
+      if (error) throw new ErroAplicacao("Não foi possível listar os PDFs legados", error);
+      return (data as LinhaDocumento[])
+        .map(paraDocumento)
+        .filter((documento) => documento.clinicaId === clinicaId && documento.pdf.length > 0);
+    },
+
     async salvar(documento) {
       const { error } = await admin
         .from("documentos_gerados")
         .insert(paraLinhaDocumento(documento));
       if (error) throw new ErroAplicacao("Não foi possível salvar o documento", error);
+    },
+
+    async registrarCaminho(clinicaId, documentoId, caminho) {
+      const { error } = await admin
+        .from("documentos_gerados")
+        .update({ caminho, pdf: null })
+        .eq("clinica_id", clinicaId)
+        .eq("id", documentoId);
+      if (error) throw new ErroAplicacao("Não foi possível registrar o caminho do PDF", error);
     },
   };
 

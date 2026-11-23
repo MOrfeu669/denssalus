@@ -18,6 +18,7 @@ export type DocumentoGerado = {
   anteriorId: string | null;
   conteudoFinal: string;
   pdf: Uint8Array;
+  caminho: string | null;
   assinatura: string;
   geradoPor: string;
   geradoEm: string;
@@ -31,3 +32,5 @@ export type DadosDocumento = {
 
 export const MENSAGEM_MODELO_NAO_ENCONTRADO = "Modelo não encontrado";
 export const MENSAGEM_DOCUMENTO_NAO_ENCONTRADO = "Documento não encontrado";
+export const MENSAGEM_SEM_CRO = "Dentista sem CRO não assina documento";
+export const MENSAGEM_CAMINHO = "Caminho de documento inválido";
