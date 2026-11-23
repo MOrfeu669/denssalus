@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Agendamento } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL } from "../../src/domain/auth/tipos";
 import { MENSAGEM_CLINICA_NAO_ENCONTRADA } from "../../src/domain/clinica/tipos";
+import { estoqueAbaixoDoMinimo } from "../../src/domain/dashboard/regras";
+import { listarVisiveis, publicarPorRegra } from "../../src/domain/notificacao/casos";
+import { NotificacoesMemoria } from "./apoio-notificacao";
 import {
   baixarPorAtendimento,
   criarMaterial,
@@ -361,8 +364,52 @@ describe("baixa na conclusão do atendimento", () => {
     expect(outra.ok).toBe(false);
   });
 
-  it.todo("Feature 018: o sino mostra o alerta crítico de estoque mínimo e de estoque insuficiente");
-  it.todo("Feature 019: o dashboard exibe em vermelho o alerta de estoque abaixo do mínimo");
+  it("dado falta de 1 unidade e estoque abaixo do mínimo, quando a caixa lista, então os dois alertas críticos aparecem para qualquer papel", async () => {
+    memoria.material({ quantidadeMinima: 5 });
+    memoria.lote({ quantidade: 1 });
+    memoria.vinculo("p1", 2);
+    await baixar();
+
+    const caixa = new NotificacoesMemoria();
+    caixa.usuarios = [
+      { id: "ator-admin", papel: "admin", ativo: true },
+      { id: "ator-dentista", papel: "dentista", ativo: true },
+      { id: "ator-recepcionista", papel: "recepcionista", ativo: true },
+    ];
+    for (const aviso of memoria.avisos) {
+      await publicarPorRegra(caixa.deps(), {
+        clinicaId: CLINICA_ID,
+        tipo: aviso.tipo === "estoque_minimo" ? "estoque_abaixo_minimo" : "estoque_baixa_insuficiente",
+        referenciaId: aviso.materialId,
+        mensagem: aviso.texto,
+      });
+    }
+
+    const daRecepcao = await listarVisiveis(caixa.deps(), CLINICA_ID, "ator-recepcionista");
+    const doDentista = await listarVisiveis(caixa.deps(), CLINICA_ID, "ator-dentista");
+
+    expect(daRecepcao.map((item) => [item.tipo, item.urgencia, item.mensagem])).toEqual([
+      ["estoque_baixa_insuficiente", "critica", "Resina Composta: faltou 1"],
+      ["estoque_abaixo_minimo", "critica", "Resina Composta: quantidade 0"],
+    ]);
+    expect(doDentista.map((item) => item.tipo)).toEqual(daRecepcao.map((item) => item.tipo));
+  });
+
+  it("dado material abaixo do mínimo, quando o dashboard monta o alerta, então devolve nome e quantidade", () => {
+    const material = memoria.material({ id: "m-luvas", nome: "Luvas Descartáveis", quantidadeMinima: 20 });
+    const lote = memoria.lote({ id: "l-luvas", materialId: material.id, quantidade: 15 });
+
+    const criticos = estoqueAbaixoDoMinimo(
+      CLINICA_ID,
+      [material],
+      new Map([[material.id, [lote]]]),
+      HOJE,
+    );
+
+    expect(criticos).toEqual([
+      { materialId: "m-luvas", nome: "Luvas Descartáveis", quantidade: 15 },
+    ]);
+  });
 });
 
 describe("salvar evolução e baixa de estoque", () => {

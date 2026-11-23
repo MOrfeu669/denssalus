@@ -4,6 +4,8 @@ import type { Dependencias as DependenciasAgenda } from "../../src/domain/agenda
 import { MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO, type Agendamento } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import type { Clinica } from "../../src/domain/clinica/tipos";
+import { imagensDoDente } from "../../src/domain/imagem/regras";
+import { protesesDoDente } from "../../src/domain/protese/regras";
 import { notificacoesVazias } from "./apoio-notificacao";
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../../src/domain/paciente/tipos";
 import {
@@ -400,6 +402,28 @@ describe("odontograma", () => {
   });
 
 
-  it.todo("Feature 015: imagem no dente");
-  it.todo("Feature 016: prótese no dente 16");
+  it("dado imagens em dentes diferentes, quando consulta o dente 26, então só entra a imagem desse dente", () => {
+    const doDente = imagensDoDente(
+      [
+        { id: "img-26", dente: 26 },
+        { id: "img-16", dente: 16 },
+        { id: "img-geral", dente: null },
+      ],
+      26,
+    );
+
+    expect(doDente.map((imagem) => imagem.id)).toEqual(["img-26"]);
+  });
+
+  it("dado uma prótese nos dentes 14, 15 e 16, quando abre o dente 16, então a prótese aparece nele", () => {
+    const doDente = protesesDoDente(
+      [
+        { id: "ponte", dentes: [14, 15, 16] },
+        { id: "outra", dentes: [21] },
+      ],
+      16,
+    );
+
+    expect(doDente.map((protese) => protese.id)).toEqual(["ponte"]);
+  });
 });

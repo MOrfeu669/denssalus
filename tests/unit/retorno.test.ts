@@ -11,7 +11,9 @@ import {
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
 import type { Clinica } from "../../src/domain/clinica/tipos";
 import type { Paciente } from "../../src/domain/paciente/tipos";
-import { notificacoesVazias } from "./apoio-notificacao";
+import { TEXTOS_PADRAO } from "../../src/domain/mensagem/regras";
+import { listarVisiveis } from "../../src/domain/notificacao/casos";
+import { NotificacoesMemoria, notificacoesVazias } from "./apoio-notificacao";
 import {
   configurarPrazo,
   listarRetornosPendentes,
@@ -553,6 +555,23 @@ describe("listar retornos pendentes", () => {
     expect(memoria.retornos.get(retorno.id)?.status).toBe("pendente");
   });
 
-  it.todo("Feature 018: a caixa de notificações substitui esta lista de retornos");
-  it.todo("Feature 020: confirmar que não há mensagem ao paciente sobre o retorno");
+  it("dado um retorno dentro do prazo, quando a verificação roda, então a recepcionista vê a notificação e o paciente não recebe mensagem externa", async () => {
+    const retorno = memoria.semearRetorno({ status: "pendente", dataPrevista: "2026-12-01" });
+    const caixa = new NotificacoesMemoria();
+    caixa.usuarios = [{ id: "recep-1", papel: "recepcionista", ativo: true }];
+    const deps = memoria.deps();
+    deps.notificacoes = caixa.deps();
+
+    await verificarRetornos(deps, new Date(2026, 10, 24));
+    const visiveis = await listarVisiveis(caixa.deps(), CLINICA_ID, "recep-1");
+
+    expect(visiveis.map((item) => [item.tipo, item.referenciaId, item.urgencia])).toEqual([
+      ["retorno_reagendar", retorno.id, "critica"],
+    ]);
+    expect(Object.keys(TEXTOS_PADRAO)).toEqual([
+      "confirmacao_agendamento",
+      "lembrete_24h",
+      "lembrete_5h",
+    ]);
+  });
 });

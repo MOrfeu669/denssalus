@@ -1,5 +1,6 @@
 "use client";
 
+import { protesesDoDente } from "../../../domain/protese/regras";
 import type { Protese } from "../../../domain/protese/tipos";
 import {
   FormularioConferencia,
@@ -63,7 +64,7 @@ function Item({
 }
 
 export function ProtesesDoDente({ proteses, dente }: { proteses: Protese[]; dente: number }) {
-  const doDente = proteses.filter((protese) => protese.dentes.includes(dente));
+  const doDente = protesesDoDente(proteses, dente);
   return (
     <section aria-label={`Próteses do dente ${dente}`}>
       <h4>Próteses do dente {dente}</h4>

@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { sugerirFim } from "../../src/domain/agendamento/regras";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
+import { vincularMaterial } from "../../src/domain/estoque/casos";
+import { Memoria as MemoriaEstoque } from "./apoio-estoque";
 import { MENSAGEM_CLINICA_NAO_ENCONTRADA, type Clinica } from "../../src/domain/clinica/tipos";
 import {
   criarProcedimento,
@@ -308,8 +311,61 @@ describe("cadastro de procedimentos", () => {
     expect(memoria.procedimentos.size).toBe(1);
   });
 
-  it.todo("Feature 017: dado um material do estoque, quando cria um procedimento com material, então o vínculo é salvo");
-  it.todo("Feature 017: dado um procedimento existente, quando edita incluindo material, então o vínculo é atualizado");
-  it.todo("Feature 006: dado um procedimento escolhido no agendamento, então a duração é pré-preenchida com o tempo médio");
-  it.todo("Feature 006: dado um procedimento excluído, então o histórico de agendamentos permanece consistente");
+  it("dado um material do estoque, quando cria um procedimento e vincula 2 unidades, então o vínculo é salvo", async () => {
+    const criado = await criarProcedimento(memoria.deps(), dentista, ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+    const estoque = estoqueCom(criado.valor);
+
+    const vinculo = await vincularMaterial(estoque.deps(), dentista, {
+      procedimentoId: criado.valor.id,
+      materialId: "m1",
+      quantidade: 2,
+    });
+
+    expect(vinculo.ok && vinculo.valor).toEqual({
+      procedimentoId: criado.valor.id,
+      materialId: "m1",
+      quantidade: 2,
+    });
+  });
+
+  it("dado um procedimento existente, quando edita e inclui material, então o vínculo passa a 3 unidades", async () => {
+    const criado = await criarProcedimento(memoria.deps(), dentista, ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+    const estoque = estoqueCom(criado.valor);
+    await vincularMaterial(estoque.deps(), dentista, {
+      procedimentoId: criado.valor.id,
+      materialId: "m1",
+      quantidade: 2,
+    });
+    const editado = await editarProcedimento(memoria.deps(), dentista, criado.valor.id, {
+      ...ENTRADA,
+      nome: "Restauração ampliada",
+    });
+    if (!editado.ok) throw new Error(editado.mensagem);
+    estoque.procedimentos.set(editado.valor.id, editado.valor);
+
+    const vinculo = await vincularMaterial(estoque.deps(), dentista, {
+      procedimentoId: editado.valor.id,
+      materialId: "m1",
+      quantidade: 3,
+    });
+
+    expect(editado.valor.nome).toBe("Restauração ampliada");
+    expect(vinculo.ok && vinculo.valor.quantidade).toBe(3);
+    expect(estoque.vinculos.size).toBe(1);
+  });
+
+  it("dado um procedimento de 40 minutos escolhido às 14:00, então a duração sugerida termina às 14:40", () => {
+    expect(sugerirFim("2026-10-15T14:00", ENTRADA.tempoMedioMinutos)).toBe("2026-10-15T14:40");
+  });
+
+  it.todo("Feature 006: dado um procedimento excluído, então o histórico de agendamentos permanece consistente — PENDENTE se a exclusão apaga o histórico ou arquiva o procedimento");
 });
+
+function estoqueCom(procedimento: Procedimento): MemoriaEstoque {
+  const estoque = new MemoriaEstoque();
+  estoque.material();
+  estoque.procedimentos.set(procedimento.id, procedimento);
+  return estoque;
+}

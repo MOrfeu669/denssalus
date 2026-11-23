@@ -19,6 +19,10 @@ export function prazoDeRemocao(excluidoEm: Date): string {
   return limite.toISOString();
 }
 
+export function imagensDoDente<T extends { dente: number | null }>(imagens: T[], dente: number): T[] {
+  return imagens.filter((imagem) => imagem.dente === dente);
+}
+
 export function emOrdemCronologica<T extends { adicionadoEm: string }>(lista: T[]): T[] {
   return [...lista].sort((a, b) => a.adicionadoEm.localeCompare(b.adicionadoEm));
 }
