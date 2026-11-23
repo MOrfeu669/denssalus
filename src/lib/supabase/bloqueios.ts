@@ -13,9 +13,13 @@ type LinhaBloqueio = {
   fim: string;
   motivo: string | null;
   criado_por: string;
+  frequencia?: string | null;
+  data_fim?: string | null;
+  excecoes?: string[] | null;
 };
 
 function paraBloqueio(linha: LinhaBloqueio): BloqueioAgenda {
+  const frequencia = linha.frequencia === "diaria" || linha.frequencia === "semanal" ? linha.frequencia : "pontual";
   return {
     id: linha.id,
     clinicaId: linha.clinica_id,
@@ -24,6 +28,9 @@ function paraBloqueio(linha: LinhaBloqueio): BloqueioAgenda {
     fim: linha.fim,
     motivo: linha.motivo,
     criadoPor: linha.criado_por,
+    frequencia,
+    dataFim: linha.data_fim ? linha.data_fim.slice(0, 10) : null,
+    excecoes: (linha.excecoes ?? []).map((data) => data.slice(0, 10)),
   };
 }
 
@@ -36,6 +43,9 @@ function paraLinha(bloqueio: BloqueioAgenda): LinhaBloqueio {
     fim: bloqueio.fim,
     motivo: bloqueio.motivo,
     criado_por: bloqueio.criadoPor,
+    frequencia: bloqueio.frequencia ?? "pontual",
+    data_fim: bloqueio.dataFim ?? null,
+    excecoes: bloqueio.excecoes ?? [],
   };
 }
 
@@ -59,7 +69,7 @@ export function criarBloqueios(): BloqueiosAgenda {
         .select("*")
         .eq("clinica_id", clinicaId)
         .lt("inicio", fim)
-        .gt("fim", inicio)
+        .or(`fim.gt.${inicio},data_fim.gte.${inicio.slice(0, 10)}`)
         .order("inicio", { ascending: true });
       if (error) throw new ErroAplicacao("Não foi possível listar os bloqueios", error);
       return (data as LinhaBloqueio[]).map(paraBloqueio);

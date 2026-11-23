@@ -207,13 +207,15 @@ export function Agendamentos({
             <button type="submit" disabled={pendenteCriar || pendenteEmergencia}>
               {rotuloDoBotao(ROTULO_CRIAR, PENDENTE_CRIAR, pendenteCriar)}
             </button>
-            <button
-              type="submit"
-              formAction={acaoEmergencia}
-              disabled={pendenteCriar || pendenteEmergencia}
-            >
-              {rotuloDoBotao(ROTULO_EMERGENCIA, PENDENTE_EMERGENCIA, pendenteEmergencia)}
-            </button>
+            {papel === "recepcionista" ? null : (
+              <button
+                type="submit"
+                formAction={acaoEmergencia}
+                disabled={pendenteCriar || pendenteEmergencia}
+              >
+                {rotuloDoBotao(ROTULO_EMERGENCIA, PENDENTE_EMERGENCIA, pendenteEmergencia)}
+              </button>
+            )}
           </div>
         </form>
       </section>
@@ -235,6 +237,18 @@ export function Agendamentos({
             <label className="agendamentos-campo">
               Fim
               <input name="fim" type="datetime-local" required />
+            </label>
+            <label className="agendamentos-campo">
+              Repetição
+              <select name="frequencia" defaultValue="pontual">
+                <option value="pontual">Só este horário</option>
+                <option value="diaria">Todo dia</option>
+                <option value="semanal">Toda semana</option>
+              </select>
+            </label>
+            <label className="agendamentos-campo">
+              Até
+              <input name="dataFim" type="date" />
             </label>
             <label className="agendamentos-campo">
               Motivo

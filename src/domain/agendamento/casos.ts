@@ -10,12 +10,14 @@ import { MENSAGEM_CANCELAMENTO_COMUNICAR, MENSAGEM_PACIENTE_AGUARDANDO } from ".
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO } from "../paciente/tipos";
 import { MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO } from "../procedimento/tipos";
 import type { Dependencias } from "./portas";
-import { horarioValido, mensagemDeConflito, mensagemDosSetePassos } from "./regras";
+import { horarioValido, mensagemDeConflito, mensagemDosSetePassos, ocorrenciasEntre } from "./regras";
 import {
   MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO,
   MENSAGEM_HORARIO_INVALIDO,
   MENSAGEM_JA_CONCLUIDO,
   MENSAGEM_MOTIVO_OBRIGATORIO,
+  MENSAGEM_OCORRENCIA,
+  MENSAGEM_RECORRENCIA,
   MENSAGEM_SO_AGENDADO,
   type Agendamento,
   type BloqueioAgenda,
@@ -208,6 +210,9 @@ export async function registrarEmergencia(
   ator: Sessao,
   entrada: EntradaAgendamento,
 ): Promise<Resultado<Agendamento>> {
+  const permitido = autorizarAcao(ator, "agendamento:emergencia");
+  if (!permitido.ok) return permitido;
+
   const contexto = await buscarClinica(deps, ator.usuario.clinicaId);
   if (!contexto.ok) return contexto;
 
@@ -338,6 +343,14 @@ export async function criarBloqueio(
     return { ok: false, mensagem: MENSAGEM_HORARIO_INVALIDO };
   }
 
+  const frequencia = entrada.frequencia ?? "pontual";
+  const dataFim = frequencia === "pontual" ? null : (entrada.dataFim ?? null);
+  if (frequencia !== "pontual") {
+    if (!dataFim || !/^\d{4}-\d{2}-\d{2}$/.test(dataFim) || dataFim < entrada.inicio.slice(0, 10)) {
+      return { ok: false, mensagem: MENSAGEM_RECORRENCIA };
+    }
+  }
+
   const dentista = await deps.dentistas.buscarPorId(entrada.dentistaId);
   if (!dentista || dentista.clinicaId !== contexto.clinica.id) {
     return { ok: false, mensagem: MENSAGEM_DENTISTA_NAO_ENCONTRADO };
@@ -354,9 +367,38 @@ export async function criarBloqueio(
     fim: entrada.fim,
     motivo: entrada.motivo,
     criadoPor: ator.usuario.id,
+    frequencia,
+    dataFim,
+    excecoes: [],
   };
   await deps.bloqueios.salvar(bloqueio);
   return { ok: true, valor: bloqueio };
+}
+
+export async function removerOcorrencia(
+  deps: Dependencias,
+  ator: Sessao,
+  bloqueioId: string,
+  data: string,
+): Promise<Resultado<BloqueioAgenda>> {
+  const contexto = await clinicaAutorizada(deps, ator, "agendamento:bloquear");
+  if (!contexto.ok) return contexto;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) return { ok: false, mensagem: MENSAGEM_OCORRENCIA };
+
+  const serieId = bloqueioId.split("@")[0];
+  const todos = await deps.bloqueios.listar(contexto.clinica.id);
+  const serie = todos.find((item) => item.id === serieId && item.clinicaId === contexto.clinica.id);
+  if (!serie) return { ok: false, mensagem: MENSAGEM_OCORRENCIA };
+
+  const ocorre = ocorrenciasEntre(serie, `${data}T00:00`, `${data}T23:59`).some(
+    (item) => item.inicio.slice(0, 10) === data,
+  );
+  if (!ocorre) return { ok: false, mensagem: MENSAGEM_OCORRENCIA };
+
+  const excecoes = [...new Set([...(serie.excecoes ?? []), data])];
+  const atualizado: BloqueioAgenda = { ...serie, excecoes };
+  await deps.bloqueios.salvar(atualizado);
+  return { ok: true, valor: atualizado };
 }
 
 export async function listarAgendamentos(

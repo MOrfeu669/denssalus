@@ -1,3 +1,4 @@
+import { ocorrenciasEntre } from "../agendamento/regras";
 import type { Agendamento, BloqueioAgenda } from "../agendamento/tipos";
 import type { Clinica, Dia } from "../clinica/tipos";
 import type { Debito, Pagamento } from "../debito/tipos";
@@ -162,7 +163,8 @@ export function calcularCapacidade(
   for (const dia of dias) {
     const abre = Date.parse(`${dia}T${clinica.horarioAbertura}:00.000Z`);
     const fecha = Date.parse(`${dia}T${clinica.horarioFechamento}:00.000Z`);
-    for (const b of bloqueios) {
+    const ate = `${somarDias(dia, 1)}T00:00`;
+    for (const b of bloqueios.flatMap((item) => ocorrenciasEntre(item, `${dia}T00:00`, ate))) {
       if (b.clinicaId !== clinica.id) continue;
       const parte = Math.min(fecha, Date.parse(b.fim)) - Math.max(abre, Date.parse(b.inicio));
       if (parte > 0) bloqueado += parte / HORA_MS;

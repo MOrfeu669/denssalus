@@ -14,6 +14,8 @@ export type CamposBloqueio = {
   inicio: string;
   fim: string;
   motivo: string;
+  frequencia: string;
+  dataFim: string;
 };
 
 export type AgendamentoValidado = {
@@ -30,6 +32,8 @@ export type BloqueioValidado = {
   inicio: string;
   fim: string;
   motivo: string | null;
+  frequencia: "pontual" | "diaria" | "semanal";
+  dataFim: string | null;
 };
 
 const MENSAGEM_PACIENTE = "Informe o paciente";
@@ -116,6 +120,10 @@ export function validarBloqueio(campos: CamposBloqueio): Resultado<BloqueioValid
   const horario = validarHorario(campos.inicio, campos.fim);
   if (!horario.ok) return horario;
 
+  const frequencia =
+    campos.frequencia === "diaria" || campos.frequencia === "semanal" ? campos.frequencia : "pontual";
+  const dataFim = vazioParaNulo(campos.dataFim);
+
   return {
     ok: true,
     valor: {
@@ -123,6 +131,8 @@ export function validarBloqueio(campos: CamposBloqueio): Resultado<BloqueioValid
       inicio: horario.valor.inicio,
       fim: horario.valor.fim,
       motivo: vazioParaNulo(campos.motivo),
+      frequencia,
+      dataFim,
     },
   };
 }

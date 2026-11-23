@@ -17,6 +17,7 @@ import {
   type ConflitoAgenda,
   type EntradaAgendamento,
   type FiltroAgenda,
+  type FrequenciaBloqueio,
   type Grade,
   type StatusAgendamento,
 } from "./tipos";
@@ -56,6 +57,52 @@ export function semanaDe(data: string): string[] {
   return Array.from({ length: 7 }, (_, indice) => somarDias(data, indice - desdeSegunda) as string);
 }
 
+const PASSO: Record<FrequenciaBloqueio, number> = { pontual: 0, diaria: 1, semanal: 7 };
+
+function horaDe(iso: string): string {
+  return iso.slice(11, 16);
+}
+
+// Ocorrências concretas do bloqueio que cruzam [de, ate). Pontual sem campos novos continua uma ocorrência só.
+export function ocorrenciasEntre(bloqueio: BloqueioAgenda, de: string, ate: string): BloqueioAgenda[] {
+  const frequencia = bloqueio.frequencia ?? "pontual";
+  if (frequencia === "pontual") {
+    const exceto = (bloqueio.excecoes ?? []).includes(bloqueio.inicio.slice(0, 10));
+    if (exceto || !(bloqueio.inicio < ate && bloqueio.fim > de)) return [];
+    return [bloqueio];
+  }
+  const excecoes = new Set(bloqueio.excecoes ?? []);
+  const inicioData = bloqueio.inicio.slice(0, 10);
+  const horaInicio = horaDe(bloqueio.inicio);
+  const horaFim = horaDe(bloqueio.fim);
+  const fimSerie = bloqueio.dataFim ?? inicioData;
+  const passo = PASSO[frequencia];
+  const saida: BloqueioAgenda[] = [];
+  let data: string | null = inicioData;
+  let guard = 0;
+  while (data && data <= fimSerie && guard < 800) {
+    guard += 1;
+    const inicio = `${data}T${horaInicio}`;
+    const fim = `${data}T${horaFim}`;
+    if (inicio < ate && fim > de && !excecoes.has(data)) {
+      saida.push({
+        ...bloqueio,
+        id: `${bloqueio.id}@${data}`,
+        inicio,
+        fim,
+        frequencia: "pontual",
+        dataFim: null,
+        excecoes: [],
+      });
+    }
+    if (passo === 0) break;
+    const proxima = somarDias(data, passo);
+    if (!proxima || proxima <= data) break;
+    data = proxima;
+  }
+  return saida;
+}
+
 export function filtrarGrade(
   filtro: FiltroAgenda & { modo: "dia" | "semana" },
   origem: OrigemGrade,
@@ -63,6 +110,10 @@ export function filtrarGrade(
 ): Grade {
   const dias = semanaDe(filtro.data);
   const visiveis = filtro.modo === "dia" ? [filtro.data] : dias;
+  const deGrade = visiveis.length === 0 ? "" : `${visiveis[0]}T00:00`;
+  const ateGrade =
+    visiveis.length === 0 ? "" : `${somarDias(visiveis[visiveis.length - 1], 1) ?? visiveis[0]}T00:00`;
+  const ocorrencias = origem.bloqueios.flatMap((item) => ocorrenciasEntre(item, deGrade, ateGrade));
   const noPeriodo = (item: { inicio: string }) =>
     FORMATO_DATA.test(item.inicio) && visiveis.includes(item.inicio.slice(0, 10));
   const doDentista = (item: { dentistaId: string }) =>
@@ -83,7 +134,7 @@ export function filtrarGrade(
         dentistaInativo(item.dentistaId),
       textoAlerta: item.alertaHorario ? TEXTO_ALERTA_HORARIO : null,
     }));
-  const bloqueios = origem.bloqueios.filter((item) => noPeriodo(item) && doDentista(item));
+  const bloqueios = ocorrencias.filter((item) => noPeriodo(item) && doDentista(item));
 
   return {
     dias,
@@ -161,9 +212,9 @@ export function mensagemDosSetePassos(
     return MENSAGEM_CADEIRA_OCUPADA;
   }
   const dentistaOcupado = ativos.some((item) => item.dentistaId === entrada.dentistaId && cruza(item));
-  const bloqueado = bloqueios.some(
-    (item) => item.clinicaId === clinica.id && item.dentistaId === entrada.dentistaId && cruza(item),
-  );
+  const bloqueado = bloqueios
+    .flatMap((item) => ocorrenciasEntre(item, entrada.inicio, entrada.fim))
+    .some((item) => item.clinicaId === clinica.id && item.dentistaId === entrada.dentistaId && cruza(item));
   if (dentistaOcupado || bloqueado) return MENSAGEM_DENTISTA_OCUPADO;
   if (ativos.some((item) => item.pacienteId === entrada.pacienteId && cruza(item))) {
     return MENSAGEM_PACIENTE_OCUPADO;
