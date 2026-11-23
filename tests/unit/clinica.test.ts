@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { filtrarGrade } from "../../src/domain/agendamento/regras";
+import type { Agendamento } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao, type Usuario } from "../../src/domain/auth/tipos";
 import {
   adicionarCadeira,
@@ -413,5 +415,51 @@ describe("criar e configurar clínica", () => {
     expect(bloqueia("2026-11-01T10:00:00", "2026-11-01T10:30:00")).toBe(true);
   });
 
-  it.todo("Feature 007: agendamento com alerta aparece destacado na agenda (cor diferente ou sinal '!')");
+  it("dado um agendamento futuro em cadeira desativada, quando vê a agenda, então ele aparece destacado", async () => {
+    const { cadeiras } = await criarComTresCadeiras();
+    memoria.agendar({
+      id: "futuro",
+      cadeiraId: cadeiras[1].id,
+      inicio: "2026-10-26T10:00:00",
+      fim: "2026-10-26T10:30:00",
+    });
+    await desativarCadeira(memoria.deps(), admin, cadeiras[1].id, AGORA);
+    const gravado = memoria.agendamentos.get("futuro");
+    if (!gravado) throw new Error("agendamento ausente");
+
+    const marcado: Agendamento = {
+      id: gravado.id,
+      clinicaId: gravado.clinicaId,
+      pacienteId: "paciente-joao",
+      dentistaId: "dentista-1",
+      cadeiraId: gravado.cadeiraId,
+      procedimentoId: null,
+      inicio: gravado.inicio,
+      fim: gravado.fim,
+      status: "agendado",
+      iniciadoPor: null,
+      emergencia: false,
+      criadoPor: "ator-admin",
+      alertaCadeira: gravado.alertaCadeira,
+      alertaHorario: gravado.alertaHorario,
+      alertaDentista: false,
+      motivoCancelamento: null,
+      canceladoPor: null,
+      canceladoEm: null,
+      concluidoEm: null,
+    };
+    const grade = filtrarGrade(
+      { data: "2026-10-26", dentistaId: null, cadeiraId: null, modo: "dia" },
+      {
+        agendamentos: [marcado],
+        bloqueios: [],
+        cadeiras: [{ id: cadeiras[1].id, ativa: false }],
+        dentistas: [{ id: "dentista-1", ativo: true }],
+      },
+      { horarioAbertura: "08:00", horarioFechamento: "18:00" },
+    );
+
+    expect(gravado.alertaCadeira).toBe(true);
+    expect(grade.agendamentos[0]).toMatchObject({ alerta: true, textoAlerta: null });
+  });
 });

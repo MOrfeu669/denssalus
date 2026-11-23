@@ -2,6 +2,7 @@ import { autorizarAcao } from "../auth/casos";
 import { MENSAGEM_PAPEL, type Acao, type Resultado, type Sessao } from "../auth/tipos";
 import type { Cadeira, Clinica } from "../clinica/tipos";
 import { MENSAGEM_CADEIRA_NAO_ENCONTRADA, MENSAGEM_CLINICA_NAO_ENCONTRADA } from "../clinica/tipos";
+import { listarDisponiveis } from "../dentista/regras";
 import type { Dentista } from "../dentista/tipos";
 import { MENSAGEM_DENTISTA_NAO_ENCONTRADO } from "../dentista/tipos";
 import { publicar, publicarPorRegra } from "../notificacao/casos";
@@ -390,7 +391,11 @@ export async function listarOpcoesAgendamento(
     valor: {
       pacientes: porNome(pacientes.map((item) => ({ id: item.id, nome: item.nome }))),
       dentistas: porNome(
-        dentistas.map((item) => ({ id: item.id, nome: item.nome, usuarioId: item.usuarioId })),
+        listarDisponiveis(dentistas).map((item) => ({
+          id: item.id,
+          nome: item.nome,
+          usuarioId: item.usuarioId,
+        })),
       ),
       cadeiras: cadeiras
         .map((item) => ({ id: item.id, identificacao: item.identificacao }))

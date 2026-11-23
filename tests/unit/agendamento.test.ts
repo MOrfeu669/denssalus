@@ -10,7 +10,7 @@ import {
 } from "../../src/domain/agendamento/casos";
 import type { Dependencias } from "../../src/domain/agendamento/portas";
 import { notificacoesVazias } from "./apoio-notificacao";
-import { intervalosSobrepoem, ocupaAgenda, sugerirFim } from "../../src/domain/agendamento/regras";
+import { filtrarGrade, intervalosSobrepoem, ocupaAgenda, sugerirFim } from "../../src/domain/agendamento/regras";
 import {
   MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO,
   MENSAGEM_CADEIRA_INDISPONIVEL,
@@ -815,7 +815,7 @@ describe("criar agendamento", () => {
     });
   });
 
-  it("dado pacientes, dentistas, cadeiras e procedimentos da clínica, quando lista as opções, então devolve os da clínica ordenados em pt-BR, inclusive inativos", async () => {
+  it("dado pacientes, dentistas, cadeiras e procedimentos da clínica, quando lista as opções, então devolve os da clínica ordenados em pt-BR e só o dentista ativo", async () => {
     memoria.pacientes.get(PACIENTE_JOAO)!.nome = "ana";
     memoria.pacientes.get(PACIENTE_MARIA)!.nome = "Bruno";
     memoria.pacientes.set(
@@ -849,7 +849,6 @@ describe("criar agendamento", () => {
     expect(opcoes.valor.pacientes.map((item) => item.nome)).toEqual(["ana", "Bruno"]);
     expect(opcoes.valor.dentistas).toEqual([
       { id: DENTISTA_ANA, nome: "ana", usuarioId: USUARIO_ANA },
-      { id: DENTISTA_CARLOS, nome: "Zélia", usuarioId: USUARIO_CARLOS },
     ]);
     expect(opcoes.valor.cadeiras.map((item) => item.identificacao)).toEqual([
       "alfa",
@@ -948,6 +947,38 @@ describe("criar agendamento", () => {
   it.todo(
     "Cenário 13: bloqueio recorrente impede o horário da ocorrência — PENDENTE o formato da recorrência",
   );
-  it.todo("Feature 007: grade de dia e de semana da agenda");
+  it("dado agendamentos na quinta e na segunda da mesma semana, quando a grade é de dia, então só entra o dia; na semana, entram os dois", () => {
+    const quinta = "2026-10-15T14:00";
+    const segunda = "2026-10-12T09:00";
+    const origem = {
+      agendamentos: [
+        {
+          ...memoria.semearAgendamento({ id: "quinta", inicio: quinta, fim: "2026-10-15T14:30" }),
+        },
+        {
+          ...memoria.semearAgendamento({ id: "segunda", inicio: segunda, fim: "2026-10-12T09:30" }),
+        },
+      ],
+      bloqueios: [],
+      cadeiras: [{ id: CADEIRA_1, ativa: true }],
+      dentistas: [{ id: DENTISTA_CARLOS, ativo: true }],
+    };
+    const expediente = { horarioAbertura: "08:00", horarioFechamento: "18:00" };
+    const dia = filtrarGrade(
+      { data: "2026-10-15", dentistaId: null, cadeiraId: null, modo: "dia" },
+      origem,
+      expediente,
+    );
+    const semana = filtrarGrade(
+      { data: "2026-10-15", dentistaId: null, cadeiraId: null, modo: "semana" },
+      origem,
+      expediente,
+    );
+
+    expect(dia.agendamentos.map((item) => item.id)).toEqual(["quinta"]);
+    expect(semana.dias[0]).toBe("2026-10-12");
+    expect(semana.dias[6]).toBe("2026-10-18");
+    expect(semana.agendamentos.map((item) => item.id).sort()).toEqual(["quinta", "segunda"]);
+  });
   it.todo("PENDENTE: quem pode registrar um atendimento de emergência retroativo");
 });
