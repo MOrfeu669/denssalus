@@ -384,6 +384,7 @@ describe("salvar evolução e baixa de estoque", () => {
         },
       },
       auditoria: { registrar: async () => {}, listar: async () => [] },
+      referencias: { idsOdontograma: async () => [], idsDocumento: async () => [] },
       estoque: {
         baixar: async (...argumentos) => {
           chamadas.push(argumentos);

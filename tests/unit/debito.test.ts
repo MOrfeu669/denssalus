@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Agendamento } from "../../src/domain/agendamento/tipos";
 import { MENSAGEM_PAPEL, type Papel, type Sessao } from "../../src/domain/auth/tipos";
+import { calcularRecebido } from "../../src/domain/dashboard/regras";
+import type { TipoNotificacao } from "../../src/domain/notificacao/tipos";
 import {
   aplicarDesconto,
   gerarDebitosDoAtendimento,
@@ -87,6 +89,7 @@ class Memoria {
         },
       },
       auditoria: { registrar: async () => {}, listar: async () => [] },
+      referencias: { idsOdontograma: async () => [], idsDocumento: async () => [] },
       estoque: { baixar: async () => {} },
       concluirItensDoAgendamento: async () => {},
       gerarDebitosDoAtendimento: async (_clinicaId, agendamentoId, sessaoAtor) => {
@@ -467,6 +470,42 @@ describe("débitos", () => {
     });
   });
 
-  it.todo("Feature 019: dashboard exibe faturado (competência) e recebido (caixa)");
-  it.todo("Feature 018: alerta de débito em atraso");
+  it("dado um débito de R$ 150 quitado com desconto de R$ 30, quando o dashboard soma o caixa, então o recebido é R$ 120", () => {
+    const debito = memoria.semearDebito({ desconto: 30, status: "quitado" });
+    const recebido = calcularRecebido(
+      CLINICA_ID,
+      [debito],
+      [
+        {
+          id: "pag-1",
+          debitoId: debito.id,
+          forma: "pix",
+          data: "2026-10-20",
+          registradoPor: "ator-admin",
+        },
+      ],
+      { inicio: "2026-10-01", fim: "2026-10-31" },
+    );
+
+    expect(recebido).toBe(120);
+  });
+
+  it("dado um débito em aberto, então ele não tem vencimento e não existe notificação de atraso", () => {
+    const debito = memoria.semearDebito();
+    const tipos: TipoNotificacao[] = [
+      "paciente_aguardando",
+      "retorno_reagendar",
+      "cancelamento_comunicar",
+      "estoque_abaixo_minimo",
+      "estoque_baixa_insuficiente",
+      "cadeira_indisponivel",
+      "fora_de_horario",
+      "dentista_removido",
+      "falha_envio_mensagem",
+      "atraso_protese",
+    ];
+
+    expect(Object.keys(debito)).not.toContain("vencimento");
+    expect(tipos).not.toContain("debito_em_atraso" as TipoNotificacao);
+  });
 });

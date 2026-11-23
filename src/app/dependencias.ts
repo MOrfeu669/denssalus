@@ -255,6 +255,20 @@ export function dependenciasProntuario(): DependenciasProntuario {
     anamneses: prontuario.anamneses,
     evolucoes: prontuario.evolucoes,
     auditoria: prontuario.auditoria,
+    referencias: {
+      async idsOdontograma(clinicaId, pacienteId) {
+        const registros = await criarOdontograma().listarPorPaciente(clinicaId, pacienteId);
+        return registros
+          .filter((registro) => registro.clinicaId === clinicaId && registro.pacienteId === pacienteId)
+          .map((registro) => registro.id);
+      },
+      async idsDocumento(clinicaId, pacienteId) {
+        const documentos = await criarDocumentos().documentos.listarPorPaciente(clinicaId, pacienteId);
+        return documentos
+          .filter((documento) => documento.clinicaId === clinicaId && documento.pacienteId === pacienteId)
+          .map((documento) => documento.id);
+      },
+    },
     estoque: {
       async baixar(agendamentoId, ajustes, usuarioId, agora) {
         await baixarPorAtendimento(
