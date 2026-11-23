@@ -11,9 +11,10 @@ type LinhaProcedimento = {
   nome: string;
   tempo_medio_minutos: number | string;
   valor_medio: number | string;
+  arquivado?: boolean | null;
 };
 
-const COLUNAS = "id, clinica_id, nome, tempo_medio_minutos, valor_medio";
+const COLUNAS = "id, clinica_id, nome, tempo_medio_minutos, valor_medio, arquivado";
 
 function paraProcedimento(linha: LinhaProcedimento): Procedimento {
   const tempoMedioMinutos = Number(linha.tempo_medio_minutos);
@@ -28,6 +29,7 @@ function paraProcedimento(linha: LinhaProcedimento): Procedimento {
     nome: linha.nome,
     tempoMedioMinutos,
     valorMedio,
+    arquivado: linha.arquivado === true,
   };
 }
 
@@ -38,6 +40,7 @@ function paraLinha(procedimento: Procedimento): LinhaProcedimento {
     nome: procedimento.nome,
     tempo_medio_minutos: procedimento.tempoMedioMinutos,
     valor_medio: procedimento.valorMedio,
+    arquivado: procedimento.arquivado === true,
   };
 }
 

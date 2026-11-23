@@ -53,6 +53,7 @@ export async function criarProcedimento(
     nome: dados.valor.nome,
     tempoMedioMinutos: dados.valor.tempoMedioMinutos,
     valorMedio: dados.valor.valorMedio,
+    arquivado: false,
   };
   await deps.procedimentos.salvar(procedimento);
   return { ok: true, valor: procedimento };
@@ -79,6 +80,7 @@ export async function editarProcedimento(
     nome: dados.valor.nome,
     tempoMedioMinutos: dados.valor.tempoMedioMinutos,
     valorMedio: dados.valor.valorMedio,
+    arquivado: atual.procedimento.arquivado === true,
   };
   await deps.procedimentos.salvar(editado);
   return { ok: true, valor: editado };
@@ -95,7 +97,7 @@ export async function excluirProcedimento(
   const atual = await procedimentoDaClinica(deps, contexto.clinicaId, procedimentoId);
   if (!atual.ok) return atual;
 
-  await deps.procedimentos.remover(atual.procedimento.id);
+  await deps.procedimentos.salvar({ ...atual.procedimento, arquivado: true });
   return { ok: true, valor: undefined };
 }
 
@@ -108,7 +110,7 @@ export async function listarProcedimentos(
 
   const lista = await deps.procedimentos.listar(contexto.clinicaId);
   const ordenada = lista
-    .filter((item) => item.clinicaId === contexto.clinicaId)
+    .filter((item) => item.clinicaId === contexto.clinicaId && item.arquivado !== true)
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   return { ok: true, valor: ordenada };
 }
