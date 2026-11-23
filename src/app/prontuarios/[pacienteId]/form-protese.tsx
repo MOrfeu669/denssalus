@@ -55,10 +55,12 @@ export function FormularioPedido({
   pacienteId,
   responsaveis,
   procedimentos,
+  laboratorios = [],
 }: {
   pacienteId: string;
   responsaveis: ResponsavelOpcao[];
   procedimentos: ProcedimentoOpcao[];
+  laboratorios?: { id: string; nome: string }[];
 }) {
   const { resposta, executar, pendente } = useFormulario(registrarPedidoProtese);
   return (
@@ -87,7 +89,14 @@ export function FormularioPedido({
         </label>
         <label>
           Laboratório
-          <input type="text" name="laboratorio" required />
+          <select name="laboratorioId" defaultValue="" required>
+            <option value="">Selecione</option>
+            {laboratorios.map((laboratorio) => (
+              <option key={laboratorio.id} value={laboratorio.id}>
+                {laboratorio.nome}
+              </option>
+            ))}
+          </select>
         </label>
         <SelectProcedimento
           rotulo="Avaliação/Consulta"

@@ -359,6 +359,7 @@ export function dependenciasProtese(): DependenciasProtese {
     dentistas: criarDentistas(),
     procedimentos: criarProcedimentos(),
     agendamentos: criarAgendamentos(),
+    laboratorios: proteses.laboratorios,
     ids: { novo: () => crypto.randomUUID() },
   };
 }

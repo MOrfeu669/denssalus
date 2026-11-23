@@ -93,6 +93,7 @@ export function SecaoProteses({
   agendamentos,
   papel,
   limite,
+  laboratorios = [],
 }: {
   pacienteId: string;
   proteses: Protese[];
@@ -101,6 +102,7 @@ export function SecaoProteses({
   agendamentos: AgendamentoOpcao[];
   papel: string;
   limite: number;
+  laboratorios?: { id: string; nome: string }[];
 }) {
   return (
     <>
@@ -108,6 +110,7 @@ export function SecaoProteses({
         pacienteId={pacienteId}
         responsaveis={responsaveis}
         procedimentos={procedimentos}
+        laboratorios={laboratorios}
       />
       {papel === "admin" ? <FormularioLimite limite={limite} /> : null}
       {proteses.length === 0 ? <p>Nenhuma prótese registrada.</p> : null}

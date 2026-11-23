@@ -7,7 +7,14 @@ describe("menu da casca (etapa 2)", () => {
       const rotulos = menuDaCasca(papel).map((item) => item.rotulo);
       const base = itensMenu(papel).map((item) => item.rotulo);
       expect(rotulos.slice(0, base.length)).toEqual(base);
-      expect(rotulos).toEqual([...base, "Retornos", "Estoque", "Dashboard", ...(papel === "admin" ? ["Mensagens"] : [])]);
+      expect(rotulos).toEqual([
+        ...base,
+        "Retornos",
+        "Estoque",
+        "Laboratórios",
+        "Dashboard",
+        ...(papel === "admin" ? ["Mensagens"] : []),
+      ]);
     }
   });
 
@@ -23,6 +30,7 @@ describe("menu da casca (etapa 2)", () => {
     expect(itensEtapa2("admin").map((item) => item.rotulo)).toEqual([
       "Retornos",
       "Estoque",
+      "Laboratórios",
       "Dashboard",
       "Mensagens",
     ]);

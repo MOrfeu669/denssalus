@@ -2,7 +2,7 @@ import type { Agendamentos } from "../agendamento/portas";
 import type { Dentistas } from "../dentista/portas";
 import type { Pacientes } from "../paciente/portas";
 import type { Procedimentos } from "../procedimento/portas";
-import type { AvisoProtese, ConfigAtrasoProtese, Protese } from "./tipos";
+import type { AvisoProtese, ConfigAtrasoProtese, Laboratorio, Protese } from "./tipos";
 
 export type Proteses = {
   listarPorPaciente(clinicaId: string, pacienteId: string): Promise<Protese[]>;
@@ -20,10 +20,17 @@ export type AvisosProtese = {
   salvar(aviso: AvisoProtese): Promise<void>;
 };
 
+export type Laboratorios = {
+  listar(clinicaId: string): Promise<Laboratorio[]>;
+  buscarPorId(id: string): Promise<Laboratorio | null>;
+  salvar(laboratorio: Laboratorio): Promise<void>;
+};
+
 export type Dependencias = {
   proteses: Proteses;
   configuracoes: ConfiguracoesProtese;
   avisos: AvisosProtese;
+  laboratorios: Laboratorios;
   pacientes: Pick<Pacientes, "buscarPorId">;
   dentistas: Pick<Dentistas, "buscarPorId" | "listar">;
   procedimentos: Pick<Procedimentos, "buscarPorId">;

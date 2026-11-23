@@ -16,6 +16,7 @@ export type Protese = {
   tipo: string;
   responsavelId: string;
   laboratorio: string;
+  laboratorioId?: string | null;
   procedimentoAvaliacaoId: string | null;
   procedimentoCirurgiaId: string | null;
   agendamentoInstalacaoId: string | null;
@@ -38,12 +39,19 @@ export type AvisoProtese = {
   criadoEm: string;
 };
 
+export type Laboratorio = {
+  id: string;
+  clinicaId: string;
+  nome: string;
+};
+
 export type EntradaPedidoProtese = {
   pacienteId: string;
   dentes: number[];
   tipo: string;
   responsavelId: string;
   laboratorio: string;
+  laboratorioId?: string | null;
   procedimentoAvaliacaoId?: string | null;
   procedimentoCirurgiaId?: string | null;
 };

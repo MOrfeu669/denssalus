@@ -24,6 +24,7 @@ import {
   MENSAGEM_INSTALACAO,
   MENSAGEM_LABORATORIO,
   MENSAGEM_PROTESE_NAO_ENCONTRADA,
+  type Laboratorio,
   MENSAGEM_SAIDA,
   MENSAGEM_TIPO,
   type ConfigAtrasoProtese,
@@ -33,6 +34,55 @@ import {
 } from "./tipos";
 
 const naoEncontrada = { ok: false, mensagem: MENSAGEM_PROTESE_NAO_ENCONTRADA } as const;
+
+async function laboratorioDoPedido(
+  deps: Dependencias,
+  clinicaId: string,
+  entrada: EntradaPedidoProtese,
+): Promise<Resultado<{ laboratorio: string; laboratorioId: string | null }>> {
+  const laboratorioId = entrada.laboratorioId ?? null;
+  if (laboratorioId) {
+    const cadastrado = await deps.laboratorios.buscarPorId(laboratorioId);
+    if (!cadastrado || cadastrado.clinicaId !== clinicaId) {
+      return { ok: false, mensagem: MENSAGEM_LABORATORIO };
+    }
+    return { ok: true, valor: { laboratorio: cadastrado.nome, laboratorioId: cadastrado.id } };
+  }
+  const laboratorio = entrada.laboratorio.trim();
+  if (laboratorio === "") return { ok: false, mensagem: MENSAGEM_LABORATORIO };
+  return { ok: true, valor: { laboratorio, laboratorioId: null } };
+}
+
+export async function cadastrarLaboratorio(
+  deps: Dependencias,
+  ator: Sessao,
+  nome: string,
+): Promise<Resultado<Laboratorio>> {
+  const permitido = autorizarAcao(ator, "protese:gerir");
+  if (!permitido.ok) return permitido;
+  const limpo = nome.trim();
+  if (limpo === "") return { ok: false, mensagem: MENSAGEM_LABORATORIO };
+  const laboratorio: Laboratorio = {
+    id: deps.ids.novo(),
+    clinicaId: ator.usuario.clinicaId,
+    nome: limpo,
+  };
+  await deps.laboratorios.salvar(laboratorio);
+  return { ok: true, valor: laboratorio };
+}
+
+export async function listarLaboratorios(
+  deps: Dependencias,
+  ator: Sessao,
+): Promise<Resultado<Laboratorio[]>> {
+  const permitido = autorizarAcao(ator, "protese:gerir");
+  if (!permitido.ok) return permitido;
+  const clinicaId = ator.usuario.clinicaId;
+  const lista = (await deps.laboratorios.listar(clinicaId))
+    .filter((item) => item.clinicaId === clinicaId)
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  return { ok: true, valor: lista };
+}
 
 async function pacienteDaClinica(deps: Dependencias, ator: Sessao, pacienteId: string) {
   const paciente = await deps.pacientes.buscarPorId(pacienteId);
@@ -83,8 +133,9 @@ export async function registrarPedido(
   if ("mensagem" in dentes) return { ok: false, mensagem: dentes.mensagem };
   const tipo = entrada.tipo.trim();
   if (tipo === "") return { ok: false, mensagem: MENSAGEM_TIPO };
-  const laboratorio = entrada.laboratorio.trim();
-  if (laboratorio === "") return { ok: false, mensagem: MENSAGEM_LABORATORIO };
+  const vinculado = await laboratorioDoPedido(deps, clinicaId, entrada);
+  if (!vinculado.ok) return vinculado;
+  const { laboratorio, laboratorioId } = vinculado.valor;
 
   const paciente = await pacienteDaClinica(deps, ator, entrada.pacienteId);
   if (!paciente) return { ok: false, mensagem: MENSAGEM_PACIENTE_NAO_ENCONTRADO };
@@ -107,6 +158,7 @@ export async function registrarPedido(
     tipo,
     responsavelId: responsavel.id,
     laboratorio,
+    laboratorioId,
     procedimentoAvaliacaoId: avaliacao.id,
     procedimentoCirurgiaId: cirurgia.id,
     agendamentoInstalacaoId: null,

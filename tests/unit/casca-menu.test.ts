@@ -56,6 +56,7 @@ describe("menu da casca (etapa 2)", () => {
       "Agenda",
       "Retornos",
       "Estoque",
+      "Laboratórios",
       "Dashboard",
       "Mensagens",
     ]);
@@ -68,6 +69,7 @@ describe("menu da casca (etapa 2)", () => {
       "Agenda",
       "Retornos",
       "Estoque",
+      "Laboratórios",
       "Dashboard",
     ]);
   });
