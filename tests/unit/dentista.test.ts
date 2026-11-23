@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { filtrarGrade } from "../../src/domain/agendamento/regras";
+import type { Agendamento } from "../../src/domain/agendamento/tipos";
 import type { NovoAcesso } from "../../src/domain/auth/portas";
 import { MENSAGEM_PAPEL, type Papel, type Sessao, type Usuario } from "../../src/domain/auth/tipos";
 import { MENSAGEM_CLINICA_NAO_ENCONTRADA, type Clinica } from "../../src/domain/clinica/tipos";
@@ -395,6 +397,49 @@ describe("cadastro de dentistas", () => {
     },
   );
 
-  it.todo("Feature 006: a tela de agendamento oferece só os dentistas ativos da clínica para escolha");
-  it.todo("Feature 007: agendamento com alertaDentista aparece destacado na agenda (cor diferente ou sinal '!')");
+  it("dado dentistas ativos e inativos da clínica, quando a escolha do agendamento filtra os disponíveis, então só o ativo entra", () => {
+    const escolhidos = listarDisponiveis([
+      { id: "ativo", ativo: true },
+      { id: "removido", ativo: false },
+    ]);
+
+    expect(escolhidos.map((item) => item.id)).toEqual(["ativo"]);
+  });
+
+  it("dado um agendamento com alertaDentista, quando vê a agenda, então ele aparece destacado", () => {
+    const marcado: Agendamento = {
+      id: "a1",
+      clinicaId: CLINICA_ID,
+      pacienteId: "paciente-joao",
+      dentistaId: "d1",
+      cadeiraId: "cadeira-1",
+      procedimentoId: null,
+      inicio: "2026-10-26T10:00",
+      fim: "2026-10-26T10:30",
+      status: "agendado",
+      iniciadoPor: null,
+      emergencia: false,
+      criadoPor: "ator-admin",
+      alertaCadeira: false,
+      alertaHorario: false,
+      alertaDentista: true,
+      motivoCancelamento: null,
+      canceladoPor: null,
+      canceladoEm: null,
+      concluidoEm: null,
+    };
+
+    const grade = filtrarGrade(
+      { data: "2026-10-26", dentistaId: null, cadeiraId: null, modo: "dia" },
+      {
+        agendamentos: [marcado],
+        bloqueios: [],
+        cadeiras: [{ id: "cadeira-1", ativa: true }],
+        dentistas: [{ id: "d1", ativo: false }],
+      },
+      { horarioAbertura: "08:00", horarioFechamento: "18:00" },
+    );
+
+    expect(grade.agendamentos[0]).toMatchObject({ id: "a1", alerta: true, textoAlerta: null });
+  });
 });
