@@ -8,11 +8,13 @@ import { MENSAGEM_DENTISTA_NAO_ENCONTRADO, type Dentista } from "../../src/domai
 import { MENSAGEM_PACIENTE_NAO_ENCONTRADO, type Paciente } from "../../src/domain/paciente/tipos";
 import { MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO, type Procedimento } from "../../src/domain/procedimento/tipos";
 import {
+  cadastrarLaboratorio,
   conferirRetorno,
   configurarAtraso,
   descontinuarProtese,
   instalarProtese,
   listarPorDente,
+  listarLaboratorios,
   listarProteses,
   listarResponsaveis,
   obterLimiteAtraso,
@@ -20,6 +22,7 @@ import {
   registrarPedido,
 } from "../../src/domain/protese/casos";
 import type { Dependencias } from "../../src/domain/protese/portas";
+import type { Laboratorio } from "../../src/domain/protese/tipos";
 import {
   LIMITE_ATRASO_PADRAO,
   MENSAGEM_AJUSTE,
@@ -56,6 +59,7 @@ class Memoria {
   dentistas = new Map<string, Dentista>();
   procedimentos = new Map<string, Procedimento>();
   agendamentos = new Map<string, Agendamento>();
+  laboratorios = new Map<string, Laboratorio>();
   proximoId = 0;
 
   deps(): Dependencias {
@@ -88,6 +92,14 @@ class Memoria {
       },
       procedimentos: { buscarPorId: async (id) => this.procedimentos.get(id) ?? null },
       agendamentos: { buscarPorId: async (id) => this.agendamentos.get(id) ?? null },
+      laboratorios: {
+        listar: async (clinicaId) =>
+          [...this.laboratorios.values()].filter((item) => item.clinicaId === clinicaId),
+        buscarPorId: async (id) => this.laboratorios.get(id) ?? null,
+        salvar: async (laboratorio) => {
+          this.laboratorios.set(laboratorio.id, laboratorio);
+        },
+      },
       ids: { novo: () => `id-${++this.proximoId}` },
     };
   }
@@ -191,6 +203,7 @@ describe("protese", () => {
       tipo: "Coroa",
       responsavelId: DENTISTA_ANA,
       laboratorio: "Lab Sorriso",
+      laboratorioId: null,
       procedimentoAvaliacaoId: null,
       procedimentoCirurgiaId: null,
       agendamentoInstalacaoId: null,
@@ -663,5 +676,28 @@ describe("protese", () => {
     expect(instalada.valor.valorComissao).toBe(800);
   });
 
-  it.todo("versão futura: cadastro de laboratórios parceiros");
+  it("dado um laboratório da clínica, quando o pedido vincula esse id, então a prótese guarda o id e o nome; laboratório de outra clínica não entra", async () => {
+    const criado = await cadastrarLaboratorio(memoria.deps(), sessao("recepcionista"), "Prótese Sul");
+    if (!criado.ok) throw new Error(criado.mensagem);
+    memoria.laboratorios.set("alheio", { id: "alheio", clinicaId: "clinica-002", nome: "Fora" });
+
+    const lista = await listarLaboratorios(memoria.deps(), sessao("dentista"));
+    const pedidoVinculado = await registrarPedido(
+      memoria.deps(),
+      sessao("dentista"),
+      pedido({ laboratorio: "ignorado", laboratorioId: criado.valor.id }),
+      AGORA,
+    );
+    const alheio = await registrarPedido(
+      memoria.deps(),
+      sessao("dentista"),
+      pedido({ laboratorioId: "alheio" }),
+      AGORA,
+    );
+
+    expect(lista.ok && lista.valor.map((item) => item.nome)).toEqual(["Prótese Sul"]);
+    expect(pedidoVinculado.ok && pedidoVinculado.valor.laboratorioId).toBe(criado.valor.id);
+    expect(pedidoVinculado.ok && pedidoVinculado.valor.laboratorio).toBe("Prótese Sul");
+    expect(alheio).toEqual({ ok: false, mensagem: "Informe o laboratório" });
+  });
 });

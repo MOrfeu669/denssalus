@@ -16,6 +16,7 @@ const PACIENTES: ItemMenu = { href: "/pacientes", rotulo: "Pacientes" };
 const AGENDA: ItemMenu = { href: "/agenda", rotulo: "Agenda" };
 const RETORNOS: ItemMenu = { href: "/retornos", rotulo: "Retornos" };
 const ESTOQUE: ItemMenu = { href: "/estoque", rotulo: "Estoque" };
+const LABORATORIOS: ItemMenu = { href: "/laboratorios", rotulo: "Laboratórios" };
 const DASHBOARD: ItemMenu = { href: "/dashboard", rotulo: "Dashboard" };
 const MENSAGENS: ItemMenu = { href: "/mensagens", rotulo: "Mensagens" };
 
@@ -26,9 +27,9 @@ const MENU: Record<Papel, ItemMenu[]> = {
 };
 
 const ETAPA_2: Record<Papel, ItemMenu[]> = {
-  admin: [RETORNOS, ESTOQUE, DASHBOARD, MENSAGENS],
-  dentista: [RETORNOS, ESTOQUE, DASHBOARD],
-  recepcionista: [RETORNOS, ESTOQUE, DASHBOARD],
+  admin: [RETORNOS, ESTOQUE, LABORATORIOS, DASHBOARD, MENSAGENS],
+  dentista: [RETORNOS, ESTOQUE, LABORATORIOS, DASHBOARD],
+  recepcionista: [RETORNOS, ESTOQUE, LABORATORIOS, DASHBOARD],
 };
 
 export function rotuloPapel(papel: Papel): string {

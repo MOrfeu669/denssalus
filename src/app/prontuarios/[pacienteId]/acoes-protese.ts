@@ -72,6 +72,7 @@ export async function registrarPedidoProtese(
         tipo: texto(formData, "tipo"),
         responsavelId: texto(formData, "responsavelId"),
         laboratorio: texto(formData, "laboratorio"),
+        laboratorioId: texto(formData, "laboratorioId") || null,
         procedimentoAvaliacaoId: ouNulo(formData, "procedimentoAvaliacaoId"),
         procedimentoCirurgiaId: ouNulo(formData, "procedimentoCirurgiaId"),
       },

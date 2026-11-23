@@ -367,6 +367,7 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
             agendamentos={agendamentosAbertos}
             papel={papel}
             limite={proteses.limite}
+            laboratorios={proteses.laboratorios}
           />
         ) : (
           <p role="alert" tabIndex={-1}>

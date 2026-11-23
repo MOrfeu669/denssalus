@@ -1,4 +1,5 @@
 import {
+  listarLaboratorios,
   listarProteses,
   listarResponsaveis,
   obterLimiteAtraso,
@@ -14,7 +15,13 @@ type Sessao = NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>;
 const LIMITE_PADRAO = 15;
 
 export type ResultadoProteses =
-  | { ok: true; proteses: Protese[]; responsaveis: ResponsavelOpcao[]; limite: number }
+  | {
+      ok: true;
+      proteses: Protese[];
+      responsaveis: ResponsavelOpcao[];
+      laboratorios: { id: string; nome: string }[];
+      limite: number;
+    }
   | { ok: false; mensagem: string };
 
 export async function carregarProteses(
@@ -34,10 +41,13 @@ export async function carregarProteses(
       if (!atual.ok) return atual;
       limite = atual.valor;
     }
+    const laboratorios = await listarLaboratorios(deps, sessao);
+    if (!laboratorios.ok) return laboratorios;
     return {
       ok: true,
       proteses: lista.valor,
       responsaveis: responsaveis.valor.map(({ id, nome }) => ({ id, nome })),
+      laboratorios: laboratorios.valor.map(({ id, nome }) => ({ id, nome })),
       limite,
     };
   } catch (erro) {

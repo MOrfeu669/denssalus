@@ -1,12 +1,14 @@
 import type {
   AvisosProtese,
   ConfiguracoesProtese,
+  Laboratorios,
   Proteses,
 } from "../../domain/protese/portas";
 import type {
   AvisoProtese,
   ConfigAtrasoProtese,
   EtapaProtese,
+  Laboratorio,
   PassagemProtese,
   Protese,
   StatusProtese,
@@ -22,6 +24,7 @@ type LinhaProtese = {
   tipo: string;
   responsavel_id: string;
   laboratorio: string;
+  laboratorio_id: string | null;
   procedimento_avaliacao_id: string | null;
   procedimento_cirurgia_id: string | null;
   agendamento_instalacao_id: string | null;
@@ -56,6 +59,7 @@ function paraProtese(linha: LinhaProtese): Protese {
     tipo: linha.tipo,
     responsavelId: linha.responsavel_id,
     laboratorio: linha.laboratorio,
+    laboratorioId: linha.laboratorio_id,
     procedimentoAvaliacaoId: linha.procedimento_avaliacao_id ?? null,
     procedimentoCirurgiaId: linha.procedimento_cirurgia_id ?? null,
     agendamentoInstalacaoId: linha.agendamento_instalacao_id ?? null,
@@ -81,6 +85,7 @@ function paraLinhaProtese(protese: Protese): LinhaProtese {
     tipo: protese.tipo,
     responsavel_id: protese.responsavelId,
     laboratorio: protese.laboratorio,
+    laboratorio_id: protese.laboratorioId ?? null,
     procedimento_avaliacao_id: protese.procedimentoAvaliacaoId || null,
     procedimento_cirurgia_id: protese.procedimentoCirurgiaId || null,
     agendamento_instalacao_id: protese.agendamentoInstalacaoId || null,
@@ -108,6 +113,7 @@ export function criarProteses(): {
   proteses: Proteses;
   configuracoes: ConfiguracoesProtese;
   avisos: AvisosProtese;
+  laboratorios: Laboratorios;
 } {
   const admin = createAdminClient();
 
@@ -191,5 +197,38 @@ export function criarProteses(): {
     },
   };
 
-  return { proteses, configuracoes, avisos };
+  const laboratorios: Laboratorios = {
+    async listar(clinicaId) {
+      const { data, error } = await admin
+        .from("laboratorios")
+        .select("id, clinica_id, nome")
+        .eq("clinica_id", clinicaId)
+        .order("nome", { ascending: true });
+      if (error) throw new ErroAplicacao("Não foi possível listar os laboratórios", error);
+      return (data as { id: string; clinica_id: string; nome: string }[])
+        .filter((linha) => linha.clinica_id === clinicaId)
+        .map((linha) => ({ id: linha.id, clinicaId: linha.clinica_id, nome: linha.nome }) as Laboratorio);
+    },
+    async buscarPorId(id) {
+      const { data, error } = await admin
+        .from("laboratorios")
+        .select("id, clinica_id, nome")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw new ErroAplicacao("Não foi possível ler o laboratório", error);
+      if (!data) return null;
+      const linha = data as { id: string; clinica_id: string; nome: string };
+      return { id: linha.id, clinicaId: linha.clinica_id, nome: linha.nome };
+    },
+    async salvar(laboratorio) {
+      const { error } = await admin.from("laboratorios").insert({
+        id: laboratorio.id,
+        clinica_id: laboratorio.clinicaId,
+        nome: laboratorio.nome,
+      });
+      if (error) throw new ErroAplicacao("Não foi possível salvar o laboratório", error);
+    },
+  };
+
+  return { proteses, configuracoes, avisos, laboratorios };
 }
