@@ -14,7 +14,7 @@ import { FormLogin } from "../../src/app/login/form";
 import { MenuCasca } from "../../src/app/menu-casca";
 
 describe("casca e login com Tailwind", () => {
-  it("dado o caminho Pacientes, quando o menu abre, então o item atual usa a cor de ação", () => {
+  it("dado o caminho Pacientes, quando o menu abre, então o item atual usa o fundo claro da lateral", () => {
     const html = renderToStaticMarkup(
       createElement(MenuCasca, {
         itens: [
@@ -25,7 +25,11 @@ describe("casca e login com Tailwind", () => {
     );
 
     expect(html).toContain('aria-current="page"');
-    expect(html).toContain("bg-sidebar-accent");
+    expect(html).toContain("bg-lateral-ativo");
+    expect(html).toContain("text-lateral-tinta");
+    expect(html).toContain("shadow-[inset_3px_0_0_var(--paper-secondary)]");
+    expect(html).not.toContain("bg-sidebar-accent");
+    expect(html).not.toContain("text-white");
     expect(html).toContain("Pacientes");
   });
 

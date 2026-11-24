@@ -29,30 +29,26 @@ export async function Casca({
         tipografiaCasca,
       )}
     >
-      <aside className="casca-lateral sticky top-0 flex h-screen flex-col gap-2 bg-marca px-4 pt-6 pb-4 text-white max-[960px]:static max-[960px]:h-auto max-[960px]:py-4">
+      <aside className="casca-lateral sticky top-0 flex h-screen flex-col gap-2 border-r border-lateral-borda bg-lateral px-4 pt-6 pb-4 text-lateral-tinta max-[960px]:static max-[960px]:h-auto max-[960px]:border-r-0 max-[960px]:border-b max-[960px]:py-4">
         <Link
-          className="px-3 font-[family-name:var(--font-heading)] text-[22px] leading-[30px] font-bold text-white no-underline"
+          className="px-3 font-[family-name:var(--font-heading)] text-[22px] leading-[30px] font-bold text-lateral-tinta no-underline"
           href="/"
         >
           denssalus
         </Link>
         {clinicaNome ? (
-          <p className="px-3 pb-4 text-[13px] leading-[18px] font-normal wrap-anywhere text-nevoa">
+          <p className="px-3 pb-4 text-[13px] leading-[18px] font-normal wrap-anywhere text-apagado">
             {clinicaNome}
           </p>
         ) : null}
         <MenuCasca itens={menuDaCasca(papel)} />
-        <div className="mt-auto flex flex-col gap-1 border-t border-sidebar-border px-3 pt-4">
+        <div className="mt-auto flex flex-col gap-1 border-t border-lateral-borda px-3 pt-4">
           <p className="text-sm leading-5 font-semibold wrap-anywhere">{nome}</p>
-          <p className="font-mono text-xs leading-4 font-normal text-nevoa uppercase tracking-wide">
+          <p className="font-mono text-xs leading-4 font-normal text-apagado uppercase tracking-wide">
             {rotuloPapel(papel)}
           </p>
           <form action={sair} className="mt-3 block">
-            <Button
-              type="submit"
-              variant="outline"
-              className="h-10 w-full rounded-md border-nevoa bg-transparent text-sm leading-5 font-semibold text-white shadow-none hover:bg-sidebar-accent hover:text-white"
-            >
+            <Button type="submit" variant="outline" className="h-10 w-full">
               Sair
             </Button>
           </form>

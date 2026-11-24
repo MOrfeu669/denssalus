@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { IconeErro, IconeOk } from "../login/icones";
 
 type Props = {
   status: "vazio" | "erro" | "sucesso";
@@ -9,7 +8,7 @@ type Props = {
   quando: number;
 };
 
-/** Aviso no visual do login (entrar-alerta). Recebe o foco depois da ação. */
+/** Aviso da recuperação. Recebe o foco depois da ação. */
 export function Alerta({ status, mensagem, quando }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const mostrar = status !== "vazio" && Boolean(mensagem);
@@ -25,12 +24,9 @@ export function Alerta({ status, mensagem, quando }: Props) {
       ref={ref}
       tabIndex={-1}
       role={status === "erro" ? "alert" : "status"}
-      className={`entrar-alerta entrar-alerta-${status}`}
+      className={`recuperar-alerta recuperar-alerta-${status}`}
     >
-      {status === "erro" ? <IconeErro /> : <IconeOk cor="#178A4C" />}
-      <div className="entrar-alerta-texto">
-        <strong>{mensagem}</strong>
-      </div>
+      <strong>{mensagem}</strong>
     </div>
   );
 }

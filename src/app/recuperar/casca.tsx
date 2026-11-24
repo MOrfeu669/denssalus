@@ -1,22 +1,15 @@
-import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
-import { Marca } from "../login/marca";
-import "../login/entrar.css";
+import { cn } from "@/lib/utils";
+import { tipografiaCasca } from "../tipografia-paper";
 import "./recuperar.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-});
 
 export function Casca({ children }: { children: ReactNode }) {
   return (
-    <main className={`entrar ${inter.className}`}>
-      <Marca />
-      <section className="entrar-painel">
-        <div className="entrar-miolo">{children}</div>
-        <p className="entrar-rodape">© 2026 denssalus · Sistema de agendamento odontológico</p>
+    <main className={cn("recuperar", tipografiaCasca)}>
+      <section className="recuperar-painel">
+        <p className="recuperar-marca">denssalus</p>
+        {children}
+        <p className="recuperar-rodape">© 2026 denssalus · Sistema de agendamento odontológico</p>
       </section>
     </main>
   );

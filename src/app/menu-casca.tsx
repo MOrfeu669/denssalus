@@ -18,8 +18,9 @@ export function MenuCasca({ itens }: { itens: ItemMenu[] }) {
                 href={item.href}
                 aria-current={atual ? "page" : undefined}
                 className={cn(
-                  "block rounded-md px-3 py-2 text-sm leading-5 font-semibold text-white no-underline hover:bg-sidebar-accent",
-                  atual && "bg-sidebar-accent shadow-[inset_3px_0_0_var(--paper-secondary)]",
+                  "block rounded-md px-3 py-2 text-sm leading-5 font-semibold text-lateral-tinta no-underline hover:bg-lateral-ativo",
+                  atual &&
+                    "bg-lateral-ativo text-lateral-tinta shadow-[inset_3px_0_0_var(--paper-secondary)]",
                 )}
               >
                 {item.rotulo}
