@@ -1,4 +1,3 @@
-import { Montserrat, PT_Mono, Roboto } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,30 +9,8 @@ import { menuDaCasca, rotuloPapel } from "./casca-menu";
 import { dependenciasInicio } from "./dependencias";
 import { MenuCasca } from "./menu-casca";
 import { Sino } from "./sino";
+import { tipografiaCasca } from "./tipografia-paper";
 import "./casca.css";
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  display: "swap",
-  variable: "--font-sans",
-});
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  display: "swap",
-  variable: "--font-heading",
-});
-
-const ptMono = PT_Mono({
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-  variable: "--font-mono",
-});
-
-const tipografiaCasca = cn(roboto.variable, montserrat.variable, ptMono.variable, roboto.className);
 
 export async function Casca({
   sessao,
