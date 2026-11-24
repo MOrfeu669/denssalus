@@ -1,3 +1,7 @@
+.casca {
+  font-variant-numeric: tabular-nums;
+}
+
 .casca :focus-visible {
   outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
@@ -190,9 +194,13 @@
   text-decoration: none;
 }
 
+.casca .casca-miolo h2,
+.casca .casca-miolo h3 {
+  font-family: var(--font-heading), Montserrat, sans-serif;
+}
+
 .casca .casca-miolo h2 {
   margin: var(--paper-space-6) 0 var(--paper-space-2);
-  font-family: var(--font-heading), Montserrat, sans-serif;
   font-size: 18px;
   line-height: 26px;
 }

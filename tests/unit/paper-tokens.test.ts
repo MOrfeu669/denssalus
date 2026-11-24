@@ -134,6 +134,59 @@ describe("tokens Paper no tema", () => {
       expect(resolver(tema, nome)).not.toBe("");
     }
     expect(hexNormalizado(resolver(tema, "--color-lateral"))).toBe(PAPER.surface);
+    expect(hexNormalizado(resolver(tema, "--paper-borda"))).toBe("#E2E2D1");
+    expect(resolver(tema, "--paper-lateral-largura")).toBe("248px");
+    expect(resolver(tema, "--radius-controle")).toBe("6px");
+  });
+
+  it("dado o status do agendamento e as tintas, quando o tema resolve, então as cores batem o desenho", () => {
+    const css = readFileSync(resolve(raiz, "src/app/globals.css"), "utf8");
+    const tema = temaConsumivel(css);
+    const pares: Record<string, string> = {
+      "--color-paper-status-agendado": "#8B5CF6",
+      "--color-paper-status-agendado-fundo": "#EDE9FE",
+      "--color-paper-status-agendado-tinta": "#5B21B6",
+      "--color-paper-status-em-espera": "#D97706",
+      "--color-paper-status-em-espera-fundo": "#FEF3C7",
+      "--color-paper-status-em-espera-tinta": "#92400E",
+      "--color-paper-status-iniciado": "#111111",
+      "--color-paper-status-iniciado-fundo": "#111111",
+      "--color-paper-status-iniciado-tinta": "#FFFFFF",
+      "--color-paper-status-concluido": "#16A34A",
+      "--color-paper-status-concluido-fundo": "#DCFCE7",
+      "--color-paper-status-concluido-tinta": "#166534",
+      "--color-paper-status-cancelado": "#8A887A",
+      "--color-paper-status-cancelado-fundo": "#FFFFFF",
+      "--color-paper-status-cancelado-tinta": "#4B4A42",
+      "--color-paper-tint-neutral": "#F1F1EA",
+      "--color-paper-tint-purple": "#EDE9FE",
+      "--color-paper-tint-success": "#DCFCE7",
+      "--color-paper-tint-warning": "#FEF3C7",
+      "--color-paper-tint-danger": "#FEE2E2",
+      "--color-paper-tint-agendado": "#F5F3FF",
+      "--color-paper-tint-em-espera": "#FFFBEB",
+      "--color-paper-tint-concluido": "#F0FDF4",
+      "--color-paper-ink-2": "#4B4A42",
+      "--color-paper-subtle": "#F7F7F0",
+      "--color-paper-marca": "#0F433D",
+    };
+
+    for (const [nome, hex] of Object.entries(pares)) {
+      expect(hexNormalizado(resolver(tema, nome))).toBe(hex);
+    }
+
+    const contrastes: [string, string][] = [
+      ["--color-paper-status-agendado-tinta", "--color-paper-status-agendado-fundo"],
+      ["--color-paper-status-em-espera-tinta", "--color-paper-status-em-espera-fundo"],
+      ["--color-paper-status-iniciado-tinta", "--color-paper-status-iniciado-fundo"],
+      ["--color-paper-status-concluido-tinta", "--color-paper-status-concluido-fundo"],
+      ["--color-paper-status-cancelado-tinta", "--color-paper-status-cancelado-fundo"],
+    ];
+    for (const [frente, fundo] of contrastes) {
+      expect(contraste(hexNormalizado(resolver(tema, frente)), hexNormalizado(resolver(tema, fundo)))).toBeGreaterThanOrEqual(
+        CONTRASTE_AA_TEXTO,
+      );
+    }
   });
 
   it("dado tintas de estado sobre os fundos de estado, então passam WCAG AA de texto", () => {

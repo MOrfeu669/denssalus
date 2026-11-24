@@ -71,7 +71,7 @@ async function esperar(condicao: () => boolean) {
 }
 
 const botaoEntrar =
-  "h-12 w-full rounded-[10px] border-0 bg-(--cor-login-acao) text-base leading-6 font-semibold text-white shadow-none hover:bg-(--cor-login-marca) active:translate-y-0 disabled:bg-(--cor-login-acao) disabled:opacity-100";
+  "h-12 w-full rounded-[10px] border-0 bg-(--cor-login-acao) text-base leading-6 font-semibold text-white shadow-none hover:bg-(--cor-login-marca) active:translate-y-0 disabled:border-0 disabled:bg-(--cor-login-acao) disabled:text-white disabled:opacity-100";
 
 describe("botão Paper", () => {
   it("dado a variante padrão, quando o ponteiro paira, então o fundo usa --paper-primary-hover", () => {
@@ -79,7 +79,9 @@ describe("botão Paper", () => {
     expect(classes).toContain("hover:bg-(--paper-primary-hover)");
     expect(classes).not.toContain("hover:bg-primary/80");
     expect(classes).toContain("focus-visible:outline-destaque");
-    expect(classes).toContain("disabled:opacity-50");
+    expect(classes).toContain("disabled:bg-desabilitado");
+    expect(classes).toContain("disabled:text-desabilitado-tinta");
+    expect(classes).toContain("disabled:opacity-100");
     expect(classes).toContain("aria-invalid:border-perigo");
   });
 
@@ -103,6 +105,9 @@ describe("botão Paper", () => {
     expect(classes).not.toContain("hover:bg-(--paper-primary-hover)");
     expect(classes).toContain("disabled:opacity-100");
     expect(classes).not.toContain("disabled:opacity-50");
+    expect(classes).not.toContain("disabled:bg-desabilitado");
+    expect(classes).not.toContain("disabled:text-desabilitado-tinta");
+    expect(classes).toContain("disabled:text-white");
     expect(classes).toContain("bg-(--cor-login-acao)");
     expect(classes).toContain("text-white");
     expect(classes).not.toContain("text-tinta");

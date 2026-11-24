@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type Ref } from "react";
-import { useFormStatus } from "react-dom";
-import { Button } from "@/components/ui/button";
+import { BotaoEnviar } from "@/components/ui/botao-enviar";
 import { cn } from "@/lib/utils";
 import { IconeErro } from "../login/icones";
 import { IconeSucesso } from "../icone-sucesso";
@@ -69,16 +68,13 @@ export function BotaoAcao({
   nomeAcessivel?: string;
   variante?: "default" | "outline" | "destructive";
 }) {
-  const { pending } = useFormStatus();
   return (
-    <Button
-      type="submit"
-      variant={variante}
-      className={cn("h-11 px-5 text-[15px] leading-6 font-semibold", className)}
-      disabled={pending}
-      aria-label={nomeAcessivel}
-    >
-      {pending ? pendente : rotulo}
-    </Button>
+    <BotaoEnviar
+      rotulo={rotulo}
+      pendente={pendente}
+      className={className}
+      nomeAcessivel={nomeAcessivel}
+      variante={variante}
+    />
   );
 }

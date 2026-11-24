@@ -10,7 +10,7 @@ import { estadoVazio } from "../formulario";
 import { IconeCadeado, IconeEmail, IconeErro, IconeEscudo, IconeOk, IconeOlho } from "./icones";
 
 const botaoEntrar =
-  "h-12 w-full rounded-[10px] border-0 bg-(--cor-login-acao) text-base leading-6 font-semibold text-white shadow-none hover:bg-(--cor-login-marca) active:translate-y-0 disabled:bg-(--cor-login-acao) disabled:opacity-100";
+  "h-12 w-full rounded-[10px] border-0 bg-(--cor-login-acao) text-base leading-6 font-semibold text-white shadow-none hover:bg-(--cor-login-marca) active:translate-y-0 disabled:border-0 disabled:bg-(--cor-login-acao) disabled:text-white disabled:opacity-100";
 
 export function FormLogin() {
   const [estado, acao, pendente] = useActionState(entrar, estadoVazio);

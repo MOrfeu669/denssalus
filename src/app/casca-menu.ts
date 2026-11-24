@@ -47,3 +47,43 @@ export function itensEtapa2(papel: Papel): ItemMenu[] {
 export function menuDaCasca(papel: Papel): ItemMenu[] {
   return [...itensMenu(papel), ...itensEtapa2(papel)];
 }
+
+export type GrupoMenu = {
+  id: "atendimento" | "clinica" | "gestao";
+  rotulo: string;
+  itens: ItemMenu[];
+};
+
+const ROTULO_ROTA: Record<string, string> = {
+  "/": "Início",
+  "/agenda": "Agenda",
+  "/pacientes": "Pacientes",
+  "/retornos": "Retornos",
+  "/procedimentos": "Procedimentos",
+  "/dentistas": "Dentistas",
+  "/laboratorios": "Laboratórios",
+  "/estoque": "Estoque",
+  "/dashboard": "Dashboard",
+  "/mensagens": "Mensagens",
+  "/usuarios": "Usuários",
+  "/clinica": "Clínica",
+  "/voz": "Assistente de voz",
+};
+
+const GRUPOS: { id: GrupoMenu["id"]; rotulo: string; hrefs: string[] }[] = [
+  { id: "atendimento", rotulo: "Atendimento", hrefs: ["/", "/agenda", "/pacientes", "/retornos"] },
+  { id: "clinica", rotulo: "Clínica", hrefs: ["/procedimentos", "/dentistas", "/laboratorios", "/estoque"] },
+  { id: "gestao", rotulo: "Gestão", hrefs: ["/dashboard", "/mensagens", "/usuarios", "/clinica", "/voz"] },
+];
+
+/** A voz e o início valem para quem já entra na casca. O resto segue o menu do papel. */
+export function gruposDaCasca(papel: Papel): GrupoMenu[] {
+  const permitidos = new Set<string>(["/", "/voz", ...menuDaCasca(papel).map((item) => item.href)]);
+  return GRUPOS.map((grupo) => ({
+    id: grupo.id,
+    rotulo: grupo.rotulo,
+    itens: grupo.hrefs
+      .filter((href) => permitidos.has(href))
+      .map((href) => ({ href, rotulo: ROTULO_ROTA[href] ?? href })),
+  })).filter((grupo) => grupo.itens.length > 0);
+}

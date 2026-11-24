@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { Casca } from "./casca";
 import { nomeDaClinica } from "./casca-clinica";
+import { contadoresDaLateral } from "./casca-contadores";
 import { telaSemCasca } from "./casca-publico";
 import "./globals.css";
 import { sessaoAtual } from "./sessao";
+import { tipografiaCasca } from "./tipografia-paper";
 import { BotaoVoz } from "./voz/botao-voz";
 import { cn } from "@/lib/utils";
 
@@ -47,11 +49,14 @@ export default async function Layout({ children }: { children: ReactNode }) {
     );
   }
 
-  const clinicaNome = await nomeDaClinica(sessao);
+  const [clinicaNome, contadores] = await Promise.all([
+    nomeDaClinica(sessao),
+    contadoresDaLateral(sessao),
+  ]);
   return (
-    <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
-      <body className={inter.className}>
-        <Casca sessao={sessao} clinicaNome={clinicaNome}>
+    <html lang="pt-BR" className={tipografiaCasca}>
+      <body>
+        <Casca sessao={sessao} clinicaNome={clinicaNome} contadores={contadores}>
           {children}
         </Casca>
         <BotaoVoz nomeUsuario={sessao.usuario.nome} papel={sessao.usuario.papel} />
