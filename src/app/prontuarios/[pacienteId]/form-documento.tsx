@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import type { ModeloDocumento } from "../../../domain/documento/tipos";
 import { Aviso } from "../../aviso";
 import { estadoVazio, type EstadoFormulario } from "../../formulario";
@@ -40,21 +45,21 @@ export function FormularioGerar({
         {anteriorId ? <input type="hidden" name="anteriorId" value={anteriorId} /> : null}
         {modeloId ? <input type="hidden" name="modeloId" value={modeloId} /> : null}
         {modelos ? (
-          <label>
+          <Label className="flex-col items-stretch gap-1.5">
             Modelo
-            <select name="modeloId" defaultValue="" required>
-              <option value="">Selecione</option>
+            <NativeSelect name="modeloId" defaultValue="" required>
+              <NativeSelectOption value="">Selecione</NativeSelectOption>
               {modelos.map((modelo) => (
-                <option key={modelo.id} value={modelo.id}>
+                <NativeSelectOption key={modelo.id} value={modelo.id}>
                   {modelo.nome}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
-          </label>
+            </NativeSelect>
+          </Label>
         ) : null}
-        <button type="submit" disabled={pendente} aria-describedby={descricao}>
+        <Button type="submit" disabled={pendente} aria-describedby={descricao}>
           Gerar documento
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -67,21 +72,21 @@ export function FormularioPersonalizar({ pacienteId }: { pacienteId: string }) {
       <Aviso tipo={resposta.status} mensagem={resposta.mensagem} />
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Nome do modelo
-          <input type="text" name="nome" required />
-        </label>
-        <label>
+          <Input type="text" name="nome" required />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Conteúdo do modelo
-          <textarea name="conteudo" rows={6} required />
-        </label>
-        <label>
-          <input type="checkbox" name="compartilhado" />
+          <Textarea name="conteudo" rows={6} required />
+        </Label>
+        <Label>
+          <input type="checkbox" name="compartilhado" className="size-4 accent-primary" />
           Compartilhado
-        </label>
-        <button type="submit" disabled={pendente}>
+        </Label>
+        <Button type="submit" disabled={pendente}>
           Personalizar
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -102,9 +107,9 @@ export function FormularioImportar({
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="modeloId" value={modelo.id} />
-        <button type="submit" disabled={pendente} aria-describedby={`modelo-${modelo.id}`}>
+        <Button type="submit" variant="outline" className="prontuario-contorno" disabled={pendente} aria-describedby={`modelo-${modelo.id}`}>
           Importar modelo
-        </button>
+        </Button>
       </form>
     </li>
   );

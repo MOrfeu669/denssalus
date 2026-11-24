@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Agendamento } from "../../domain/agendamento/tipos";
 import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
 import type { EstadoFormulario } from "../formulario";
@@ -47,36 +50,37 @@ export function FormularioCancelar({
   }, [pedeConfirmacao, estado.quando]);
 
   return (
-    <form action={acao} aria-busy={pendente}>
+    <form className="flex flex-wrap items-end gap-2" action={acao} aria-busy={pendente}>
       <input type="hidden" name="id" value={id} />
       {pedeConfirmacao ? <input type="hidden" name="confirmouReversao" value="sim" /> : null}
-      <label>
+      <Label className="flex-col items-stretch gap-1 text-xs">
         {CAMPO_MOTIVO}
-        <input
+        <Input
           name="motivo"
+          className="h-9 w-52"
           value={motivo}
           required
           onChange={(evento) => setMotivo(evento.target.value)}
         />
-      </label>
+      </Label>
       {pedeConfirmacao ? (
         <>
           <p
             ref={mensagemRef}
             role="alert"
             tabIndex={-1}
-            className="agendamentos-aviso agendamentos-aviso-erro"
+            className="basis-full rounded-paper-md border border-perigo bg-perigo-fundo px-4 py-3 text-sm font-semibold text-perigo-tinta outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-perigo"
           >
             {estado.mensagem}
           </p>
-          <button type="submit" className="agendamentos-perigo" disabled={pendente}>
+          <Button type="submit" variant="destructive" className="h-9" disabled={pendente}>
             Confirmar reversão
-          </button>
+          </Button>
         </>
       ) : (
-        <button type="submit" className="agendamentos-perigo" disabled={pendente}>
+        <Button type="submit" variant="destructive" className="h-9" disabled={pendente}>
           {rotuloDoBotao(ROTULO_CANCELAR, PENDENTE_CANCELAR, pendente)}
-        </button>
+        </Button>
       )}
     </form>
   );
@@ -124,12 +128,28 @@ export function PerguntaReagendar({
   }
 
   return (
-    <div ref={ref} tabIndex={-1} role="group" aria-labelledby={idPergunta} className="agendamentos-pergunta">
-      <p id={idPergunta}>{PERGUNTA_REAGENDAR}</p>
-      <Link href={CAMINHO_AGENDA} onClick={dispensar} className="agendamentos-pergunta-nao">
+    <div
+      ref={ref}
+      tabIndex={-1}
+      role="group"
+      aria-labelledby={idPergunta}
+      className="flex flex-wrap items-center gap-3 rounded-paper-md border border-ok bg-ok-fundo px-4 py-3 font-semibold text-ok-tinta outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-destaque"
+    >
+      <p id={idPergunta} className="m-0 flex-1 text-sm leading-5">
+        {PERGUNTA_REAGENDAR}
+      </p>
+      <Link
+        href={CAMINHO_AGENDA}
+        onClick={dispensar}
+        className="inline-flex h-9 items-center rounded-paper-md border border-borda-papel bg-card px-3 text-sm font-medium text-tinta no-underline hover:bg-papel"
+      >
         {RESPOSTA_NAO}
       </Link>
-      <Link href={caminhoDeReagendar(agendamento)} onClick={dispensar}>
+      <Link
+        href={caminhoDeReagendar(agendamento)}
+        onClick={dispensar}
+        className="inline-flex h-9 items-center rounded-paper-md bg-primary px-3 text-sm font-medium text-primary-foreground no-underline hover:bg-(--paper-primary-hover)"
+      >
         {RESPOSTA_SIM}
       </Link>
     </div>

@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
 import { Aviso } from "../../aviso";
 import { estadoVazio } from "../../formulario";
@@ -17,17 +20,17 @@ function Procedimentos({
   procedimentos: ProcedimentoOpcao[];
 }) {
   return (
-    <label>
+    <Label className="flex-col items-stretch gap-1.5">
       {rotulo}
-      <select name="procedimentoId" defaultValue="" required>
-        <option value="">Selecione</option>
+      <NativeSelect name="procedimentoId" defaultValue="" required>
+        <NativeSelectOption value="">Selecione</NativeSelectOption>
         {procedimentos.map((procedimento) => (
-          <option key={procedimento.id} value={procedimento.id}>
+          <NativeSelectOption key={procedimento.id} value={procedimento.id}>
             {procedimento.nome}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
-    </label>
+      </NativeSelect>
+    </Label>
   );
 }
 
@@ -64,21 +67,21 @@ export function FormulariosDoDente({
       <form action={acaoAtendimento} aria-busy={pendenteAtendimento}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="dente" value={dente} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Agendamento
-          <select name="agendamentoId" defaultValue="" required>
-            <option value="">Selecione</option>
+          <NativeSelect name="agendamentoId" defaultValue="" required>
+            <NativeSelectOption value="">Selecione</NativeSelectOption>
             {agendamentos.map((agendamento) => (
-              <option key={agendamento.id} value={agendamento.id}>
+              <NativeSelectOption key={agendamento.id} value={agendamento.id}>
                 {`${dataAgendamento(agendamento.inicio)} · ${agendamento.status} · ${agendamento.id.slice(0, 8)}`}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </label>
+          </NativeSelect>
+        </Label>
         <Procedimentos rotulo="Procedimento realizado" procedimentos={procedimentos} />
-        <button type="submit" disabled={pendenteAtendimento}>
+        <Button type="submit" disabled={pendenteAtendimento}>
           Registrar no dente
-        </button>
+        </Button>
       </form>
 
       <Aviso tipo={preExistente.status} mensagem={preExistente.mensagem} />
@@ -86,29 +89,29 @@ export function FormulariosDoDente({
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="dente" value={dente} />
         <Procedimentos rotulo="Procedimento pré-existente" procedimentos={procedimentos} />
-        <button type="submit" disabled={pendentePre}>
+        <Button type="submit" disabled={pendentePre}>
           Registrar pré-existente
-        </button>
+        </Button>
       </form>
 
       <Aviso tipo={edicao.status} mensagem={edicao.mensagem} />
       <form action={acaoEditar} aria-busy={pendenteEditar}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Registro a editar
-          <select name="registroId" defaultValue={confirmados.at(-1)?.id ?? ""} required>
-            <option value="">Selecione</option>
+          <NativeSelect name="registroId" defaultValue={confirmados.at(-1)?.id ?? ""} required>
+            <NativeSelectOption value="">Selecione</NativeSelectOption>
             {confirmados.map((registro) => (
-              <option key={registro.id} value={registro.id}>
+              <NativeSelectOption key={registro.id} value={registro.id}>
                 {`${procedimentos.find((item) => item.id === registro.procedimentoId)?.nome ?? registro.procedimentoId} · ${registro.id.slice(0, 8)}`}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </label>
+          </NativeSelect>
+        </Label>
         <Procedimentos rotulo="Novo procedimento" procedimentos={procedimentos} />
-        <button type="submit" disabled={pendenteEditar}>
+        <Button type="submit" disabled={pendenteEditar}>
           Salvar registro
-        </button>
+        </Button>
       </form>
     </>
   );

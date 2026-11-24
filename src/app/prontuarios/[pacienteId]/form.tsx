@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Aviso } from "../../aviso";
 import { estadoVazio } from "../../formulario";
 import { registrarAnamnese, registrarEvolucao } from "./actions";
@@ -25,13 +29,13 @@ export function FormularioAnamnese({
       <Aviso tipo={resultado.status} mensagem={resultado.mensagem} />
       <form action={acao} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Anamnese
-          <textarea name="conteudo" defaultValue={conteudo} rows={6} />
-        </label>
-        <button type="submit" disabled={pendente}>
+          <Textarea name="conteudo" defaultValue={conteudo} rows={6} />
+        </Label>
+        <Button type="submit" disabled={pendente}>
           {pendente ? "Salvando…" : "Salvar anamnese"}
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -66,25 +70,25 @@ export function FormularioEvolucao({
         {materiais?.map((material) => (
           <div key={material.materialId}>
             <input type="hidden" name="materialId" value={material.materialId} />
-            <label>
+            <Label className="flex-col items-stretch gap-1.5">
               {`Quantidade usada de ${material.nome}`}
-              <input
+              <Input
                 type="number"
                 name={`quantidade-${material.materialId}`}
                 defaultValue={material.quantidade}
                 min={0}
                 step={1}
               />
-            </label>
+            </Label>
           </div>
         ))}
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           {`Evolução da consulta de ${rotulo}`}
-          <textarea name="texto" defaultValue={texto} rows={5} />
-        </label>
-        <button type="submit" disabled={pendente}>
+          <Textarea name="texto" defaultValue={texto} rows={5} />
+        </Label>
+        <Button type="submit" disabled={pendente}>
           {pendente ? "Salvando…" : "Salvar evolução"}
-        </button>
+        </Button>
       </form>
     </>
   );

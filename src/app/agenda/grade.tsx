@@ -99,12 +99,12 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
       />
 
       {arraste.erro ? (
-        <p ref={arraste.erroRef} tabIndex={-1} role="alert" className="m-0 rounded-[14px] border border-perigo bg-perigo-fundo px-4 py-3 text-sm font-semibold text-perigo-tinta">
+        <p ref={arraste.erroRef} tabIndex={-1} role="alert" className="m-0 rounded-paper-md border border-perigo bg-perigo-fundo px-4 py-3 text-sm font-semibold text-perigo-tinta shadow-paper-sm outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-perigo">
           {arraste.erro}
         </p>
       ) : null}
       {vazio ? (
-        <p className="m-0 rounded-[14px] border border-linha bg-white px-6 py-6 text-base leading-6 text-apagado">
+        <p className="m-0 rounded-paper-md border border-borda-papel bg-card px-6 py-6 text-base leading-6 text-apagado shadow-paper-sm">
           {vazioDaGrade(visao)}
         </p>
       ) : null}
@@ -112,7 +112,7 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
         <div
           ref={arraste.gradeRef}
           className={cn(
-            "cursor-grab overflow-x-auto rounded-[14px] border border-linha bg-white touch-pan-y",
+            "cursor-grab overflow-x-auto rounded-paper-md border border-borda-papel bg-card shadow-paper-md touch-pan-y",
             rolagem.arrastando && "cursor-grabbing [&_*]:cursor-grabbing",
           )}
           onPointerDown={rolagem.pointerDown}
@@ -127,7 +127,7 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
               gridTemplateColumns: `4rem repeat(${Math.max(chaves.length, 1)}, minmax(${visao === "semana" ? "8.5rem" : "14rem"}, 1fr))`,
             }}
           >
-            <div className="border-b border-linha bg-white" />
+            <div className="border-b border-borda-papel bg-papel" />
             {colunas.map((coluna) => (
               <Cabecalho key={coluna.id} visao={visao} id={coluna.id} nome={coluna.nome} hoje={hoje} />
             ))}
@@ -146,7 +146,7 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
               <div
                 key={coluna.id}
                 data-coluna={indice}
-                className="relative border-l border-linha"
+                className="relative border-l border-borda-papel"
                 style={{ height: horas.length * ALTURA_HORA }}
               >
                 {horas.map((hora, indice) => {
@@ -157,8 +157,8 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
                       key={hora}
                       type="button"
                       className={cn(
-                        "absolute left-0! z-0 w-full! cursor-pointer border-x-0! border-b-0! border-t! border-linha! bg-transparent! p-0! shadow-none hover:bg-nevoa/70!",
-                        foraDoExpediente(hora, grade.horarioAbertura, grade.horarioFechamento) && "bg-fundo!",
+                        "absolute left-0! z-0 w-full! cursor-pointer border-x-0! border-b-0! border-t! border-borda-papel! bg-transparent! p-0! shadow-none hover:bg-papel!",
+                        foraDoExpediente(hora, grade.horarioAbertura, grade.horarioFechamento) && "bg-desabilitado!",
                       )}
                       style={{ top: indice * ALTURA_HORA, height: ALTURA_HORA }}
                       aria-label={

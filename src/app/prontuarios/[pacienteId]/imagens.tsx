@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
 import { imagensDoDente } from "../../../domain/imagem/regras";
 import { Aviso } from "../../aviso";
@@ -17,7 +18,7 @@ function Miniatura({ url, descricao }: { url: string; descricao: string }) {
   if (!url) return <span>Imagem indisponível</span>;
   // URL assinada de outro domínio: next/image exigiria configuração de host.
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={descricao} style={{ maxWidth: "16rem", height: "auto" }} />;
+  return <img src={url} alt={descricao} className="h-auto max-w-64 rounded-paper-sm border border-borda-papel" />;
 }
 
 function Legenda({ dente, tipoCaso }: { dente: number | null; tipoCaso: string }) {
@@ -94,13 +95,15 @@ export function SecaoImagens({
             <span>{imagem.descricao}</span>
             <Legenda dente={imagem.dente} tipoCaso={imagem.tipoCaso} />
             {podeEscrever ? (
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                className="prontuario-perigo"
                 disabled={pendenteId !== null}
                 onClick={() => executar(excluirImagem, imagem.id)}
               >
                 Excluir imagem
-              </button>
+              </Button>
             ) : null}
           </li>
         ))}
@@ -115,13 +118,15 @@ export function SecaoImagens({
                 <span>{imagem.descricao}</span>
                 <Legenda dente={imagem.dente} tipoCaso={imagem.tipoCaso} />
                 {podeEscrever ? (
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    className="prontuario-contorno"
                     disabled={pendenteId !== null}
                     onClick={() => executar(restaurarImagem, imagem.id)}
                   >
                     Restaurar imagem
-                  </button>
+                  </Button>
                 ) : null}
               </li>
             ))}

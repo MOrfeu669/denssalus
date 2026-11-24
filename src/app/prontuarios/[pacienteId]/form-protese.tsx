@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Aviso } from "../../aviso";
 import { estadoVazio, type EstadoFormulario } from "../../formulario";
 import {
@@ -37,17 +41,17 @@ function SelectProcedimento({
   procedimentos: ProcedimentoOpcao[];
 }) {
   return (
-    <label>
+    <Label className="flex-col items-stretch gap-1.5">
       {rotulo}
-      <select name={nome} defaultValue="">
-        <option value="">Nenhum</option>
+      <NativeSelect name={nome} defaultValue="">
+        <NativeSelectOption value="">Nenhum</NativeSelectOption>
         {procedimentos.map((procedimento) => (
-          <option key={procedimento.id} value={procedimento.id}>
+          <NativeSelectOption key={procedimento.id} value={procedimento.id}>
             {procedimento.nome}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
-    </label>
+      </NativeSelect>
+    </Label>
   );
 }
 
@@ -68,36 +72,36 @@ export function FormularioPedido({
       <Aviso key={resposta.quando} tipo={resposta.status} mensagem={resposta.mensagem} />
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Tipo de prótese
-          <input type="text" name="tipo" required />
-        </label>
-        <label>
+          <Input type="text" name="tipo" required />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Dentes
-          <input type="text" name="dentes" placeholder="14 15 16" />
-        </label>
-        <label>
+          <Input type="text" name="dentes" placeholder="14 15 16" />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Responsável
-          <select name="responsavelId" defaultValue="" required>
-            <option value="">Selecione</option>
+          <NativeSelect name="responsavelId" defaultValue="" required>
+            <NativeSelectOption value="">Selecione</NativeSelectOption>
             {responsaveis.map((responsavel) => (
-              <option key={responsavel.id} value={responsavel.id}>
+              <NativeSelectOption key={responsavel.id} value={responsavel.id}>
                 {responsavel.nome}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </label>
-        <label>
+          </NativeSelect>
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Laboratório
-          <select name="laboratorioId" defaultValue="" required>
-            <option value="">Selecione</option>
+          <NativeSelect name="laboratorioId" defaultValue="" required>
+            <NativeSelectOption value="">Selecione</NativeSelectOption>
             {laboratorios.map((laboratorio) => (
-              <option key={laboratorio.id} value={laboratorio.id}>
+              <NativeSelectOption key={laboratorio.id} value={laboratorio.id}>
                 {laboratorio.nome}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </label>
+          </NativeSelect>
+        </Label>
         <SelectProcedimento
           rotulo="Avaliação/Consulta"
           nome="procedimentoAvaliacaoId"
@@ -108,9 +112,9 @@ export function FormularioPedido({
           nome="procedimentoCirurgiaId"
           procedimentos={procedimentos}
         />
-        <button type="submit" disabled={pendente}>
+        <Button type="submit" disabled={pendente}>
           Registrar pedido
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -137,9 +141,14 @@ function FormularioDaProtese({
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="proteseId" value={proteseId} />
         {children}
-        <button type="submit" disabled={pendente}>
+        <Button
+          type="submit"
+          variant={rotulo === "Descontinuar pedido" ? "destructive" : "default"}
+          className={rotulo === "Descontinuar pedido" ? "prontuario-perigo" : undefined}
+          disabled={pendente}
+        >
           {rotulo}
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -150,10 +159,10 @@ type Ids = { pacienteId: string; proteseId: string };
 export function FormularioEnvio(ids: Ids) {
   return (
     <FormularioDaProtese acao={registrarEnvioProtese} rotulo="Registrar envio" {...ids}>
-      <label>
+      <Label className="flex-col items-stretch gap-1.5">
         Prazo de retorno
-        <input type="date" name="prazoRetorno" />
-      </label>
+        <Input type="date" name="prazoRetorno" />
+      </Label>
     </FormularioDaProtese>
   );
 }
@@ -161,10 +170,10 @@ export function FormularioEnvio(ids: Ids) {
 export function FormularioConferencia(ids: Ids) {
   return (
     <FormularioDaProtese acao={conferirRetornoProtese} rotulo="Conferir retorno" {...ids}>
-      <label>
+      <Label className="flex-col items-stretch gap-1.5">
         Ajuste necessário
-        <input type="text" name="ajusteNecessario" />
-      </label>
+        <Input type="text" name="ajusteNecessario" />
+      </Label>
     </FormularioDaProtese>
   );
 }
@@ -175,21 +184,21 @@ export function FormularioInstalacao({
 }: Ids & { agendamentos: AgendamentoOpcao[] }) {
   return (
     <FormularioDaProtese acao={instalarProteseAcao} rotulo="Instalar prótese" {...ids}>
-      <label>
+      <Label className="flex-col items-stretch gap-1.5">
         Comissão
-        <input type="number" name="valorComissao" min="0" step="0.01" />
-      </label>
-      <label>
+        <Input type="number" name="valorComissao" min="0" step="0.01" />
+      </Label>
+      <Label className="flex-col items-stretch gap-1.5">
         Agendamento da instalação
-        <select name="agendamentoInstalacaoId" defaultValue="">
-          <option value="">Sem agendamento</option>
+        <NativeSelect name="agendamentoInstalacaoId" defaultValue="">
+          <NativeSelectOption value="">Sem agendamento</NativeSelectOption>
           {agendamentos.map((agendamento) => (
-            <option key={agendamento.id} value={agendamento.id}>
+            <NativeSelectOption key={agendamento.id} value={agendamento.id}>
               {`${dataAgendamento(agendamento.inicio)} · ${agendamento.status} · ${agendamento.id.slice(0, 8)}`}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
-      </label>
+        </NativeSelect>
+      </Label>
     </FormularioDaProtese>
   );
 }
@@ -204,13 +213,13 @@ export function FormularioLimite({ limite }: { limite: number }) {
     <>
       <Aviso key={resposta.quando} tipo={resposta.status} mensagem={resposta.mensagem} />
       <form action={executar} aria-busy={pendente}>
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Limite de atraso (dias)
-          <input type="number" name="diasLimiteAtraso" min="1" step="1" defaultValue={limite} />
-        </label>
-        <button type="submit" disabled={pendente}>
+          <Input type="number" name="diasLimiteAtraso" min="1" step="1" defaultValue={limite} />
+        </Label>
+        <Button type="submit" disabled={pendente}>
           Salvar limite
-        </button>
+        </Button>
       </form>
     </>
   );

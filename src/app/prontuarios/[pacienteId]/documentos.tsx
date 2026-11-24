@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import type { ModeloDocumento } from "../../../domain/documento/tipos";
 import { Aviso } from "../../aviso";
 import { baixarPdf } from "./acoes-documento";
@@ -57,9 +58,9 @@ function BotaoBaixar({ documentoId, descricao }: { documentoId: string; descrica
   return (
     <>
       <Aviso tipo={erro ? "erro" : "vazio"} mensagem={erro} />
-      <button type="button" onClick={baixar} disabled={pendente} aria-describedby={descricao}>
+      <Button type="button" variant="outline" className="prontuario-contorno" onClick={baixar} disabled={pendente} aria-describedby={descricao}>
         Baixar PDF
-      </button>
+      </Button>
     </>
   );
 }
