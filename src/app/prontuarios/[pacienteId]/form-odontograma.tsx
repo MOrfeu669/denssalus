@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { BotaoEnviar } from "@/components/ui/botao-enviar";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
 import { Aviso } from "../../aviso";
@@ -79,9 +79,7 @@ export function FormulariosDoDente({
           </NativeSelect>
         </Label>
         <Procedimentos rotulo="Procedimento realizado" procedimentos={procedimentos} />
-        <Button type="submit" disabled={pendenteAtendimento}>
-          Registrar no dente
-        </Button>
+        <BotaoEnviar>Registrar no dente</BotaoEnviar>
       </form>
 
       <Aviso tipo={preExistente.status} mensagem={preExistente.mensagem} />
@@ -89,9 +87,7 @@ export function FormulariosDoDente({
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="dente" value={dente} />
         <Procedimentos rotulo="Procedimento pré-existente" procedimentos={procedimentos} />
-        <Button type="submit" disabled={pendentePre}>
-          Registrar pré-existente
-        </Button>
+        <BotaoEnviar>Registrar pré-existente</BotaoEnviar>
       </form>
 
       <Aviso tipo={edicao.status} mensagem={edicao.mensagem} />
@@ -109,9 +105,7 @@ export function FormulariosDoDente({
           </NativeSelect>
         </Label>
         <Procedimentos rotulo="Novo procedimento" procedimentos={procedimentos} />
-        <Button type="submit" disabled={pendenteEditar}>
-          Salvar registro
-        </Button>
+        <BotaoEnviar>Salvar registro</BotaoEnviar>
       </form>
     </>
   );
