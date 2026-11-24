@@ -1,82 +1,78 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { Badge } from "@/components/ui/badge";
+import { BadgeStatus } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { AgendamentoNaGrade, StatusAgendamento } from "../../domain/agendamento/tipos";
 import { horarioDoDia } from "../agendamentos/texto";
+import { CORES_DENTISTA } from "./apresentacao";
 import type { VisaoGrade } from "./posicao";
-import { rotuloStatus, varianteStatus } from "./rotulo";
+import { rotuloStatus } from "./rotulo";
 
 type Nomes = {
   pacientes: Record<string, string>;
   dentistas: Record<string, string>;
   cadeiras: Record<string, string>;
+  procedimentos: Record<string, string>;
 };
 
-const CORES: Record<StatusAgendamento, string> = {
-  agendado: "border-borda-papel border-l-primary bg-card",
-  em_espera: "border-aviso bg-aviso-fundo",
-  iniciado: "border-primary bg-secondary",
-  concluido: "border-ok bg-ok-fundo",
-  cancelado: "border-borda-papel bg-papel",
+const DIA: Record<StatusAgendamento, { caixa: string; titulo: string; apoio: string; faixa: string }> = {
+  agendado: {
+    caixa: "bg-paper-tint-agendado",
+    titulo: "text-[#3B0764]",
+    apoio: "text-paper-status-agendado-tinta",
+    faixa: "bg-paper-status-agendado",
+  },
+  em_espera: {
+    caixa: "bg-paper-tint-em-espera",
+    titulo: "text-[#78350F]",
+    apoio: "text-paper-status-em-espera-tinta",
+    faixa: "bg-paper-status-em-espera",
+  },
+  iniciado: {
+    caixa: "bg-paper-tint-iniciado shadow-paper-md",
+    titulo: "text-white",
+    apoio: "text-paper-status-iniciado-apoio",
+    faixa: "bg-paper-secondary",
+  },
+  concluido: {
+    caixa: "bg-paper-tint-concluido",
+    titulo: "text-[#14532D]",
+    apoio: "text-[#3F6B4E]",
+    faixa: "bg-paper-status-concluido",
+  },
+  cancelado: {
+    caixa: "border border-borda-papel bg-paper-tint-cancelado",
+    titulo: "text-paper-status-cancelado line-through font-normal",
+    apoio: "text-paper-status-cancelado line-through",
+    faixa: "bg-paper-status-cancelado-faixa",
+  },
 };
 
-export function Cabecalho({
-  visao,
-  id,
-  nome,
-  hoje,
-}: {
-  visao: VisaoGrade;
-  id: string;
-  nome: string;
-  hoje: string;
-}) {
-  if (visao === "semana") {
-    const rotulo = rotuloDoDia(id);
-    return (
-      <div className="flex items-center gap-2 border-b border-borda-papel px-3 py-2">
-        <div>
-          <p className="m-0 font-heading text-sm leading-4 font-semibold text-tinta">{rotulo.nome}</p>
-          <p className="m-0 text-xs leading-4 text-apagado">{rotulo.sub}</p>
-        </div>
-        {id === hoje ? (
-          <Badge variant="secondary" className="h-5 px-1.5 text-[11px]">
-            Hoje
-          </Badge>
-        ) : null}
-      </div>
-    );
-  }
-  return (
-    <div className="flex items-center gap-2.5 border-b border-borda-papel bg-papel px-3 py-3">
-      <span
-        className="grid size-7 shrink-0 place-items-center rounded-paper-sm border border-borda-papel bg-card text-[11px] font-bold text-tinta"
-        aria-hidden="true"
-      >
-        {iniciais(nome)}
-      </span>
-      <span className="truncate text-sm leading-4 font-semibold text-tinta">{nome}</span>
-    </div>
-  );
-}
+const COM_BADGE = new Set<StatusAgendamento>(["agendado", "em_espera", "iniciado", "concluido", "cancelado"]);
 
 export function Cartao({
   item,
-  faixa,
+  topo,
+  altura,
   visao,
   nomes,
   href,
+  corIndice,
+  trilho,
   podeMover,
   arrastando,
   onComecar,
   consumirClique,
 }: {
   item: AgendamentoNaGrade;
-  faixa: { topoMinutos: number; alturaMinutos: number };
+  topo: number;
+  altura: number;
   visao: VisaoGrade;
   nomes: Nomes;
   href: string;
+  corIndice: number;
+  trilho?: { indice: number; total: number };
   podeMover: boolean;
   arrastando: boolean;
   onComecar: (evento: ReactPointerEvent<HTMLElement>, modo: "mover" | "alongar") => void;
@@ -85,19 +81,33 @@ export function Cartao({
   const paciente = nomes.pacientes[item.pacienteId] ?? item.pacienteId;
   const dentista = nomes.dentistas[item.dentistaId] ?? item.dentistaId;
   const cadeira = nomes.cadeiras[item.cadeiraId] ?? item.cadeiraId;
+  const procedimento = item.procedimentoId ? (nomes.procedimentos[item.procedimentoId] ?? "") : "";
   const horario = horarioDoDia(item.inicio, item.fim);
-  const visual = item.alerta ? "border-aviso bg-aviso-fundo" : CORES[item.status];
-  const detalhe = visao === "dia" ? `${horario} · ${cadeira}` : `${horario} · ${dentista} · ${cadeira}`;
+  const horaInicio = item.inicio.slice(11, 16);
+  const visual = DIA[item.status];
+  const cor = CORES_DENTISTA[corIndice % CORES_DENTISTA.length];
+  const semanaIniciado = visao === "semana" && item.status === "iniciado";
+  const alto = altura >= 76;
   return (
     <Link
       href={href}
+      data-status={item.status}
       className={cn(
-        "absolute right-1 left-1 z-10 flex flex-col gap-0.5 overflow-hidden rounded-paper-sm border border-l-4 px-2 py-1 text-xs leading-4 text-tinta no-underline shadow-paper-sm",
-        visual,
+        "agenda-evento absolute z-10 flex flex-col overflow-hidden rounded-controle px-2.5 py-1.5 text-[13px] leading-[18px] no-underline",
+        trilho && trilho.total > 1 ? "right-auto" : "right-1 left-1",
+        visao === "dia" ? visual.caixa : "shadow-none",
+        item.status === "cancelado" && visao === "semana" && "border border-borda-papel",
         podeMover && "cursor-grab touch-none",
         arrastando && "cursor-grabbing",
       )}
-      style={{ top: faixa.topoMinutos + 1, height: Math.max(faixa.alturaMinutos - 2, 1) }}
+      style={{
+        top: topo + 2,
+        height: Math.max(altura - 4, 1),
+        left: trilho && trilho.total > 1 ? `calc(${(trilho.indice / trilho.total) * 100}% + 2px)` : undefined,
+        width: trilho && trilho.total > 1 ? `calc(${100 / trilho.total}% - 4px)` : undefined,
+        background: visao === "semana" ? (semanaIniciado ? "#111111" : item.status === "cancelado" ? "#FFFFFF" : cor.fill) : undefined,
+        color: visao === "semana" ? (semanaIniciado ? "#FFFFFF" : cor.texto) : undefined,
+      }}
       draggable={false}
       aria-label={`${horario}, ${paciente}, ${dentista}, ${cadeira}, ${rotuloStatus(item.status)}${item.alerta ? ", alerta" : ""}`}
       onPointerDown={(evento) => {
@@ -110,23 +120,46 @@ export function Cartao({
           return;
         }
         const avisar = () => {
-          if (window.location.hash.length > 1) {
-            window.dispatchEvent(new HashChangeEvent("hashchange"));
-          }
+          if (window.location.hash.length > 1) window.dispatchEvent(new HashChangeEvent("hashchange"));
         };
         queueMicrotask(avisar);
         requestAnimationFrame(avisar);
       }}
     >
-      <span className="flex items-start justify-between gap-1">
-        <span className={cn("truncate font-bold", item.status === "cancelado" && "line-through")}>{paciente}</span>
-        <Badge variant={item.alerta ? "warning" : varianteStatus(item.status)} className="h-5 px-1.5 text-[11px]">
-          {rotuloStatus(item.status)}
-        </Badge>
-      </span>
-      <span className={cn("truncate text-apagado", item.status === "cancelado" && "line-through")}>{detalhe}</span>
+      <span
+        className={cn("absolute top-0 bottom-0 left-0 w-[3px]", visao === "dia" && visual.faixa)}
+        style={{ background: visao === "semana" ? (item.status === "cancelado" ? "#C9C8BA" : cor.stripe) : undefined }}
+        aria-hidden="true"
+      />
+      {visao === "semana" ? (
+        <>
+          <span className={cn("truncate pl-1.5 text-xs font-medium", item.status === "cancelado" && "line-through")}>
+            {paciente}
+          </span>
+          {altura >= 40 ? (
+            <span className={cn("truncate pl-1.5 text-[11px] leading-[14px] opacity-80", item.status === "cancelado" && "line-through")}>
+              {procedimento ? `${horaInicio} · ${procedimento}` : horaInicio}
+            </span>
+          ) : null}
+          {item.status === "concluido" ? (
+            <>
+              <span className="pointer-events-none absolute inset-0 bg-white/45" aria-hidden="true" />
+              <Check className="absolute top-1.5 right-1.5 size-3.5 text-paper-status-concluido" aria-hidden="true" strokeWidth={2.25} />
+            </>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <span className={cn("truncate pl-1.5 font-medium", visual.titulo)}>{paciente}</span>
+          {procedimento ? <span className={cn("truncate pl-1.5 text-xs leading-4", visual.apoio)}>{procedimento}</span> : null}
+          <span className="mt-auto flex items-end justify-between gap-1 pl-1.5">
+            <span className={cn("font-mono text-[11px] leading-4 tracking-wide", visual.apoio)}>{horario}</span>
+            {alto && COM_BADGE.has(item.status) ? <BadgeStatus status={item.status} /> : null}
+          </span>
+        </>
+      )}
       {item.alerta ? (
-        <span className="font-bold text-perigo-tinta">
+        <span className="pl-1.5 text-xs font-bold text-perigo">
           <span aria-hidden="true">! </span>
           {item.textoAlerta ?? "Alerta"}
         </span>
@@ -161,45 +194,27 @@ export function Bloqueio({
   motivo,
   dentista,
   visao,
-  faixa,
+  topo,
+  altura,
 }: {
   inicio: string;
   fim: string;
   motivo: string | null;
   dentista: string;
   visao: VisaoGrade;
-  faixa: { topoMinutos: number; alturaMinutos: number };
+  topo: number;
+  altura: number;
 }) {
   const horario = horarioDoDia(inicio, fim);
   const texto = [visao === "semana" ? dentista : null, horario, motivo].filter(Boolean).join(" · ");
   return (
     <div
-      className="agenda-bloqueio absolute right-1 left-1 z-10 flex flex-col justify-center overflow-hidden rounded-paper-sm border border-l-4 border-tinta px-2 py-1 text-xs leading-4 text-tinta"
-      style={{
-        top: faixa.topoMinutos + 1,
-        height: Math.max(faixa.alturaMinutos - 2, 1),
-      }}
+      className="agenda-bloqueio absolute right-1 left-1 z-10 flex flex-col justify-center overflow-hidden rounded-controle border-l-[3px] border-tinta px-2 py-1 text-xs leading-4 text-tinta"
+      style={{ top: topo + 1, height: Math.max(altura - 2, 1) }}
       aria-label={`Bloqueio, ${texto}`}
     >
       <span className="font-semibold">Bloqueio</span>
       <span className="truncate">{texto}</span>
     </div>
   );
-}
-
-function rotuloDoDia(dia: string) {
-  const [ano, mes, diaNum] = dia.split("-").map(Number);
-  const data = new Date(ano, mes - 1, diaNum);
-  const semana = data.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
-  return {
-    nome: semana.charAt(0).toUpperCase() + semana.slice(1),
-    sub: `${String(diaNum).padStart(2, "0")}/${String(mes).padStart(2, "0")}`,
-  };
-}
-
-function iniciais(nome: string) {
-  const partes = nome.trim().split(/\s+/).filter(Boolean);
-  if (partes.length === 0) return "?";
-  const letras = partes.length === 1 ? partes[0].slice(0, 2) : `${partes[0][0]}${partes[partes.length - 1][0]}`;
-  return letras.toUpperCase();
 }
