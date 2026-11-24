@@ -41,7 +41,7 @@ export function Bloco({
             <Button
               type="button"
               variant="ghost"
-              className="dashboard-botao-discreto"
+              className="h-8 px-3 shadow-none"
               aria-describedby={id}
               disabled={pendente}
               onClick={() => ocultar(campo)}

@@ -107,7 +107,7 @@ export function FormularioImportar({
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="modeloId" value={modelo.id} />
-        <Button type="submit" variant="outline" className="prontuario-contorno" disabled={pendente} aria-describedby={`modelo-${modelo.id}`}>
+        <Button type="submit" variant="outline" disabled={pendente} aria-describedby={`modelo-${modelo.id}`}>
           Importar modelo
         </Button>
       </form>

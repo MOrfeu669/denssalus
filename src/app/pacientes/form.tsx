@@ -64,7 +64,7 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
             Nome completo e ao menos um canal de comunicação são obrigatórios.
           </p>
         </div>
-        <DialogTrigger render={<Button type="button" className="pacientes-principal h-10" />}>
+        <DialogTrigger render={<Button type="button" className="h-10" />}>
           Novo paciente
         </DialogTrigger>
       </div>
@@ -136,16 +136,16 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
           aria-busy={pendenteCadastrar}
         >
           <Campos />
-          <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" principal />
+          <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" />
         </form>
       </DialogContent>
     </Dialog>
   );
 }
 
-function Enviar({ pendente, texto, principal = false }: { pendente: boolean; texto: string; principal?: boolean }) {
+function Enviar({ pendente, texto }: { pendente: boolean; texto: string }) {
   return (
-    <Button type="submit" className={principal ? "pacientes-principal h-10 self-start" : "h-10 self-start"} disabled={pendente}>
+    <Button type="submit" className="h-10 self-start" disabled={pendente}>
       {pendente ? "Salvando…" : texto}
     </Button>
   );

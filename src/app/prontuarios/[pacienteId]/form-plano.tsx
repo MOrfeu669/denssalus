@@ -101,7 +101,7 @@ export function FormularioEmAndamento({
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="planoId" value={planoId} />
-        <Button type="submit" variant="outline" className="prontuario-contorno" disabled={pendente}>
+        <Button type="submit" variant="outline" disabled={pendente}>
           Em andamento
         </Button>
       </form>

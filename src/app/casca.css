@@ -197,56 +197,11 @@
   line-height: 26px;
 }
 
-.casca .casca-miolo form {
-  display: grid;
-  gap: var(--paper-space-3);
-  margin: var(--paper-space-4) 0;
-  padding: var(--paper-space-5);
-  background: var(--paper-surface);
-  border: 1px solid var(--color-linha);
-  border-radius: var(--paper-radius-md);
-}
-
-.casca .casca-miolo .lista form,
-.casca .casca-miolo .grade form {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-}
-
 .casca .casca-miolo .lista {
   background: var(--paper-surface);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);
   padding: var(--paper-space-1) var(--paper-space-4);
-}
-
-.casca .casca-miolo input,
-.casca .casca-miolo select,
-.casca .casca-miolo textarea {
-  padding: var(--paper-space-3);
-  border: 1px solid var(--color-linha);
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-surface);
-  color: var(--paper-text);
-}
-
-.casca .casca-miolo button,
-.casca .casca-miolo a.acao {
-  width: fit-content;
-  border: 0;
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-primary);
-  color: var(--primary-foreground);
-  font-weight: 600;
-  padding: var(--paper-space-3) var(--paper-space-4);
-}
-
-.casca .casca-miolo button[type="button"] {
-  background: var(--paper-surface);
-  color: var(--color-link);
-  border: 1px solid var(--paper-primary);
 }
 
 .casca .casca-miolo .nav a {
@@ -276,53 +231,7 @@
   color: var(--color-ok-tinta);
 }
 
-.casca .casca-nota {
-  max-width: 640px;
-  margin: 0 0 var(--paper-space-4);
-  color: var(--color-apagado);
-}
-
 .casca .abaixo {
   background: var(--color-perigo-fundo);
   color: var(--color-perigo-tinta);
-}
-
-.casca .dente {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-surface);
-  color: var(--paper-primary);
-  border: 1px solid var(--color-linha);
-}
-
-.casca .dente.com-registro {
-  background: var(--secondary);
-}
-
-.casca .dente[aria-pressed="true"] {
-  background: var(--paper-primary);
-  color: var(--primary-foreground);
-}
-
-.casca .prontuario-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--paper-space-2) var(--paper-space-4);
-  margin: 0 0 var(--paper-space-5);
-}
-
-.casca .prontuario-nav a {
-  color: var(--color-link);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.casca .prontuario-secao {
-  margin: 0 0 var(--paper-space-4);
-  padding: var(--paper-space-5);
-  background: var(--paper-surface);
-  border: 1px solid var(--color-linha);
-  border-radius: var(--paper-radius-md);
 }

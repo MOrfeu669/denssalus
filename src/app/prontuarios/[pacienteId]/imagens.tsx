@@ -98,7 +98,6 @@ export function SecaoImagens({
               <Button
                 type="button"
                 variant="destructive"
-                className="prontuario-perigo"
                 disabled={pendenteId !== null}
                 onClick={() => executar(excluirImagem, imagem.id)}
               >
@@ -121,7 +120,6 @@ export function SecaoImagens({
                   <Button
                     type="button"
                     variant="outline"
-                    className="prontuario-contorno"
                     disabled={pendenteId !== null}
                     onClick={() => executar(restaurarImagem, imagem.id)}
                   >

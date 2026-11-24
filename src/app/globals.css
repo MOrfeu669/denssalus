@@ -52,8 +52,6 @@
   --paper-lateral-borda: var(--paper-borda);
 
   /* Aliases semânticos do produto → Paper */
-  --cor-marca: var(--paper-primary);
-  --cor-acao: var(--paper-primary);
   --cor-fundo: var(--paper-fundo);
   --cor-texto: var(--paper-text);
   color-scheme: light;
@@ -83,7 +81,6 @@
   --chart-4: #374151;
   --chart-5: #111827;
   --radius: 0.5rem;
-  --sidebar: #111111;
   --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #8B5CF6;
   --sidebar-primary-foreground: #FFFFFF;
@@ -138,12 +135,11 @@ select {
   border-radius: var(--paper-radius-sm);
 }
 
-button,
-.acao {
+button {
   width: fit-content;
   padding: 0.5rem 0.75rem;
   border-radius: var(--paper-radius-sm);
-  background: var(--cor-acao);
+  background: var(--paper-primary);
   color: var(--primary-foreground);
   text-decoration: none;
 }
@@ -187,79 +183,9 @@ select:focus-visible,
   margin-top: 1rem;
 }
 
-main.largura {
-  max-width: 72rem;
-}
-
-.visao,
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.visao button[aria-pressed="false"] {
-  background: var(--paper-surface);
-  color: var(--cor-acao);
-  border: 1px solid var(--cor-acao);
-}
-
-.grade-rolagem {
-  overflow-x: auto;
-}
-
-.grade {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.grade th,
-.grade td {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--paper-borda);
-  vertical-align: top;
-  text-align: left;
-}
-
-.grade .coluna {
-  min-width: 11rem;
-}
-
-.grade-itens {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.25rem;
-}
-
-.agendamento {
-  padding: 0.25rem 0.4rem;
-  background: var(--color-ok-fundo);
-  border-radius: var(--paper-radius-sm);
-}
-
 .riscado {
   text-decoration: line-through;
   color: var(--color-apagado);
-}
-
-.com-alerta {
-  background: var(--color-aviso-fundo);
-  border: 1px solid var(--color-aviso-tinta);
-}
-
-.alerta {
-  color: var(--color-perigo-tinta);
-  font-weight: 700;
-}
-
-.bloqueio {
-  padding: 0.25rem 0.4rem;
-  background: var(--paper-disabled-fundo);
-  border-left: 4px solid var(--color-apagado);
-  border-radius: var(--paper-radius-sm);
 }
 
 .sino {
@@ -290,12 +216,53 @@ main.largura {
   padding-left: 0.5rem;
   font-weight: 600;
 }
+
+/* Dentro do miolo, o padrão de formulário fica no base: utilitário e shadcn vencem. */
+.casca .casca-miolo form {
+  display: grid;
+  gap: var(--paper-space-3);
+  margin: var(--paper-space-4) 0;
+  padding: var(--paper-space-5);
+  background: var(--paper-surface);
+  border: 1px solid var(--color-linha);
+  border-radius: var(--paper-radius-md);
+}
+
+.casca .casca-miolo .lista form {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.casca .casca-miolo input,
+.casca .casca-miolo select,
+.casca .casca-miolo textarea {
+  padding: var(--paper-space-3);
+  border: 1px solid var(--color-linha);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
+  color: var(--paper-text);
+}
+
+.casca .casca-miolo button {
+  width: fit-content;
+  border: 0;
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  padding: var(--paper-space-3) var(--paper-space-4);
+}
+
+.casca .casca-miolo button[type="button"] {
+  background: var(--paper-surface);
+  color: var(--color-link);
+  border: 1px solid var(--paper-primary);
+}
 }
 
 @theme inline {
-  --color-marca: var(--paper-primary);
-  --color-acao: var(--paper-primary);
-  --color-nevoa: #D1D5DB;
   --color-destaque: var(--paper-secondary);
   --color-fundo: var(--cor-fundo);
   --color-tinta: var(--paper-text);
@@ -339,7 +306,6 @@ main.largura {
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);

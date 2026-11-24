@@ -56,11 +56,11 @@ function Modelo({
             <input type="hidden" name="tipo" value={tipo} />
             <Label className="mensagens-campo">
               {`Texto do modelo de ${ROTULO[tipo]}`}
-              <Textarea key={conteudo} name="conteudo" rows={5} defaultValue={conteudo} />
+              <Textarea key={conteudo} name="conteudo" rows={5} defaultValue={conteudo} className="resize-y text-base" />
             </Label>
             <Button
               type="submit"
-              className="mensagens-botao"
+              className="h-10 px-4 shadow-paper-sm"
               aria-label={`Salvar modelo de ${ROTULO[tipo]}`}
               disabled={pendente}
             >

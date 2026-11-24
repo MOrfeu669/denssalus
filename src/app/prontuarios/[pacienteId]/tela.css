@@ -87,80 +87,11 @@
   text-decoration: underline;
 }
 
-.casca .casca-miolo .prontuario-secao input[data-slot="input"],
-.casca .casca-miolo .prontuario-secao select[data-slot="native-select"],
-.casca .casca-miolo .prontuario-secao textarea[data-slot="textarea"] {
-  border: 1px solid var(--paper-campo-borda);
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-campo-fundo);
-  color: var(--paper-text);
-  box-shadow: var(--paper-sombra-sm);
-}
-
-.casca .casca-miolo .prontuario-secao input[data-slot="input"]:hover,
-.casca .casca-miolo .prontuario-secao select[data-slot="native-select"]:hover,
-.casca .casca-miolo .prontuario-secao textarea[data-slot="textarea"]:hover {
-  border-color: var(--paper-campo-borda-hover);
-}
-
-.casca .casca-miolo .prontuario-secao input[data-slot="input"]:focus-visible,
-.casca .casca-miolo .prontuario-secao select[data-slot="native-select"]:focus-visible,
-.casca .casca-miolo .prontuario-secao textarea[data-slot="textarea"]:focus-visible {
-  border-color: var(--paper-secondary);
-  outline: 3px solid var(--paper-secondary);
-  outline-offset: 2px;
-}
-
-.casca .casca-miolo .prontuario-secao input:disabled,
-.casca .casca-miolo .prontuario-secao select:disabled,
-.casca .casca-miolo .prontuario-secao textarea:disabled,
-.casca .casca-miolo .prontuario-secao button:disabled {
-  border-color: var(--paper-borda);
-  background: var(--paper-disabled-fundo);
-  color: var(--paper-disabled-tinta);
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
 .casca .casca-miolo .prontuario-secao button[data-slot="button"]:not(.dente) {
-  width: fit-content;
   height: 40px;
   padding: 0 var(--paper-space-4);
-  border: 1px solid var(--paper-primary);
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-primary);
-  color: var(--paper-surface);
   box-shadow: var(--paper-sombra-sm);
   font-weight: 600;
-}
-
-.casca .casca-miolo .prontuario-secao button[data-slot="button"]:not(.dente):hover:not(:disabled) {
-  background: var(--paper-primary-hover);
-  border-color: var(--paper-primary-hover);
-}
-
-.casca .casca-miolo .prontuario-secao button[data-slot="button"].prontuario-contorno:not(.dente) {
-  background: var(--paper-surface);
-  color: var(--paper-text);
-  border-color: var(--paper-borda);
-}
-
-.casca .casca-miolo .prontuario-secao button[data-slot="button"].prontuario-contorno:not(.dente):hover:not(:disabled) {
-  background: var(--paper-fundo);
-  border-color: var(--paper-campo-borda-hover);
-  color: var(--paper-text);
-}
-
-.casca .casca-miolo .prontuario-secao button[data-slot="button"].prontuario-perigo:not(.dente) {
-  background: var(--color-perigo-fundo);
-  color: var(--color-perigo-tinta);
-  border-color: var(--paper-danger);
-}
-
-.casca .casca-miolo .prontuario-secao button[data-slot="button"].prontuario-perigo:not(.dente):hover:not(:disabled) {
-  background: var(--paper-danger);
-  border-color: var(--paper-danger);
-  color: var(--paper-surface);
 }
 
 .casca .casca-miolo .odontograma {

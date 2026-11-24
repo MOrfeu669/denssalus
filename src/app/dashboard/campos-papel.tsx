@@ -66,7 +66,7 @@ export function CamposDoPapel({
                 </Label>
               ))}
             </fieldset>
-            <Button type="submit" className="dashboard-botao" disabled={pendente}>
+            <Button type="submit" className="h-10 px-4 shadow-paper-sm" disabled={pendente}>
               Salvar campos do papel
             </Button>
           </form>
