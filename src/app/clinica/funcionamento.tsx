@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CLINICA_SUGESTAO_HORARIO } from "./texto";
 import { DIAS } from "./validar";
 
@@ -6,6 +8,8 @@ export type CamposFuncionamento = {
   abertura: string;
   fechamento: string;
 };
+
+const campo = "w-full flex-col items-stretch gap-2 font-semibold";
 
 export function Funcionamento({
   campos,
@@ -20,7 +24,7 @@ export function Funcionamento({
         <legend>Dias de atendimento</legend>
         <div className="clinica-dias-lista">
           {DIAS.map((dia) => (
-            <label key={dia.valor} className="clinica-dia">
+            <Label key={dia.valor} className="clinica-dia font-normal">
               <input
                 type="checkbox"
                 name="dias"
@@ -28,19 +32,19 @@ export function Funcionamento({
                 defaultChecked={campos.dias.includes(dia.valor)}
               />
               {dia.rotulo}
-            </label>
+            </Label>
           ))}
         </div>
       </fieldset>
       <div className="clinica-horarios">
-        <label className="clinica-campo">
+        <Label className={`clinica-campo ${campo}`}>
           Horário de abertura
-          <input name="abertura" type="time" defaultValue={campos.abertura} required />
-        </label>
-        <label className="clinica-campo">
+          <Input name="abertura" type="time" defaultValue={campos.abertura} required />
+        </Label>
+        <Label className={`clinica-campo ${campo}`}>
           Horário de fechamento
-          <input name="fechamento" type="time" defaultValue={campos.fechamento} required />
-        </label>
+          <Input name="fechamento" type="time" defaultValue={campos.fechamento} required />
+        </Label>
       </div>
       {sugestao ? <p className="clinica-sugestao">{CLINICA_SUGESTAO_HORARIO}</p> : (
         <p className="clinica-sugestao">Dias desmarcados ficam indisponíveis na agenda.</p>

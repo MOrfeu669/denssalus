@@ -1,6 +1,10 @@
-import { createElement } from "react";
+// @vitest-environment happy-dom
+
+import { createElement, type ReactNode } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { act } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Procedimento } from "../../src/domain/procedimento/tipos";
 import type { MaterialTela } from "../../src/app/estoque/form";
 
@@ -21,6 +25,46 @@ vi.mock("../../src/app/estoque/actions", () => ({
 
 import { Estoque } from "../../src/app/estoque/form";
 import { Procedimentos } from "../../src/app/procedimentos/form";
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+const roots: Root[] = [];
+
+afterEach(async () => {
+  for (const root of roots.splice(0)) {
+    await act(async () => {
+      root.unmount();
+    });
+  }
+  document.body.innerHTML = "";
+});
+
+async function montar(node: ReactNode) {
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  roots.push(root);
+  await act(async () => {
+    root.render(node);
+  });
+}
+
+function dialogoVisivel(): HTMLElement | null {
+  const dialog = document.querySelector<HTMLElement>('[role="dialog"], [role="alertdialog"]');
+  if (!dialog || dialog.hasAttribute("hidden")) return null;
+  if (!dialog.hasAttribute("data-open") && dialog.hasAttribute("data-closed")) return null;
+  return dialog;
+}
+
+async function esperar(condicao: () => boolean) {
+  const inicio = Date.now();
+  while (Date.now() - inicio < 1200) {
+    if (condicao()) return;
+    await act(async () => {
+      await new Promise((resolver) => setTimeout(resolver, 16));
+    });
+  }
+}
 
 const limpeza: Procedimento = {
   id: "p1",
@@ -54,8 +98,8 @@ describe("cadastro de procedimento na tela", () => {
     expect(html).toContain("Procedimentos da clínica");
   });
 
-  it("dado o diálogo de novo procedimento, quando ele abre, então o vínculo fica no formulário", () => {
-    const html = renderToStaticMarkup(
+  it("dado o diálogo de novo procedimento, quando ele abre, então o vínculo fica no formulário", async () => {
+    await montar(
       createElement(Procedimentos, {
         procedimentos: [limpeza],
         podeExcluir: false,
@@ -63,12 +107,19 @@ describe("cadastro de procedimento na tela", () => {
         cadastroAberto: true,
       }),
     );
+    await esperar(() => dialogoVisivel() !== null);
 
-    expect(html).toContain('id="procedimentos-cadastro"');
-    expect(html).toContain("Criar procedimento");
-    expect(html).toContain("Vincular material");
-    expect(html).not.toContain("Luva");
-    expect(html).not.toContain("Quantidade por consulta");
+    const dialog = dialogoVisivel();
+    expect(dialog).toBeTruthy();
+    expect(dialog?.textContent).toContain("Novo procedimento");
+    expect(dialog?.textContent).toContain("Criar procedimento");
+    expect(dialog?.textContent).toContain("Vincular material");
+    expect(dialog?.querySelector('[name="nome"]')).toBeTruthy();
+    expect(dialog?.querySelector('[name="tempoMedioMinutos"]')).toBeTruthy();
+    expect(dialog?.querySelector('[name="valorMedio"]')).toBeTruthy();
+    expect(dialog?.textContent).not.toContain("Luva");
+    expect(dialog?.textContent).not.toContain("Quantidade por consulta");
+    expect(document.body.textContent).not.toContain("Quantidade por consulta");
   });
 });
 

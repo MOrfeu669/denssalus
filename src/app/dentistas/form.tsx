@@ -2,8 +2,22 @@
 
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useActionState, useEffect, useMemo, useRef, useState } from "react";
 import type { Dentista } from "../../domain/dentista/tipos";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrar, editar, remover } from "./actions";
 import { Alerta, BotaoAcao } from "./alerta";
@@ -11,10 +25,11 @@ import { Campos } from "./campos";
 import { filtrarDentistas } from "./filtrar";
 import { DENTISTAS_NOTA, DENTISTAS_VAZIO, mensagemComDetalhe } from "./texto";
 
+const campo = "dentistas-campo w-full flex-col items-stretch gap-2 font-semibold";
+
 export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
   const roteador = useRouter();
-  const botaoRef = useRef<HTMLButtonElement>(null);
-  const painelRef = useRef<HTMLElement>(null);
+  const nomeRef = useRef<HTMLInputElement>(null);
   const [cadastro, acaoCadastrar, pendenteCadastrar] = useActionState(cadastrar, estadoVazio);
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [remocao, acaoRemover] = useActionState(remover, estadoVazio);
@@ -35,28 +50,6 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
     if (estados.some((item) => item.status === "sucesso")) roteador.refresh();
   }, [cadastro, edicao, remocao, roteador]);
 
-  useEffect(() => {
-    if (aberto) painelRef.current?.focus();
-  }, [aberto]);
-
-  useEffect(() => {
-    if (!aberto) return;
-    function tecla(evento: KeyboardEvent) {
-      if (evento.key === "Escape" && !pendenteCadastrar) {
-        setAberto(false);
-        botaoRef.current?.focus();
-      }
-    }
-    document.addEventListener("keydown", tecla);
-    return () => document.removeEventListener("keydown", tecla);
-  }, [aberto, pendenteCadastrar]);
-
-  function fechar() {
-    if (pendenteCadastrar) return;
-    setAberto(false);
-    botaoRef.current?.focus();
-  }
-
   return (
     <>
       <div className="dentistas-cabeca">
@@ -65,74 +58,79 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
       {erroNoPainel ? null : (
         <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
       )}
-      <div className="dentistas-ferramentas">
-        <label className="dentistas-busca">
-          <Search className="dentistas-busca-icone" aria-hidden="true" />
-          <span className="sr-only">Buscar por nome</span>
-          <input
-            type="search"
-            value={busca}
-            onChange={(evento) => setBusca(evento.target.value)}
-            placeholder="Buscar por nome"
-          />
-        </label>
-        <button
-          ref={botaoRef}
-          type="button"
-          className="dentistas-botao"
-          aria-haspopup="dialog"
-          aria-expanded={aberto}
-          aria-controls={aberto ? "dentistas-cadastro" : undefined}
-          onClick={() => setAberto(true)}
-        >
-          Cadastrar dentista
-        </button>
-      </div>
-      {aberto ? (
-        <div className="dentistas-overlay">
-          <div className="dentistas-overlay-fundo" onClick={fechar} />
-          <section
-            ref={painelRef}
-            id="dentistas-cadastro"
-            className="dentistas-painel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dentistas-novo"
-            tabIndex={-1}
-          >
-            <div className="dentistas-painel-topo">
-              <h2 id="dentistas-novo" className="dentistas-subtitulo">
-                Cadastrar dentista
-              </h2>
-              <button type="button" className="dentistas-botao-sec" onClick={fechar}>
-                Fechar
-              </button>
-            </div>
-            {erroNoPainel ? (
-              <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
-            ) : null}
-            <form action={acaoCadastrar} aria-busy={pendenteCadastrar} className="dentistas-form">
-              <Campos />
-              <label className="dentistas-campo">
-                E-mail
-                <input name="email" type="email" autoComplete="off" required />
-              </label>
-              <label className="dentistas-campo">
-                Senha
-                <input name="senha" type="password" autoComplete="new-password" minLength={6} required />
-              </label>
-              <div className="dentistas-acoes">
-                <BotaoAcao
-                  rotulo="Cadastrar dentista"
-                  pendente="Salvando…"
-                  className="dentistas-botao"
-                />
-              </div>
-            </form>
-            <p className="dentistas-nota">{DENTISTAS_NOTA}</p>
-          </section>
+      <Dialog
+        open={aberto}
+        disablePointerDismissal={pendenteCadastrar}
+        onOpenChange={(proximo, detalhes) => {
+          if (!proximo && pendenteCadastrar) {
+            detalhes.cancel();
+            return;
+          }
+          setAberto(proximo);
+        }}
+      >
+        <div className="dentistas-ferramentas">
+          <Label className="dentistas-busca relative block flex-1 font-normal">
+            <Search className="dentistas-busca-icone" aria-hidden="true" />
+            <span className="sr-only">Buscar por nome</span>
+            <Input
+              type="search"
+              value={busca}
+              onChange={(evento) => setBusca(evento.target.value)}
+              placeholder="Buscar por nome"
+              className="h-10 pl-10"
+            />
+          </Label>
+          <DialogTrigger className="dentistas-botao h-11 shrink-0 px-5 text-[15px] font-semibold">
+            Cadastrar dentista
+          </DialogTrigger>
         </div>
-      ) : null}
+        <DialogContent
+          initialFocus={nomeRef}
+          showCloseButton={false}
+          className="max-h-[calc(100dvh-4rem)] overflow-y-auto sm:max-w-2xl"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <DialogHeader className="pr-0">
+              <DialogTitle>Cadastrar dentista</DialogTitle>
+            </DialogHeader>
+            <DialogClose
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 shrink-0 px-3"
+                  disabled={pendenteCadastrar}
+                />
+              }
+            >
+              Fechar
+            </DialogClose>
+          </div>
+          {erroNoPainel ? (
+            <Alerta status={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+          ) : null}
+          <form
+            action={acaoCadastrar}
+            aria-busy={pendenteCadastrar}
+            className="dentistas-form grid grid-cols-1 gap-4 sm:grid-cols-2"
+          >
+            <Campos nomeRef={nomeRef} />
+            <Label className={campo}>
+              E-mail
+              <Input name="email" type="email" autoComplete="off" required />
+            </Label>
+            <Label className={campo}>
+              Senha
+              <Input name="senha" type="password" autoComplete="new-password" minLength={6} required />
+            </Label>
+            <div className="dentistas-acoes flex sm:col-span-2">
+              <BotaoAcao rotulo="Cadastrar dentista" pendente="Salvando…" className="dentistas-botao" />
+            </div>
+          </form>
+          <DialogDescription>{DENTISTAS_NOTA}</DialogDescription>
+        </DialogContent>
+      </Dialog>
       <section className="dentistas-cartao" aria-labelledby="dentistas-lista">
         <h2 id="dentistas-lista" className="dentistas-subtitulo">
           Dentistas da clínica
@@ -143,73 +141,97 @@ export function Dentistas({ dentistas }: { dentistas: Dentista[] }) {
           <p className="dentistas-vazio">Nenhum dentista encontrado com esse nome.</p>
         ) : (
           <>
-            <ul className="dentistas-lista">
-              {visiveis.map((dentista) => (
-                <li key={dentista.id} className="dentistas-linha">
-                  <div className="dentistas-topo">
-                    <span className="dentistas-pessoa">
-                      <span className="dentistas-avatar" aria-hidden="true">
-                        {iniciais(dentista.nome)}
-                      </span>
-                      <span className="dentistas-nome">{dentista.nome}</span>
-                      <span className="dentistas-cro">CRO {dentista.cro}</span>
-                      <span
-                        className={dentista.ativo ? "dentistas-ativo" : "dentistas-inativo"}
-                      >
-                        {dentista.ativo ? "Ativo" : "! Removido"}
-                      </span>
-                      <span className="dentistas-detalhe">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dentista</TableHead>
+                  <TableHead>CRO</TableHead>
+                  <TableHead>Situação</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visiveis.map((dentista) => (
+                  <Fragment key={dentista.id}>
+                    <TableRow>
+                      <TableCell className="whitespace-normal">
+                        <span className="flex items-center gap-3">
+                          <span
+                            className="inline-grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-primary"
+                            aria-hidden="true"
+                          >
+                            {iniciais(dentista.nome)}
+                          </span>
+                          <span className="font-semibold wrap-anywhere">{dentista.nome}</span>
+                        </span>
+                      </TableCell>
+                      <TableCell>{dentista.cro}</TableCell>
+                      <TableCell>
+                        <Badge variant={dentista.ativo ? "success" : "warning"}>
+                          {dentista.ativo ? "Ativo" : "! Removido"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="whitespace-normal text-apagado">
                         {dentista.telefone}
                         {dentista.especialidades.length > 0
                           ? ` · ${dentista.especialidades.join(", ")}`
                           : ""}
-                      </span>
-                    </span>
-                    {dentista.ativo ? (
-                      <span className="dentistas-linha-acoes">
-                        <button
-                          type="button"
-                          className="dentistas-botao-sec"
-                          aria-expanded={editandoId === dentista.id}
-                          aria-label={`Editar dentista ${dentista.nome}`}
-                          onClick={() =>
-                            setEditandoId(editandoId === dentista.id ? null : dentista.id)
-                          }
-                        >
-                          Editar
-                        </button>
-                        <form action={acaoRemover} className="dentistas-remover">
-                          <input type="hidden" name="id" value={dentista.id} />
-                          <BotaoAcao
-                            rotulo="Remover"
-                            pendente="Removendo…"
-                            className="dentistas-botao-sec"
-                            nomeAcessivel={`Remover dentista ${dentista.nome}`}
-                          />
-                        </form>
-                      </span>
+                      </TableCell>
+                      <TableCell className="text-right whitespace-normal">
+                        {dentista.ativo ? (
+                          <span className="inline-flex items-center justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="dentistas-botao-sec h-9 px-3"
+                              aria-expanded={editandoId === dentista.id}
+                              aria-label={`Editar dentista ${dentista.nome}`}
+                              onClick={() =>
+                                setEditandoId(editandoId === dentista.id ? null : dentista.id)
+                              }
+                            >
+                              Editar
+                            </Button>
+                            <form action={acaoRemover} className="dentistas-remover">
+                              <input type="hidden" name="id" value={dentista.id} />
+                              <BotaoAcao
+                                rotulo="Remover"
+                                pendente="Removendo…"
+                                className="dentistas-botao-sec"
+                                variante="outline"
+                                nomeAcessivel={`Remover dentista ${dentista.nome}`}
+                              />
+                            </form>
+                          </span>
+                        ) : null}
+                      </TableCell>
+                    </TableRow>
+                    {dentista.ativo && editandoId === dentista.id ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="whitespace-normal bg-papel">
+                          <form
+                            action={acaoEditar}
+                            aria-busy={pendenteEditar}
+                            className="dentistas-form dentistas-edicao grid grid-cols-1 gap-4 sm:grid-cols-2"
+                          >
+                            <input type="hidden" name="id" value={dentista.id} />
+                            <Campos dentista={dentista} />
+                            <div className="dentistas-acoes flex sm:col-span-2">
+                              <BotaoAcao
+                                rotulo="Salvar dentista"
+                                pendente="Salvando…"
+                                className="dentistas-botao"
+                              />
+                            </div>
+                          </form>
+                        </TableCell>
+                      </TableRow>
                     ) : null}
-                  </div>
-                  {dentista.ativo && editandoId === dentista.id ? (
-                    <form
-                      action={acaoEditar}
-                      aria-busy={pendenteEditar}
-                      className="dentistas-form dentistas-edicao"
-                    >
-                      <input type="hidden" name="id" value={dentista.id} />
-                      <Campos dentista={dentista} />
-                      <div className="dentistas-acoes">
-                        <BotaoAcao
-                          rotulo="Salvar dentista"
-                          pendente="Salvando…"
-                          className="dentistas-botao"
-                        />
-                      </div>
-                    </form>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+                  </Fragment>
+                ))}
+              </TableBody>
+            </Table>
             <p className="dentistas-rodape">
               Mostrando {visiveis.length} de {dentistas.length} dentistas
             </p>

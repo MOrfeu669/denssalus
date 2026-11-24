@@ -77,17 +77,30 @@
   pointer-events: none;
 }
 
-.casca .dentistas-busca input {
+.casca .casca-miolo .dentistas-busca input,
+.casca .casca-miolo .dentistas-campo input {
   width: 100%;
-  height: 44px;
+  height: 2.5rem;
   padding: 0 var(--paper-space-3) 0 var(--paper-space-6);
-  border: 1px solid var(--color-linha);
+  border: 1px solid var(--color-campo-borda);
   border-radius: var(--paper-radius-md);
-  background: var(--paper-surface);
+  background: var(--color-campo);
   color: var(--paper-text);
+  box-shadow: var(--shadow-paper-sm);
   font: inherit;
   font-size: 14px;
   font-weight: 400;
+}
+
+.casca .casca-miolo .dentistas-campo input {
+  padding-left: var(--paper-space-3);
+}
+
+.casca .casca-miolo .dentistas-busca input:focus-visible,
+.casca .casca-miolo .dentistas-campo input:focus-visible {
+  border-color: var(--color-destaque);
+  outline: 3px solid var(--color-destaque);
+  outline-offset: 2px;
 }
 
 .casca .casca-miolo .dentistas-ferramentas > button.dentistas-botao {
@@ -107,52 +120,6 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-.casca .dentistas-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.casca .dentistas-overlay-fundo {
-  position: absolute;
-  inset: 0;
-  background: rgb(15 26 32 / 32%);
-}
-
-.casca .dentistas-painel {
-  position: relative;
-  z-index: 1;
-  width: min(640px, 100%);
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  margin: 0;
-  padding: 24px;
-  border: 1px solid var(--color-linha);
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-surface);
-  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
-}
-
-.casca .dentistas-painel:focus {
-  outline: 3px solid var(--paper-secondary);
-  outline-offset: 2px;
-}
-
-.casca .dentistas-painel-topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 0 0 16px;
-}
-
-.casca .dentistas-painel-topo .dentistas-subtitulo {
-  margin: 0;
 }
 
 .casca .dentistas-cartao {
@@ -195,24 +162,11 @@
   grid-column: 1 / -1;
 }
 
-.casca .dentistas-campo input {
-  width: 100%;
-  height: 44px;
-  padding: 0 var(--paper-space-3);
-  border: 1px solid var(--color-linha);
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-surface);
-  color: var(--paper-text);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 400;
-}
-
 .casca .dentistas-acoes {
   display: flex;
 }
 
-.casca button.dentistas-botao {
+.casca .casca-miolo button.dentistas-botao {
   width: fit-content;
   height: 44px;
   margin: 0;
@@ -228,17 +182,17 @@
   cursor: pointer;
 }
 
-.casca button.dentistas-botao:hover:not(:disabled) {
+.casca .casca-miolo button.dentistas-botao:hover:not(:disabled) {
   background: var(--paper-primary-hover);
 }
 
-.casca button.dentistas-botao:disabled {
+.casca .casca-miolo button.dentistas-botao:disabled {
   background: var(--paper-primary);
   opacity: 0.7;
   cursor: default;
 }
 
-.casca button.dentistas-botao-sec {
+.casca .casca-miolo button.dentistas-botao-sec {
   width: fit-content;
   height: 36px;
   margin: 0;
@@ -254,11 +208,11 @@
   cursor: pointer;
 }
 
-.casca button.dentistas-botao-sec:hover:not(:disabled) {
+.casca .casca-miolo button.dentistas-botao-sec:hover:not(:disabled) {
   background: var(--cor-fundo);
 }
 
-.casca button.dentistas-botao-sec:disabled {
+.casca .casca-miolo button.dentistas-botao-sec:disabled {
   opacity: 0.7;
   cursor: default;
 }

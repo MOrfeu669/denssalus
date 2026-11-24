@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export type MaterialOpcao = { id: string; nome: string };
 
@@ -55,7 +57,8 @@ export function VinculoMateriais({
         <div className="min-w-0 flex-1">{children}</div>
         <Button
           type="button"
-          className="procedimentos-botao procedimentos-botao-secundario"
+          variant="outline"
+          className="procedimentos-botao procedimentos-botao-secundario h-10 shrink-0 px-3"
           aria-expanded={aberto}
           aria-controls={aberto ? painelId : undefined}
           onClick={() => setAberto((atual) => !atual)}
@@ -68,7 +71,7 @@ export function VinculoMateriais({
           ref={painelRef}
           id={painelId}
           tabIndex={-1}
-          className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[12px] border border-linha bg-fundo p-3"
+          className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-paper-md border border-borda-papel bg-papel p-3 shadow-paper-sm"
         >
           {materiais.length === 0 ? (
             <p className="m-0 text-sm text-apagado">Nenhum material cadastrado nesta clínica.</p>
@@ -82,9 +85,9 @@ export function VinculoMateriais({
                     checked={escolhidos.includes(material.id)}
                     onCheckedChange={(marcado) => alternar(material.id, marcado)}
                   />
-                  <label htmlFor={campo} className="cursor-pointer text-sm font-semibold text-tinta">
+                  <Label htmlFor={campo} className="cursor-pointer font-semibold">
                     {material.nome}
-                  </label>
+                  </Label>
                 </div>
               );
             })
@@ -102,9 +105,9 @@ export function VinculoMateriais({
               return (
                 <li key={material.id}>
                   <input type="hidden" name="materialId" value={material.id} />
-                  <label className="procedimentos-campo max-w-xs" htmlFor={campo}>
+                  <Label className="procedimentos-campo max-w-xs flex-col items-stretch gap-2 font-semibold" htmlFor={campo}>
                     {material.nome}
-                    <input
+                    <Input
                       id={campo}
                       name={`quantidade-${material.id}`}
                       type="number"
@@ -113,7 +116,7 @@ export function VinculoMateriais({
                       defaultValue={1}
                       required
                     />
-                  </label>
+                  </Label>
                 </li>
               );
             })}
