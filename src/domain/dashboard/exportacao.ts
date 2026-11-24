@@ -73,11 +73,29 @@ function planilhaDe(linhas: Linha[]): string {
   );
 }
 
-export function gerarArquivo(visao: VisaoDashboard, formato: "pdf" | "excel"): ArquivoDashboard {
+function csvCampo(valor: string): string {
+  return `"${valor.replace(/"/g, '""')}"`;
+}
+
+function csvDe(linhas: Linha[]): string {
+  const rows = linhas.map((linha) =>
+    [csvCampo(linha.rotulo), linha.valor === undefined ? "" : String(linha.valor)].join(","),
+  );
+  return `\uFEFF${["rotulo,valor", ...rows].join("\n")}\n`;
+}
+
+export function gerarArquivo(
+  visao: VisaoDashboard,
+  formato: "pdf" | "excel" | "csv",
+): ArquivoDashboard {
   const linhas = linhasVisiveis(visao);
   if (formato === "pdf") {
     const bytes = pdfDe(linhas.map(textoDaLinha).join("\n"));
     return { nome: "dashboard.pdf", bytes, mediaType: "application/pdf" };
+  }
+  if (formato === "csv") {
+    const bytes = new TextEncoder().encode(csvDe(linhas));
+    return { nome: "dashboard.csv", bytes, mediaType: "text/csv; charset=utf-8" };
   }
   const bytes = new TextEncoder().encode(planilhaDe(linhas));
   return { nome: "dashboard.xls", bytes, mediaType: "application/vnd.ms-excel" };

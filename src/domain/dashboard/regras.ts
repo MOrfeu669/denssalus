@@ -33,6 +33,7 @@ function intervaloValido(inicio: string, fim: string): boolean {
 }
 
 export function pedidoDoTexto(texto: string): PedidoPeriodo | null {
+  if (texto === "hoje") return { tipo: "hoje" };
   if (texto === "mes") return { tipo: "mes" };
   if (texto === "7dias") return { tipo: "7dias" };
   const partes = /^(\d{4}-\d{2}-\d{2})\/(\d{4}-\d{2}-\d{2})$/.exec(texto);
@@ -42,6 +43,7 @@ export function pedidoDoTexto(texto: string): PedidoPeriodo | null {
 
 export function resolverPeriodo(pedido: PedidoPeriodo, hoje: Date): Periodo | null {
   const dia = hoje.toISOString().slice(0, 10);
+  if (pedido.tipo === "hoje") return { inicio: dia, fim: dia };
   if (pedido.tipo === "mes") {
     const ultimo = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() + 1, 0));
     return { inicio: `${dia.slice(0, 7)}-01`, fim: ultimo.toISOString().slice(0, 10) };
@@ -70,8 +72,86 @@ function acumular(mapa: Map<string, number>, id: string, valor: number): void {
   mapa.set(id, (mapa.get(id) ?? 0) + valor);
 }
 
+export type Lancamento = {
+  data: string;
+  dentistaId: string;
+  procedimentoId: string;
+  valor: number;
+};
+
+export function periodoAnterior(periodo: Periodo): Periodo {
+  const dias = diasDoPeriodo(periodo).length;
+  const fim = somarDias(periodo.inicio, -1);
+  return { inicio: somarDias(fim, -(dias - 1)), fim };
+}
+
+export function variacaoPercentual(atual: number, anterior: number): number | null {
+  if (!(anterior > 0)) return null;
+  return ((atual - anterior) / anterior) * 100;
+}
+
+export function variacaoPontos(atual: number, anterior: number): number | null {
+  if (atual === 0 && anterior === 0) return null;
+  return atual - anterior;
+}
+
+/** A meta diária não está no cadastro da clínica. Só entra se o valor já vier preenchido. */
+export function lerMetaDiaria(clinica: Clinica): number | null {
+  const bruto = (clinica as Clinica & { metaDiaria?: unknown }).metaDiaria;
+  if (typeof bruto !== "number" || !Number.isFinite(bruto) || bruto <= 0) return null;
+  return bruto;
+}
+
+function diaUtil(clinica: Clinica, dia: string): boolean {
+  return clinica.diasAtendimento.includes(DIAS_UTC[new Date(`${dia}T00:00:00.000Z`).getUTCDay()]);
+}
+
+export function serieDiaria(
+  clinica: Clinica,
+  lancamentos: Lancamento[],
+  periodo: Periodo,
+): { data: string; valor: number }[] {
+  const todos = diasDoPeriodo(periodo);
+  const uteis = todos.filter((dia) => diaUtil(clinica, dia));
+  const dias = uteis.length > 0 ? uteis : todos;
+  const mapa = new Map(dias.map((dia) => [dia, 0]));
+  for (const item of lancamentos) {
+    if (!mapa.has(item.data)) continue;
+    mapa.set(item.data, (mapa.get(item.data) ?? 0) + item.valor);
+  }
+  return dias.map((data) => ({ data, valor: mapa.get(data) ?? 0 }));
+}
+
 function ordenado(mapa: Map<string, number>): [string, number][] {
   return [...mapa.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+export function lancamentosFaturados(
+  clinicaId: string,
+  agendamentos: Agendamento[],
+  itens: ItemPlano[],
+  procedimentos: Procedimento[],
+  periodo: Periodo,
+): Lancamento[] {
+  const lista: Lancamento[] = [];
+  const somar = (data: string, dentistaId: string, procedimentoId: string, valor: number) => {
+    lista.push({ data, dentistaId, procedimentoId, valor });
+  };
+  for (const ag of agendamentos) {
+    if (ag.clinicaId !== clinicaId || ag.status !== "concluido" || !ag.concluidoEm) continue;
+    const data = dataDe(ag.concluidoEm);
+    if (!noPeriodo(data, periodo)) continue;
+    const concluidos = itens.filter((i) => i.agendamentoId === ag.id && i.status === "concluido");
+    if (concluidos.length > 0) {
+      for (const item of concluidos) somar(data, ag.dentistaId, item.procedimentoId, item.valor);
+      continue;
+    }
+    const proc = procedimentos.find(
+      (p) => p.id === ag.procedimentoId && p.clinicaId === clinicaId,
+    );
+    if (ag.procedimentoId && proc) somar(data, ag.dentistaId, proc.id, proc.valorMedio);
+  }
+  return lista;
 }
 
 export function calcularFaturamento(
@@ -83,27 +163,16 @@ export function calcularFaturamento(
 ) {
   const porDentista = new Map<string, number>();
   const porProcedimento = new Map<string, number>();
+  const lancamentos = lancamentosFaturados(clinicaId, agendamentos, itens, procedimentos, periodo);
   let faturado = 0;
-  const somar = (dentistaId: string, procedimentoId: string, valor: number) => {
-    faturado += valor;
-    acumular(porDentista, dentistaId, valor);
-    acumular(porProcedimento, procedimentoId, valor);
-  };
-  for (const ag of agendamentos) {
-    if (ag.clinicaId !== clinicaId || ag.status !== "concluido" || !ag.concluidoEm) continue;
-    if (!noPeriodo(dataDe(ag.concluidoEm), periodo)) continue;
-    const concluidos = itens.filter((i) => i.agendamentoId === ag.id && i.status === "concluido");
-    if (concluidos.length > 0) {
-      for (const item of concluidos) somar(ag.dentistaId, item.procedimentoId, item.valor);
-      continue;
-    }
-    const proc = procedimentos.find(
-      (p) => p.id === ag.procedimentoId && p.clinicaId === clinicaId,
-    );
-    if (ag.procedimentoId && proc) somar(ag.dentistaId, proc.id, proc.valorMedio);
+  for (const item of lancamentos) {
+    faturado += item.valor;
+    acumular(porDentista, item.dentistaId, item.valor);
+    acumular(porProcedimento, item.procedimentoId, item.valor);
   }
   return {
     faturado,
+    lancamentos,
     porDentista: ordenado(porDentista).map(([dentistaId, valor]) => ({ dentistaId, valor })),
     porProcedimento: ordenado(porProcedimento).map(([procedimentoId, valor]) => ({
       procedimentoId,
@@ -142,6 +211,33 @@ export function calcularDespesaProtese(
     if (instalada) total += protese.valorComissao;
   }
   return total;
+}
+
+export function contarProtesesNoPeriodo(
+  clinicaId: string,
+  proteses: Protese[],
+  periodo: Periodo,
+): number {
+  let total = 0;
+  for (const protese of proteses) {
+    if (protese.clinicaId !== clinicaId || typeof protese.valorComissao !== "number") continue;
+    const instalada = protese.historico.some(
+      (p) => p.etapa === "instalacao" && noPeriodo(dataDe(p.em), periodo),
+    );
+    if (instalada) total += 1;
+  }
+  return total;
+}
+
+export function calcularAReceber(
+  clinicaId: string,
+  debitos: Debito[],
+): { valor: number; debitos: number } {
+  const abertos = debitos.filter((d) => d.clinicaId === clinicaId && d.status === "em_aberto");
+  return {
+    debitos: abertos.length,
+    valor: abertos.reduce((total, d) => total + Math.max(0, d.valor - d.desconto), 0),
+  };
 }
 
 export function calcularCapacidade(
@@ -207,5 +303,5 @@ export function estoqueAbaixoDoMinimo(
     }))
     .filter((m) => m.quantidade < m.minimo)
     .sort((a, b) => (a.nome < b.nome ? -1 : a.nome > b.nome ? 1 : 0))
-    .map(({ materialId, nome, quantidade }) => ({ materialId, nome, quantidade }));
+    .map(({ materialId, nome, quantidade, minimo }) => ({ materialId, nome, quantidade, minimo }));
 }

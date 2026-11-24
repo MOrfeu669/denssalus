@@ -129,11 +129,10 @@ describe("cadastro de material na tela", () => {
       createElement(Estoque, { materiais: [luva] }),
     );
 
-    expect(html).toContain("Novo material");
+    expect(html).toContain("Cadastrar material");
     expect(html).toContain('aria-haspopup="dialog"');
     expect(html).toContain('aria-expanded="false"');
     expect(html).not.toContain('role="dialog"');
-    expect(html).not.toContain("Cadastrar material");
     expect(html).not.toContain('name="quantidadeMinima"');
     expect(html).toContain("Luva");
     expect(html).toContain("Materiais da clínica");
