@@ -29,7 +29,7 @@ export async function Casca({
         tipografiaCasca,
       )}
     >
-      <aside className="casca-lateral sticky top-0 flex h-screen flex-col gap-2 bg-marca px-4 pt-7 pb-5 text-white max-[960px]:static max-[960px]:h-auto max-[960px]:py-5">
+      <aside className="casca-lateral sticky top-0 flex h-screen flex-col gap-2 bg-marca px-4 pt-6 pb-4 text-white max-[960px]:static max-[960px]:h-auto max-[960px]:py-4">
         <Link
           className="px-3 font-[family-name:var(--font-heading)] text-[22px] leading-[30px] font-bold text-white no-underline"
           href="/"
@@ -42,7 +42,7 @@ export async function Casca({
           </p>
         ) : null}
         <MenuCasca itens={menuDaCasca(papel)} />
-        <div className="mt-auto flex flex-col gap-0.5 border-t border-sidebar-border px-3 pt-4">
+        <div className="mt-auto flex flex-col gap-1 border-t border-sidebar-border px-3 pt-4">
           <p className="text-sm leading-5 font-semibold wrap-anywhere">{nome}</p>
           <p className="font-mono text-xs leading-4 font-normal text-nevoa uppercase tracking-wide">
             {rotuloPapel(papel)}
@@ -62,7 +62,7 @@ export async function Casca({
         <div className="flex justify-end px-6 pt-4">
           <Sino sessao={sessao} />
         </div>
-        <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-5 max-[960px]:py-7">
+        <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-4 max-[960px]:py-6">
           {children}
         </main>
       </div>
@@ -78,7 +78,7 @@ export function CascaAberta({ children }: { children: ReactNode }) {
         tipografiaCasca,
       )}
     >
-      <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-5 max-[960px]:py-7">
+      <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-4 max-[960px]:py-6">
         {children}
       </main>
     </div>
