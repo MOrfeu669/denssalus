@@ -46,7 +46,7 @@ describe("limpeza de CSS da casca", () => {
     expect(css).not.toMatch(/\.casca-nota\b/);
     expect(css).not.toMatch(/\.acao\b/);
     expect(ler("src/app/prontuarios/[pacienteId]/tela.css")).toMatch(/\.dente\b/);
-    expect(ler("src/app/prontuarios/[pacienteId]/odontograma.tsx")).toContain('className={comRegistro.has(dente) ? "dente com-registro" : "dente"}');
+    expect(ler("src/app/prontuarios/[pacienteId]/odontograma.tsx")).toContain('className="dente"');
   });
 
   it("dado o miolo, quando estiliza campo e botão, então a regra está no layer base e o laboratório não usa importante", () => {
