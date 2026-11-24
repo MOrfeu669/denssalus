@@ -2,7 +2,7 @@ import type { Resultado, Sessao } from "../auth/tipos";
 import { MENSAGEM_PROCEDIMENTO_NAO_ENCONTRADO } from "../procedimento/tipos";
 import { clinicaDaSessao, materialDaClinica, purgarVencidos, verificarMinimo } from "./apoio";
 import type { Dependencias } from "./portas";
-import { inteiroPositivo, validarLote, validarMaterial } from "./regras";
+import { inteiroPositivo, lotesValidos, ordenarFefo, validarLote, validarMaterial } from "./regras";
 import {
   MENSAGEM_MATERIAL_JA_CADASTRADO,
   MENSAGEM_MATERIAL_NAO_ENCONTRADO,
@@ -164,4 +164,32 @@ export async function historico(
       a.registradoEm < b.registradoEm ? -1 : a.registradoEm > b.registradoEm ? 1 : 0,
     ),
   };
+}
+
+export type MaterialPainel = MaterialListado & {
+  validade: string | null;
+  movimentos: Movimentacao[];
+};
+
+export async function listarPainel(
+  deps: Dependencias,
+  ator: Sessao,
+  hoje: Date,
+): Promise<Resultado<MaterialPainel[]>> {
+  const lista = await listarMateriais(deps, ator, hoje);
+  if (!lista.ok) return lista;
+
+  const itens: MaterialPainel[] = [];
+  for (const material of lista.valor) {
+    const lotes = ordenarFefo(
+      lotesValidos(await deps.lotes.listarPorMaterial(material.id), hoje).filter(
+        (lote) => lote.materialId === material.id,
+      ),
+    );
+    const movimentos = (await deps.movimentacoes.listar(material.id))
+      .filter((item) => item.materialId === material.id)
+      .sort((a, b) => (a.registradoEm < b.registradoEm ? 1 : a.registradoEm > b.registradoEm ? -1 : 0));
+    itens.push({ ...material, validade: lotes[0]?.validade ?? null, movimentos });
+  }
+  return { ok: true, valor: itens };
 }

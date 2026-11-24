@@ -15,6 +15,7 @@ import {
   obterResumo,
 } from "../../src/domain/dashboard/casos";
 import type { Dependencias } from "../../src/domain/dashboard/portas";
+import { lerMetaDiaria, serieDiaria } from "../../src/domain/dashboard/regras";
 import type { CampoDashboard, PedidoPeriodo } from "../../src/domain/dashboard/tipos";
 
 const C1 = "clinica-001";
@@ -361,10 +362,42 @@ describe("Dashboard — estoque", () => {
     );
     const { resumo } = await ver(m, DIA);
     expect(resumo.estoque).toEqual([
-      { materialId: "m3", nome: "Algodão", quantidade: 0 },
-      { materialId: "m1", nome: "Luvas", quantidade: 15 },
+      { materialId: "m3", nome: "Algodão", quantidade: 0, minimo: 10 },
+      { materialId: "m1", nome: "Luvas", quantidade: 15, minimo: 20 },
     ]);
     expect(m.lotes).toHaveLength(4);
+  });
+});
+
+describe("Dashboard — gráfico e meta", () => {
+  it("Dado conclusões em dois dias úteis, quando abre hoje, então o período é um dia e a meta diária não existe", async () => {
+    const m = new Memoria();
+    m.concluido("a1", {}, [{ valor: 250 }]);
+    m.debito("aberto", 80, 0, null);
+    m.debito("alheio", 900, 0, null, C2);
+    const visao = await ver(m, { tipo: "hoje" });
+    expect(visao.resumo.periodo).toEqual({ inicio: "2026-10-28", fim: "2026-10-28" });
+    expect(visao.apresentacao.metaDiaria).toBeNull();
+    expect(visao.apresentacao.diario).toEqual([{ data: "2026-10-28", valor: 250 }]);
+    expect(visao.apresentacao.aReceber).toEqual({ valor: 80, debitos: 1 });
+    expect(lerMetaDiaria({ ...clinica(C1), metaDiaria: 4000 } as never)).toBe(4000);
+    expect(lerMetaDiaria(clinica(C1))).toBeNull();
+  });
+
+  it("Dado faturamento na sexta e na segunda, quando a série é do mês, então sábado e domingo não entram", () => {
+    const serie = serieDiaria(
+      clinica(C1),
+      [
+        { data: "2026-10-23", dentistaId: "d1", procedimentoId: "p", valor: 100 },
+        { data: "2026-10-24", dentistaId: "d1", procedimentoId: "p", valor: 999 },
+        { data: "2026-10-26", dentistaId: "d1", procedimentoId: "p", valor: 40 },
+      ],
+      { inicio: "2026-10-23", fim: "2026-10-26" },
+    );
+    expect(serie).toEqual([
+      { data: "2026-10-23", valor: 100 },
+      { data: "2026-10-26", valor: 40 },
+    ]);
   });
 });
 
@@ -425,6 +458,20 @@ describe("Dashboard — outra clínica e exportação", () => {
     const completo = await exportar(m.deps(), sessao("admin"), DIA, "excel", HOJE);
     if (!completo.ok) throw new Error("exportação falhou");
     expect(new TextDecoder().decode(completo.valor.bytes)).toContain("Total faturado");
+  });
+
+  it("Dado faturamento oculto, quando exporta CSV, então o arquivo é da clínica da sessão e omite o faturamento", async () => {
+    const m = comDados();
+    await definirCamposDoPapel(m.deps(), sessao("admin"), "recepcionista", ["faturamento"]);
+    const csv = await exportar(m.deps(), sessao("recepcionista"), DIA, "csv", HOJE);
+    if (!csv.ok) throw new Error("exportação falhou");
+    const texto = new TextDecoder().decode(csv.valor.bytes);
+    expect(csv.valor).toMatchObject({ nome: "dashboard.csv", mediaType: "text/csv; charset=utf-8" });
+    expect(texto).not.toContain("Total faturado");
+    expect(texto).toContain("Luvas — 15 unidades restantes");
+    const outra = await exportar(m.deps(), sessao("admin", C2, "outro-admin"), DIA, "csv", HOJE);
+    if (!outra.ok) throw new Error("exportação falhou");
+    expect(new TextDecoder().decode(outra.valor.bytes)).not.toContain("Luvas");
   });
 
   it("Dado papel sem acesso, quando exporta, então MENSAGEM_PAPEL", async () => {

@@ -8,6 +8,7 @@ import {
 } from "../auth/tipos";
 import { MENSAGEM_CLINICA_NAO_ENCONTRADA } from "../clinica/tipos";
 import type { Lote } from "../estoque/tipos";
+import { montarApresentacao } from "./apresentacao";
 import { gerarArquivo } from "./exportacao";
 import type { Dependencias } from "./portas";
 import {
@@ -27,6 +28,7 @@ import {
   type ArquivoDashboard,
   type CampoDashboard,
   type PedidoPeriodo,
+  type ApresentacaoDashboard,
   type ResumoDashboard,
   type VisaoDashboard,
 } from "./tipos";
@@ -48,7 +50,7 @@ async function montarResumo(
   clinicaId: string,
   periodo: Periodo,
   hoje: Date,
-): Promise<ResumoDashboard | null> {
+): Promise<{ resumo: ResumoDashboard; apresentacao: ApresentacaoDashboard } | null> {
   const clinica = await deps.clinicas.buscarPorId(clinicaId);
   if (!clinica || clinica.id !== clinicaId) return null;
   const [agendamentos, bloqueios, debitos, itens, procedimentos, proteses, materiais, dentistas] =
@@ -69,14 +71,33 @@ async function montarResumo(
     lotes.set(m.id, await deps.lotes.listarPorMaterial(m.id));
   }
   const faturamento = calcularFaturamento(clinicaId, agendamentos, itens, procedimentos, periodo);
-  return {
+  const recebido = calcularRecebido(clinicaId, debitosDaClinica, pagamentos, periodo);
+  const ocupacao = calcularOcupacao(clinica, agendamentos, dentistas, bloqueios, periodo);
+  const resumo: ResumoDashboard = {
     periodo,
-    ...faturamento,
-    recebido: calcularRecebido(clinicaId, debitosDaClinica, pagamentos, periodo),
+    faturado: faturamento.faturado,
+    porDentista: faturamento.porDentista,
+    porProcedimento: faturamento.porProcedimento,
+    recebido,
     despesaProtese: calcularDespesaProtese(clinicaId, proteses, periodo),
-    ocupacao: calcularOcupacao(clinica, agendamentos, dentistas, bloqueios, periodo),
+    ocupacao,
     estoque: estoqueAbaixoDoMinimo(clinicaId, materiais, lotes, hoje),
   };
+  const apresentacao = montarApresentacao(
+    clinica,
+    periodo,
+    { ...faturamento, recebido, ocupacao },
+    {
+      agendamentos,
+      itens,
+      procedimentos,
+      dentistas,
+      debitos: debitosDaClinica,
+      proteses,
+      bloqueios,
+    },
+  );
+  return { resumo, apresentacao };
 }
 
 export async function obterResumo(
@@ -96,13 +117,13 @@ export async function obterResumo(
   const periodo = efetivo ? resolverPeriodo(efetivo, hoje) : null;
   if (!periodo) return { ok: false, mensagem: MENSAGEM_PERIODO };
 
-  const resumo = await montarResumo(deps, clinicaId, periodo, hoje);
-  if (!resumo) return { ok: false, mensagem: MENSAGEM_CLINICA_NAO_ENCONTRADA };
+  const montado = await montarResumo(deps, clinicaId, periodo, hoje);
+  if (!montado) return { ok: false, mensagem: MENSAGEM_CLINICA_NAO_ENCONTRADA };
 
   const doPapel = await deps.visibilidade.buscar(clinicaId, papel);
   const widgets = preferencia?.widgetsOcultos ?? [];
   const ocultos = soValidos([...doPapel, ...widgets]);
-  return { ok: true, valor: { resumo, ocultos, periodoSalvo } };
+  return { ok: true, valor: { ...montado, ocultos, periodoSalvo } };
 }
 
 export async function definirCamposDoPapel(
@@ -140,7 +161,7 @@ export async function exportar(
   deps: Dependencias,
   ator: Sessao,
   pedido: PedidoPeriodo | null,
-  formato: "pdf" | "excel",
+  formato: "pdf" | "excel" | "csv",
   hoje: Date,
 ): Promise<Resultado<ArquivoDashboard>> {
   const visao = await obterResumo(deps, ator, pedido, hoje);
