@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Montserrat, PT_Mono, Roboto } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,28 @@ import { MenuCasca } from "./menu-casca";
 import { Sino } from "./sino";
 import "./casca.css";
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "700"],
   display: "swap",
+  variable: "--font-sans",
 });
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
+  variable: "--font-heading",
+});
+
+const ptMono = PT_Mono({
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+  variable: "--font-mono",
+});
+
+const tipografiaCasca = cn(roboto.variable, montserrat.variable, ptMono.variable, roboto.className);
 
 export async function Casca({
   sessao,
@@ -32,11 +49,14 @@ export async function Casca({
     <div
       className={cn(
         "casca grid min-h-screen grid-cols-[264px_1fr] bg-fundo text-sm leading-5 text-tinta max-[960px]:flex max-[960px]:flex-col",
-        inter.className,
+        tipografiaCasca,
       )}
     >
       <aside className="casca-lateral sticky top-0 flex h-screen flex-col gap-2 bg-marca px-4 pt-7 pb-5 text-white max-[960px]:static max-[960px]:h-auto max-[960px]:py-5">
-        <Link className="px-3 text-[22px] leading-[30px] font-bold text-white no-underline" href="/">
+        <Link
+          className="px-3 font-[family-name:var(--font-heading)] text-[22px] leading-[30px] font-bold text-white no-underline"
+          href="/"
+        >
           denssalus
         </Link>
         {clinicaNome ? (
@@ -45,14 +65,16 @@ export async function Casca({
           </p>
         ) : null}
         <MenuCasca itens={menuDaCasca(papel)} />
-        <div className="mt-auto flex flex-col gap-0.5 border-t border-acao px-3 pt-4">
+        <div className="mt-auto flex flex-col gap-0.5 border-t border-sidebar-border px-3 pt-4">
           <p className="text-sm leading-5 font-semibold wrap-anywhere">{nome}</p>
-          <p className="text-xs leading-4 font-normal text-nevoa">{rotuloPapel(papel)}</p>
+          <p className="font-mono text-xs leading-4 font-normal text-nevoa uppercase tracking-wide">
+            {rotuloPapel(papel)}
+          </p>
           <form action={sair} className="mt-3 block">
             <Button
               type="submit"
               variant="outline"
-              className="h-10 w-full rounded-[10px] border-acao bg-transparent text-sm leading-5 font-semibold text-white shadow-none hover:bg-acao hover:text-white"
+              className="h-10 w-full rounded-md border-nevoa bg-transparent text-sm leading-5 font-semibold text-white shadow-none hover:bg-acao hover:text-white"
             >
               Sair
             </Button>
@@ -63,7 +85,7 @@ export async function Casca({
         <div className="flex justify-end px-6 pt-4">
           <Sino sessao={sessao} />
         </div>
-        <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-12 py-10 text-tinta max-[960px]:px-5 max-[960px]:py-7">
+        <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-5 max-[960px]:py-7">
           {children}
         </main>
       </div>
@@ -73,8 +95,13 @@ export async function Casca({
 
 export function CascaAberta({ children }: { children: ReactNode }) {
   return (
-    <div className={cn("casca grid min-h-screen grid-cols-1 bg-fundo text-sm leading-5 text-tinta", inter.className)}>
-      <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-12 py-10 text-tinta max-[960px]:px-5 max-[960px]:py-7">
+    <div
+      className={cn(
+        "casca grid min-h-screen grid-cols-1 bg-fundo text-sm leading-5 text-tinta",
+        tipografiaCasca,
+      )}
+    >
+      <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-5 max-[960px]:py-7">
         {children}
       </main>
     </div>

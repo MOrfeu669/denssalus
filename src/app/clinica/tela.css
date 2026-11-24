@@ -6,11 +6,11 @@
   margin: 0 0 20px;
   padding: 16px;
   border: 1px solid;
-  border-radius: 14px;
+  border-radius: var(--paper-radius-md);
 }
 
 .casca .clinica-alerta:focus {
-  outline: 3px solid #0f433d;
+  outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
 }
 
@@ -21,21 +21,21 @@
 }
 
 .casca .clinica-alerta-erro {
-  background: #fef0ef;
-  border-color: #d4372c;
+  background: var(--color-perigo-fundo);
+  border-color: var(--color-perigo);
 }
 
 .casca .clinica-alerta-erro strong {
-  color: #ad2a21;
+  color: var(--color-perigo-tinta);
 }
 
 .casca .clinica-alerta-sucesso {
-  background: #ecfdf3;
-  border-color: #178a4c;
+  background: var(--color-ok-fundo);
+  border-color: var(--color-ok);
 }
 
 .casca .clinica-alerta-sucesso strong {
-  color: #146c3e;
+  color: var(--color-ok-tinta);
 }
 
 .casca .clinica-grade {
@@ -58,9 +58,9 @@
   max-width: 640px;
   margin: 0 0 24px;
   padding: 24px;
-  border: 1px solid #cbd4d9;
-  border-radius: 14px;
-  background: #fff;
+  border: 1px solid var(--color-linha);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
 }
 
 .casca .clinica-grade .clinica-cartao {
@@ -77,7 +77,7 @@
   font-size: 18px;
   line-height: 24px;
   font-weight: 700;
-  color: #0f1a20;
+  color: var(--paper-text);
   overflow-wrap: anywhere;
 }
 
@@ -85,14 +85,14 @@
   margin: 0 0 16px;
   font-size: 13px;
   line-height: 18px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
 .casca .clinica-intro {
   margin: 0 0 20px;
   font-size: 15px;
   line-height: 22px;
-  color: #0f1a20;
+  color: var(--paper-text);
 }
 
 .casca .clinica-cadeiras-topo {
@@ -136,17 +136,17 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #0f1a20;
+  color: var(--paper-text);
 }
 
 .casca .clinica-campo input {
   width: 100%;
   height: 44px;
   padding: 0 14px;
-  border: 1px solid #cbd4d9;
-  border-radius: 10px;
-  background: #fff;
-  color: #0f1a20;
+  border: 1px solid var(--color-linha);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
+  color: var(--paper-text);
   font: inherit;
   font-size: 14px;
   font-weight: 400;
@@ -165,7 +165,7 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #0f1a20;
+  color: var(--paper-text);
 }
 
 .casca .clinica-dias-lista {
@@ -180,13 +180,13 @@
   gap: 8px;
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid #cbd4d9;
-  border-radius: 10px;
-  background: #fff;
+  border: 1px solid var(--color-linha);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
   font-size: 14px;
   line-height: 20px;
   font-weight: 400;
-  color: #0f1a20;
+  color: var(--paper-text);
   cursor: pointer;
 }
 
@@ -194,12 +194,12 @@
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: #158172;
+  accent-color: var(--paper-primary);
 }
 
 .casca .clinica-dia:has(input:checked) {
-  border-color: #158172;
-  background: #d3f3ec;
+  border-color: var(--paper-primary);
+  background: var(--secondary);
 }
 
 .casca .clinica-horarios {
@@ -212,7 +212,7 @@
   margin: -8px 0 0;
   font-size: 13px;
   line-height: 18px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
 .casca .clinica-acoes {
@@ -225,9 +225,9 @@
   margin: 0;
   padding: 0 20px;
   border: 0;
-  border-radius: 10px;
-  background: #158172;
-  color: #fff;
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-primary);
+  color: var(--paper-surface);
   font: inherit;
   font-size: 15px;
   line-height: 24px;
@@ -236,11 +236,11 @@
 }
 
 .casca button.clinica-botao:hover:not(:disabled) {
-  background: #0f433d;
+  background: var(--paper-primary-hover);
 }
 
 .casca button.clinica-botao:disabled {
-  background: #158172;
+  background: var(--paper-primary);
   opacity: 0.7;
   cursor: default;
 }
@@ -250,10 +250,10 @@
   height: 36px;
   margin: 0;
   padding: 0 14px;
-  border: 1px solid #158172;
-  border-radius: 10px;
-  background: #fff;
-  color: #0f433d;
+  border: 1px solid var(--paper-primary);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
+  color: var(--paper-primary);
   font: inherit;
   font-size: 14px;
   line-height: 20px;
@@ -262,7 +262,7 @@
 }
 
 .casca button.clinica-botao-sec:hover:not(:disabled) {
-  background: #f6f8f9;
+  background: var(--cor-fundo);
 }
 
 .casca button.clinica-botao-sec:disabled {
@@ -283,7 +283,7 @@
   gap: 16px;
   min-height: 56px;
   padding: 10px 0;
-  border-bottom: 1px solid #e8eef0;
+  border-bottom: 1px solid var(--muted);
 }
 
 .casca .clinica-linha:last-child {
@@ -306,7 +306,7 @@
 .casca .clinica-cadeira-estado {
   font-size: 13px;
   line-height: 18px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
 .casca .clinica-linha-inativa {
@@ -315,9 +315,9 @@
 
 .casca .clinica-inativa {
   padding: 2px 10px;
-  border-radius: 999px;
-  background: #fef0ef;
-  color: #ad2a21;
+  border-radius: var(--paper-radius-md);
+  background: var(--color-perigo-fundo);
+  color: var(--color-perigo-tinta);
   font-size: 12px;
   line-height: 16px;
   font-weight: 600;
@@ -336,10 +336,10 @@
   height: 36px;
   margin: 0;
   padding: 4px 12px 4px 4px;
-  border: 1px solid #cbd4d9;
-  border-radius: 999px;
-  background: #fff;
-  color: #475760;
+  border: 1px solid var(--color-linha);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
+  color: var(--color-apagado);
   font: inherit;
   font-size: 12px;
   line-height: 16px;
@@ -349,9 +349,9 @@
 }
 
 .casca .clinica-linha button.clinica-interruptor[aria-checked="true"] {
-  border-color: #158172;
-  background: #edfaf7;
-  color: #0f433d;
+  border-color: var(--paper-primary);
+  background: var(--secondary);
+  color: var(--paper-primary);
 }
 
 .casca .clinica-linha button.clinica-interruptor:disabled {
@@ -363,12 +363,12 @@
   position: relative;
   width: 36px;
   height: 20px;
-  border-radius: 999px;
-  background: #cbd4d9;
+  border-radius: var(--paper-radius-md);
+  background: var(--color-linha);
 }
 
 .casca .clinica-linha button.clinica-interruptor[aria-checked="true"] .clinica-interruptor-trilho {
-  background: #158172;
+  background: var(--paper-primary);
 }
 
 .casca .clinica-interruptor-bolinha {
@@ -378,7 +378,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--paper-surface);
 }
 
 .casca .clinica-linha button.clinica-interruptor[aria-checked="true"] .clinica-interruptor-bolinha {
@@ -389,7 +389,7 @@
   margin: 0 0 16px;
   font-size: 14px;
   line-height: 20px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
 .casca .clinica-voltar {
