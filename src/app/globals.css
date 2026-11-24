@@ -45,11 +45,52 @@
   --paper-disabled-borda: var(--paper-borda);
   --paper-disabled-opacidade: 0.5;
 
-  /* Paper — lateral clara (para a casca, PR seguinte) */
+  /* Paper — lateral clara */
   --paper-lateral: var(--paper-surface);
   --paper-lateral-tinta: var(--paper-text);
   --paper-lateral-ativo: #EEEEEE;
   --paper-lateral-borda: var(--paper-borda);
+  --paper-lateral-largura: 248px;
+  --paper-radius-controle: 6px;
+  --paper-subtle: #F7F7F0;
+  --paper-ink-2: #4B4A42;
+  --paper-ink-3: #6F6D62;
+  --paper-marca: #0F433D;
+  --paper-avatar-fundo: #E9E3FF;
+
+  /* Status do agendamento — ponto, fundo e tinta do badge */
+  --paper-status-agendado: #8B5CF6;
+  --paper-status-agendado-fundo: #EDE9FE;
+  --paper-status-agendado-tinta: #5B21B6;
+  --paper-status-em-espera: #D97706;
+  --paper-status-em-espera-fundo: #FEF3C7;
+  --paper-status-em-espera-tinta: #92400E;
+  --paper-status-iniciado: #111111;
+  --paper-status-iniciado-fundo: #111111;
+  --paper-status-iniciado-tinta: #FFFFFF;
+  --paper-status-iniciado-apoio: #C9C9C0;
+  --paper-status-concluido: #16A34A;
+  --paper-status-concluido-fundo: #DCFCE7;
+  --paper-status-concluido-tinta: #166534;
+  --paper-status-cancelado: #8A887A;
+  --paper-status-cancelado-fundo: #FFFFFF;
+  --paper-status-cancelado-tinta: #4B4A42;
+  --paper-status-cancelado-borda: #E2E2D1;
+  --paper-status-cancelado-faixa: #C9C8BA;
+
+  /* Tintas de tom e de cartão */
+  --paper-tint-neutral: #F1F1EA;
+  --paper-tint-purple: #EDE9FE;
+  --paper-tint-success: #DCFCE7;
+  --paper-tint-warning: #FEF3C7;
+  --paper-tint-danger: #FEE2E2;
+  --paper-tint-ink: #111111;
+  --paper-tint-blue: #DBEAFE;
+  --paper-tint-agendado: #F5F3FF;
+  --paper-tint-em-espera: #FFFBEB;
+  --paper-tint-iniciado: #111111;
+  --paper-tint-concluido: #F0FDF4;
+  --paper-tint-cancelado: #FFFFFF;
 
   /* Aliases semânticos do produto → Paper */
   --cor-fundo: var(--paper-fundo);
@@ -72,8 +113,8 @@
   --accent: #F5F3FF;
   --accent-foreground: #111827;
   --destructive: #DC2626;
-  --border: #E5E7EB;
-  --input: #E5E7EB;
+  --border: var(--paper-borda);
+  --input: var(--paper-borda);
   --ring: #8B5CF6;
   --chart-1: #8B5CF6;
   --chart-2: #6B7280;
@@ -148,9 +189,19 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
-[tabindex="-1"]:focus {
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
   outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
+}
+
+button:disabled {
+  background: var(--paper-disabled-fundo);
+  color: var(--paper-disabled-tinta);
+  border-color: var(--paper-disabled-borda);
+  cursor: not-allowed;
 }
 
 .erro {
@@ -291,6 +342,42 @@ select:focus-visible,
   --color-lateral-tinta: var(--paper-lateral-tinta);
   --color-lateral-ativo: var(--paper-lateral-ativo);
   --color-lateral-borda: var(--paper-lateral-borda);
+  --color-paper-subtle: var(--paper-subtle);
+  --color-paper-ink-2: var(--paper-ink-2);
+  --color-paper-ink-3: var(--paper-ink-3);
+  --color-paper-marca: var(--paper-marca);
+  --color-paper-avatar-fundo: var(--paper-avatar-fundo);
+  --color-paper-status-agendado: var(--paper-status-agendado);
+  --color-paper-status-agendado-fundo: var(--paper-status-agendado-fundo);
+  --color-paper-status-agendado-tinta: var(--paper-status-agendado-tinta);
+  --color-paper-status-em-espera: var(--paper-status-em-espera);
+  --color-paper-status-em-espera-fundo: var(--paper-status-em-espera-fundo);
+  --color-paper-status-em-espera-tinta: var(--paper-status-em-espera-tinta);
+  --color-paper-status-iniciado: var(--paper-status-iniciado);
+  --color-paper-status-iniciado-fundo: var(--paper-status-iniciado-fundo);
+  --color-paper-status-iniciado-tinta: var(--paper-status-iniciado-tinta);
+  --color-paper-status-iniciado-apoio: var(--paper-status-iniciado-apoio);
+  --color-paper-status-concluido: var(--paper-status-concluido);
+  --color-paper-status-concluido-fundo: var(--paper-status-concluido-fundo);
+  --color-paper-status-concluido-tinta: var(--paper-status-concluido-tinta);
+  --color-paper-status-cancelado: var(--paper-status-cancelado);
+  --color-paper-status-cancelado-fundo: var(--paper-status-cancelado-fundo);
+  --color-paper-status-cancelado-tinta: var(--paper-status-cancelado-tinta);
+  --color-paper-status-cancelado-borda: var(--paper-status-cancelado-borda);
+  --color-paper-status-cancelado-faixa: var(--paper-status-cancelado-faixa);
+  --color-paper-tint-neutral: var(--paper-tint-neutral);
+  --color-paper-tint-purple: var(--paper-tint-purple);
+  --color-paper-tint-success: var(--paper-tint-success);
+  --color-paper-tint-warning: var(--paper-tint-warning);
+  --color-paper-tint-danger: var(--paper-tint-danger);
+  --color-paper-tint-ink: var(--paper-tint-ink);
+  --color-paper-tint-blue: var(--paper-tint-blue);
+  --color-paper-tint-agendado: var(--paper-tint-agendado);
+  --color-paper-tint-em-espera: var(--paper-tint-em-espera);
+  --color-paper-tint-iniciado: var(--paper-tint-iniciado);
+  --color-paper-tint-concluido: var(--paper-tint-concluido);
+  --color-paper-tint-cancelado: var(--paper-tint-cancelado);
+  --radius-controle: var(--paper-radius-controle);
   --radius-paper-sm: var(--paper-radius-sm);
   --radius-paper-md: var(--paper-radius-md);
   --shadow-paper-sm: var(--paper-sombra-sm);

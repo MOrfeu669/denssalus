@@ -1,63 +1,36 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Sessao } from "../domain/auth/tipos";
 import { lerBaseDaClinica } from "../domain/inicio/casos";
-import { sair } from "./auth/actions";
-import { menuDaCasca, rotuloPapel } from "./casca-menu";
+import { CabecalhoCasca } from "./casca-cabecalho";
+import { contadoresDaLateral } from "./casca-contadores";
+import { LateralCasca } from "./casca-lateral";
 import { dependenciasInicio } from "./dependencias";
-import { MenuCasca } from "./menu-casca";
-import { Sino } from "./sino";
 import { tipografiaCasca } from "./tipografia-paper";
 import "./casca.css";
 
 export async function Casca({
   sessao,
   clinicaNome,
+  contadores,
   children,
 }: {
   sessao: Sessao;
   clinicaNome: string | null;
+  contadores?: Record<string, number>;
   children: ReactNode;
 }) {
-  const { nome, papel } = sessao.usuario;
+  const selos = contadores ?? (await contadoresDaLateral(sessao));
   return (
     <div
       className={cn(
-        "casca grid min-h-screen grid-cols-[264px_1fr] bg-fundo text-sm leading-5 text-tinta max-[960px]:flex max-[960px]:flex-col",
+        "casca grid min-h-screen grid-cols-[var(--paper-lateral-largura)_minmax(0,1fr)] bg-fundo text-sm leading-5 text-tinta max-[960px]:flex max-[960px]:flex-col",
         tipografiaCasca,
       )}
     >
-      <aside className="casca-lateral sticky top-0 flex h-screen flex-col gap-2 border-r border-lateral-borda bg-lateral px-4 pt-6 pb-4 text-lateral-tinta max-[960px]:static max-[960px]:h-auto max-[960px]:border-r-0 max-[960px]:border-b max-[960px]:py-4">
-        <Link
-          className="px-3 font-[family-name:var(--font-heading)] text-[22px] leading-[30px] font-bold text-lateral-tinta no-underline"
-          href="/"
-        >
-          denssalus
-        </Link>
-        {clinicaNome ? (
-          <p className="px-3 pb-4 text-[13px] leading-[18px] font-normal wrap-anywhere text-apagado">
-            {clinicaNome}
-          </p>
-        ) : null}
-        <MenuCasca itens={menuDaCasca(papel)} />
-        <div className="mt-auto flex flex-col gap-1 border-t border-lateral-borda px-3 pt-4">
-          <p className="text-sm leading-5 font-semibold wrap-anywhere">{nome}</p>
-          <p className="font-mono text-xs leading-4 font-normal text-apagado uppercase tracking-wide">
-            {rotuloPapel(papel)}
-          </p>
-          <form action={sair} className="mt-3 block">
-            <Button type="submit" variant="outline" className="h-10 w-full">
-              Sair
-            </Button>
-          </form>
-        </div>
-      </aside>
+      <LateralCasca sessao={sessao} clinicaNome={clinicaNome} contadores={selos} />
       <div className="flex min-w-0 flex-col">
-        <div className="flex justify-end px-6 pt-4">
-          <Sino sessao={sessao} />
-        </div>
+        <CabecalhoCasca sessao={sessao} />
         <main className="casca-miolo m-0 min-w-0 max-w-none rounded-none border-0 bg-fundo px-8 py-8 text-tinta max-[960px]:px-4 max-[960px]:py-6">
           {children}
         </main>

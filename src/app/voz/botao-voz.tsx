@@ -164,6 +164,7 @@ function PainelVoz({ nomeUsuario, papel }: Props) {
         type="button"
         variant={ativo ? "destructive" : "default"}
         className="fixed right-4 bottom-4 z-50 h-11 px-4 shadow-paper-md"
+        data-voz-flutuante=""
         aria-label={ativo ? "Encerrar conversa por voz" : "Iniciar conversa por voz"}
         disabled={conectando}
         onClick={ativo ? () => endSession() : iniciar}
