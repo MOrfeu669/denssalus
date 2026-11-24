@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { CampoDashboard, ResumoDashboard } from "../../domain/dashboard/tipos";
 import { Aviso } from "../aviso";
 import {
@@ -75,67 +80,74 @@ export function Painel({
     executar(() => salvarPreferencia([...ocultos, campo], periodoSalvo), "Bloco ocultado");
   const bloco = { ocultos, pendente, ocultar };
   const semDetalhe = resumo.porDentista.length === 0 && resumo.porProcedimento.length === 0;
-  const ocupacao = Math.min(100, Math.max(0, resumo.ocupacao));
 
   return (
     <div className="dashboard-painel">
       {aviso ? <Aviso key={aviso.quando} tipo={aviso.tipo} mensagem={aviso.mensagem} /> : null}
 
       <section className="dashboard-periodo" aria-labelledby="dashboard-titulo-periodo" aria-busy={pendente}>
-        <h2 id="dashboard-titulo-periodo">Período</h2>
-        <p className="dashboard-periodo-texto">{`Período: ${data(resumo.periodo.inicio)} a ${data(resumo.periodo.fim)}`}</p>
-        <div className="dashboard-acoes">
-          <button
-            type="button"
-            className="dashboard-botao dashboard-botao-secundario"
-            aria-pressed={periodoSalvo === "mes"}
-            disabled={pendente}
-            onClick={() => escolherPeriodo("mes")}
-          >
-            Mês atual
-          </button>
-          <button
-            type="button"
-            className="dashboard-botao dashboard-botao-secundario"
-            aria-pressed={periodoSalvo === "7dias"}
-            disabled={pendente}
-            onClick={() => escolherPeriodo("7dias")}
-          >
-            Últimos 7 dias
-          </button>
-        </div>
-        <form className="dashboard-form dashboard-form-linha" onSubmit={aplicarIntervalo}>
-          <label className="dashboard-campo">
-            Início
-            <input name="inicio" type="date" required />
-          </label>
-          <label className="dashboard-campo">
-            Fim
-            <input name="fim" type="date" required />
-          </label>
-          <button type="submit" className="dashboard-botao" disabled={pendente}>
-            Aplicar período
-          </button>
-        </form>
-        <div className="dashboard-acoes dashboard-exportar">
-          <button
-            type="button"
-            className="dashboard-botao dashboard-botao-secundario"
-            disabled={pendente}
-            onClick={() => exportarComo("pdf")}
-          >
-            Exportar PDF
-          </button>
-          <button
-            type="button"
-            className="dashboard-botao dashboard-botao-secundario"
-            disabled={pendente}
-            onClick={() => exportarComo("excel")}
-          >
-            Exportar Excel
-          </button>
-        </div>
-        <p className="dashboard-nota">Ocultar um bloco vale só para a sua visão.</p>
+        <Card>
+          <CardContent className="flex flex-col gap-4">
+            <h2 id="dashboard-titulo-periodo">Período</h2>
+            <p className="dashboard-periodo-texto">{`Período: ${data(resumo.periodo.inicio)} a ${data(resumo.periodo.fim)}`}</p>
+            <div className="dashboard-acoes">
+              <Button
+                type="button"
+                variant="outline"
+                className="dashboard-botao-secundario"
+                aria-pressed={periodoSalvo === "mes"}
+                disabled={pendente}
+                onClick={() => escolherPeriodo("mes")}
+              >
+                Mês atual
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="dashboard-botao-secundario"
+                aria-pressed={periodoSalvo === "7dias"}
+                disabled={pendente}
+                onClick={() => escolherPeriodo("7dias")}
+              >
+                Últimos 7 dias
+              </Button>
+            </div>
+            <form className="dashboard-form dashboard-form-linha" onSubmit={aplicarIntervalo}>
+              <Label className="dashboard-campo">
+                Início
+                <Input name="inicio" type="date" required />
+              </Label>
+              <Label className="dashboard-campo">
+                Fim
+                <Input name="fim" type="date" required />
+              </Label>
+              <Button type="submit" className="dashboard-botao" disabled={pendente}>
+                Aplicar período
+              </Button>
+            </form>
+            <div className="dashboard-acoes dashboard-exportar">
+              <Button
+                type="button"
+                variant="outline"
+                className="dashboard-botao-secundario"
+                disabled={pendente}
+                onClick={() => exportarComo("pdf")}
+              >
+                Exportar PDF
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="dashboard-botao-secundario"
+                disabled={pendente}
+                onClick={() => exportarComo("excel")}
+              >
+                Exportar Excel
+              </Button>
+            </div>
+            <p className="dashboard-nota">Ocultar um bloco vale só para a sua visão.</p>
+          </CardContent>
+        </Card>
       </section>
 
       <Bloco campo="faturamento" titulo={ROTULOS_CAMPO.faturamento} {...bloco}>
@@ -166,18 +178,18 @@ export function Painel({
       </Bloco>
       <Bloco campo="ocupacao" titulo={ROTULOS_CAMPO.ocupacao} {...bloco}>
         <p className="dashboard-numero">{`${resumo.ocupacao}%`}</p>
-        <div className="dashboard-barra" aria-hidden="true">
-          <div className="dashboard-barra-cheia" style={{ width: `${ocupacao}%` }} />
-        </div>
       </Bloco>
       <Bloco campo="estoque" titulo={ROTULOS_CAMPO.estoque} {...bloco}>
         {resumo.estoque.length === 0 ? (
           <p className="dashboard-vazio">Nenhum material abaixo do mínimo</p>
         ) : (
-          <ul className="dashboard-valores">
+          <ul className="dashboard-alertas">
             {resumo.estoque.map((item) => (
-              <li key={item.materialId} className="dashboard-valor-linha dashboard-alerta alerta">
-                {`${item.nome} — ${item.quantidade} unidades restantes`}
+              <li key={item.materialId} className="dashboard-alerta abaixo">
+                <Badge variant="destructive" className="border-perigo bg-card text-perigo-tinta">
+                  Abaixo do mínimo
+                </Badge>
+                <span>{`${item.nome} — ${item.quantidade} unidades restantes`}</span>
               </li>
             ))}
           </ul>

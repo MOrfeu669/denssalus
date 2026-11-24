@@ -1,183 +1,114 @@
-/* Estoque. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
+/* Estoque. O diálogo de cadastro vive no portal, fora de `.casca`.
+   Campo e botão da lista vencem a regra genérica da casca. */
 
 .casca .estoque-tela {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--paper-space-5);
   max-width: 880px;
 }
 
-.casca .estoque-tela > h1,
-.casca .estoque-cabeca h1 {
+.casca .casca-miolo .estoque-tela h1,
+.casca .casca-miolo .estoque-cabeca h1,
+.casca .casca-miolo .estoque-tela h2 {
   margin: 0;
-  color: #0f433d;
+  color: var(--paper-text);
+}
+
+.casca .casca-miolo .estoque-tela h2 {
+  font-family: var(--font-heading), Montserrat, sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
 }
 
 .casca .estoque-cabeca {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-}
-
-.casca .casca-miolo .estoque-cabeca > button.estoque-botao {
-  flex: none;
-  background: #158172;
-  color: #fff;
-  border: 0;
-}
-
-.casca .estoque-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.casca .estoque-overlay-fundo {
-  position: absolute;
-  inset: 0;
-  background: rgb(15 26 32 / 32%);
-}
-
-.casca .estoque-painel {
-  position: relative;
-  z-index: 1;
-  width: min(720px, 100%);
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  margin: 0;
-  padding: 24px;
-  border: 1px solid #cbd4d9;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 16px 40px rgb(15 26 32 / 18%);
-}
-
-.casca .estoque-painel:focus {
-  outline: 3px solid #0f433d;
-  outline-offset: 2px;
-}
-
-.casca .estoque-painel-topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.casca .estoque-painel-topo h2 {
-  margin: 0;
+  gap: var(--paper-space-4);
 }
 
 .casca .estoque-secao {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  border: 1px solid #cbd4d9;
-  border-radius: 14px;
-  background: #fff;
-}
-
-.casca .estoque-secao h2 {
-  margin: 0;
-  font-size: 18px;
-  line-height: 26px;
-  font-weight: 700;
-  color: #0f433d;
+  gap: var(--paper-space-4);
+  padding: var(--paper-space-5);
+  border: 1px solid var(--paper-borda);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-surface);
+  box-shadow: var(--paper-sombra-sm);
 }
 
 .casca .estoque-vazio {
   margin: 0;
   font-size: 16px;
   line-height: 24px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
-/* Lista de materiais */
 .casca .estoque-lista {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--paper-space-3);
 }
 
 .casca .estoque-lista li.estoque-item {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--paper-space-3);
   margin: 0;
-  padding: 14px 16px;
-  border: 1px solid #cbd4d9;
-  border-radius: 12px;
-  background: #f6f8f9;
-  color: #0f1a20;
+  padding: var(--paper-space-3) var(--paper-space-4);
+  border: 1px solid var(--paper-borda);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-fundo);
+  color: var(--paper-text);
 }
 
-/* Abaixo do mínimo: a linha inteira fica vermelha, com nome e quantidade. */
 .casca .estoque-lista li.estoque-item.abaixo,
 .casca .estoque-lista li.estoque-item-abaixo {
-  border-color: #d4372c;
-  border-left-width: 6px;
-  background: #fef0ef;
-  color: #ad2a21;
-}
-
-.casca .estoque-item-abaixo .estoque-nome,
-.casca .estoque-item-abaixo .estoque-quantidade,
-.casca .estoque-item-abaixo .estoque-minimo {
-  color: #ad2a21;
+  border-color: var(--paper-danger);
+  border-left-width: 4px;
 }
 
 .casca .estoque-resumo {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 20px;
+  align-items: center;
+  gap: var(--paper-space-1) var(--paper-space-4);
 }
 
 .casca .estoque-nome {
   font-size: 16px;
   line-height: 24px;
   font-weight: 700;
-  color: #0f1a20;
   overflow-wrap: anywhere;
 }
 
 .casca .estoque-quantidade {
-  font-size: 15px;
-  line-height: 22px;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 600;
-  color: #0f1a20;
 }
 
 .casca .estoque-minimo {
   font-size: 14px;
   line-height: 20px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
-.casca .estoque-selo {
-  padding: 2px 10px;
-  border: 1px solid #ad2a21;
-  border-radius: 999px;
-  background: #fff;
-  font-size: 13px;
-  line-height: 20px;
-  color: #ad2a21;
+.casca .estoque-item-abaixo .estoque-minimo {
+  color: inherit;
 }
 
-/* Formulários */
-.casca .estoque-tela form.estoque-form {
+.casca .casca-miolo .estoque-tela form.estoque-form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--paper-space-4);
   margin: 0;
   padding: 0;
   border: 0;
@@ -185,148 +116,141 @@
   background: transparent;
 }
 
-.casca .estoque-tela form.estoque-form-linha {
+.casca .casca-miolo .estoque-tela form.estoque-form-linha {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px;
-}
-
-.casca .estoque-campos {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  gap: var(--paper-space-3);
 }
 
 .casca .estoque-campo {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 0;
+  align-items: flex-start;
+  gap: var(--paper-space-1);
+  min-width: 12rem;
+  flex: 1;
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #0f1a20;
+  color: var(--paper-text);
 }
 
-.casca .estoque-campo input,
-.casca .estoque-campo select {
+.casca .casca-miolo .estoque-tela input[data-slot="input"],
+.casca .casca-miolo .estoque-tela select[data-slot="native-select"] {
   width: 100%;
-  height: 44px;
-  margin: 0;
-  padding: 0 12px;
-  border: 1px solid #cbd4d9;
-  border-radius: 10px;
-  background: #fff;
-  color: #0f1a20;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 400;
-}
-
-.casca .estoque-campo input:focus-visible,
-.casca .estoque-campo select:focus-visible {
-  outline: 2px solid #158172;
-  outline-offset: 1px;
-}
-
-.casca .estoque-tela button.estoque-botao {
-  width: fit-content;
-  height: 44px;
-  margin: 0;
-  padding: 0 20px;
-  border: 1px solid #158172;
-  border-radius: 10px;
-  background: #158172;
-  color: #fff;
-  font: inherit;
-  font-size: 15px;
-  line-height: 24px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.casca .estoque-tela button.estoque-botao:hover:not(:disabled) {
-  background: #0f433d;
-  border-color: #0f433d;
-}
-
-.casca .estoque-tela button.estoque-botao:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.casca .estoque-tela button.estoque-botao-secundario {
   height: 40px;
-  background: #fff;
-  color: #0f433d;
+  margin: 0;
+  padding: 0 var(--paper-space-3);
+  border: 1px solid var(--paper-campo-borda);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-campo-fundo);
+  color: var(--paper-text);
   font-size: 14px;
+  font-weight: 400;
+  box-shadow: var(--paper-sombra-sm);
 }
 
-.casca .estoque-tela button.estoque-botao-secundario:hover:not(:disabled) {
-  background: #d3f3ec;
-  border-color: #158172;
-  color: #0f433d;
+.casca .casca-miolo .estoque-tela input[data-slot="input"]:hover,
+.casca .casca-miolo .estoque-tela select[data-slot="native-select"]:hover {
+  border-color: var(--paper-campo-borda-hover);
 }
 
-/* Histórico de entradas e baixas */
+.casca .casca-miolo .estoque-tela input[data-slot="input"]:focus-visible,
+.casca .casca-miolo .estoque-tela select[data-slot="native-select"]:focus-visible {
+  border-color: var(--paper-campo-foco);
+  outline: 3px solid var(--paper-campo-foco);
+  outline-offset: 2px;
+}
+
+.casca .casca-miolo .estoque-tela input[data-slot="input"]:disabled,
+.casca .casca-miolo .estoque-tela select[data-slot="native-select"]:disabled {
+  cursor: not-allowed;
+  border-color: var(--paper-borda);
+  background: var(--paper-disabled-fundo);
+  color: var(--paper-disabled-tinta);
+  box-shadow: none;
+}
+
+.casca .casca-miolo .estoque-tela input[data-slot="input"][aria-invalid="true"],
+.casca .casca-miolo .estoque-tela select[data-slot="native-select"][aria-invalid="true"] {
+  border: 2px solid var(--paper-danger);
+}
+
+.casca .casca-miolo .estoque-tela input[data-slot="input"][aria-invalid="true"]:focus-visible,
+.casca .casca-miolo .estoque-tela select[data-slot="native-select"][aria-invalid="true"]:focus-visible {
+  outline-color: var(--paper-danger);
+}
+
+.casca .casca-miolo .estoque-tela button.estoque-botao,
+.casca .casca-miolo .estoque-tela button[data-slot="button"] {
+  width: fit-content;
+  height: 40px;
+  margin: 0;
+  padding: 0 var(--paper-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-primary);
+  color: var(--primary-foreground);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--paper-sombra-sm);
+}
+
+.casca .casca-miolo .estoque-tela button.estoque-botao:hover:not(:disabled),
+.casca .casca-miolo .estoque-tela button[data-slot="button"]:hover:not(:disabled) {
+  background: var(--paper-primary-hover);
+}
+
+.casca .casca-miolo .estoque-tela button.estoque-botao:focus-visible,
+.casca .casca-miolo .estoque-tela button[data-slot="button"]:focus-visible {
+  outline: 3px solid var(--paper-secondary);
+  outline-offset: 2px;
+}
+
+.casca .casca-miolo .estoque-tela button.estoque-botao:disabled,
+.casca .casca-miolo .estoque-tela button[data-slot="button"]:disabled {
+  opacity: var(--paper-disabled-opacidade);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.casca .casca-miolo .estoque-tela button[data-slot="button"].estoque-botao-secundario {
+  border: 1px solid var(--paper-borda);
+  background: var(--paper-surface);
+  color: var(--paper-text);
+  box-shadow: none;
+}
+
+.casca .casca-miolo .estoque-tela button[data-slot="button"].estoque-botao-secundario:hover:not(:disabled) {
+  border-color: var(--paper-campo-borda-hover);
+  background: var(--paper-fundo);
+  color: var(--paper-text);
+}
+
 .casca .estoque-historico summary {
   width: fit-content;
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #14665b;
+  color: var(--paper-text);
   cursor: pointer;
 }
 
 .casca .estoque-historico summary:focus-visible {
-  outline: 2px solid #158172;
+  outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
 }
 
 .casca .estoque-historico[open] summary {
-  margin-bottom: 8px;
-}
-
-.casca .estoque-movimentos {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.casca .estoque-movimentos li.estoque-movimento {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  margin: 0;
-  padding: 8px 12px;
-  border: 1px solid #e2e8ec;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 14px;
-  line-height: 20px;
-  color: #0f1a20;
-}
-
-.casca .estoque-movimento-tipo {
-  min-width: 84px;
-  font-weight: 700;
-  color: #0f433d;
-}
-
-/* Alerta (erro e sucesso recebem foco) */
-.casca .estoque-tela .erro,
-.casca .estoque-tela .sucesso {
-  margin: 0;
+  margin-bottom: var(--paper-space-2);
 }
 
 .casca .estoque-tela .erro:focus,
 .casca .estoque-tela .sucesso:focus {
-  outline: 3px solid #0f433d;
+  outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
 }
 
@@ -335,12 +259,12 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--paper-space-3);
 }
 
 @media (max-width: 640px) {
   .casca .estoque-secao {
-    padding: 16px;
+    padding: var(--paper-space-4);
   }
 
   .casca .estoque-cabeca {
@@ -348,7 +272,7 @@
     align-items: flex-start;
   }
 
-  .casca .estoque-tela form.estoque-form-linha {
+  .casca .casca-miolo .estoque-tela form.estoque-form-linha {
     flex-direction: column;
     align-items: stretch;
   }

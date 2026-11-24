@@ -7,6 +7,15 @@ import {
   useConversationStatus,
 } from "@elevenlabs/react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { executarFerramenta, obterUrlAssinada } from "./actions";
 import "./tela.css";
 
@@ -24,6 +33,52 @@ export function BotaoVoz(props: Props) {
     <ConversationProvider>
       <PainelVoz {...props} />
     </ConversationProvider>
+  );
+}
+
+export function ConfirmacaoVoz({
+  resumo,
+  onConfirmar,
+  onCancelar,
+}: {
+  resumo: string;
+  onConfirmar: () => void;
+  onCancelar: () => void;
+}) {
+  const confirmarRef = useRef<HTMLButtonElement>(null);
+  const decidiu = useRef(false);
+  const [aberto, setAberto] = useState(true);
+
+  function decidir(ok: boolean) {
+    if (decidiu.current) return;
+    decidiu.current = true;
+    setAberto(false);
+    if (ok) onConfirmar();
+    else onCancelar();
+  }
+
+  return (
+    <Dialog
+      open={aberto}
+      onOpenChange={(proximo) => {
+        if (!proximo) decidir(false);
+      }}
+    >
+      <DialogContent role="alertdialog" initialFocus={confirmarRef} className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Confirmar?</DialogTitle>
+          <DialogDescription>{resumo}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => decidir(false)}>
+            Cancelar
+          </Button>
+          <Button type="button" ref={confirmarRef} onClick={() => decidir(true)}>
+            Confirmar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -105,34 +160,21 @@ function PainelVoz({ nomeUsuario, papel }: Props) {
 
   return (
     <>
-      <button
+      <Button
         type="button"
-        className={`voz-botao${ativo ? " voz-botao-ativo" : ""}`}
+        variant={ativo ? "destructive" : "default"}
+        className="fixed right-4 bottom-4 z-50 h-11 px-4 shadow-paper-md"
         aria-label={ativo ? "Encerrar conversa por voz" : "Iniciar conversa por voz"}
         disabled={conectando}
         onClick={ativo ? () => endSession() : iniciar}
       >
         {rotulo}
-      </button>
+      </Button>
       <p className="voz-aviso" role="status" aria-live="polite">
         {aviso}
       </p>
-
       {pendente ? (
-        <div className="voz-fundo">
-          <div className="voz-dialogo" role="alertdialog" aria-modal="true" aria-labelledby="voz-titulo" aria-describedby="voz-resumo">
-            <h2 id="voz-titulo">Confirmar?</h2>
-            <p id="voz-resumo">{pendente}</p>
-            <div className="voz-acoes">
-              <button type="button" onClick={() => responder(false)}>
-                Cancelar
-              </button>
-              <button type="button" autoFocus onClick={() => responder(true)}>
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmacaoVoz resumo={pendente} onConfirmar={() => responder(true)} onCancelar={() => responder(false)} />
       ) : null}
     </>
   );

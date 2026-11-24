@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { RetornoVisivel } from "../../domain/retorno/tipos";
 import { estadoVazio } from "../formulario";
 import { salvarPrazo } from "./actions";
@@ -31,27 +36,40 @@ import "./tela.css";
 export function Retornos({ retornos }: { retornos: RetornoVisivel[] }) {
   return (
     <section className="retornos-secao" aria-labelledby="retornos-lista-titulo">
-      <h2 id="retornos-lista-titulo">{TITULO_LISTA}</h2>
-      {retornos.length === 0 ? (
-        <p className="retornos-vazio">{VAZIO_RETORNOS}</p>
-      ) : (
-        <>
-          <p className="retornos-nota">{NOTA_LISTA}</p>
-          <ul className="retornos-lista">
-            {retornos.map((retorno) => (
-              <li key={retorno.id} className="retornos-item">
-                <div className="retornos-resumo">
-                  <span className="retornos-texto">{retorno.texto}</span>
-                  <span className="retornos-meta">{textoPrevisto(retorno.dataPrevista)}</span>
-                </div>
-                <Link className="casca-botao" href={hrefReagendar(retorno.pacienteId)}>
-                  {ROTULO_REAGENDAR}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+      <Card>
+        <CardContent className="flex flex-col gap-4">
+          <h2 id="retornos-lista-titulo">{TITULO_LISTA}</h2>
+          {retornos.length === 0 ? (
+            <p className="retornos-vazio">{VAZIO_RETORNOS}</p>
+          ) : (
+            <>
+              <p className="retornos-nota">{NOTA_LISTA}</p>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Retorno</TableHead>
+                    <TableHead>Previsto</TableHead>
+                    <TableHead className="text-right">Ação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {retornos.map((retorno) => (
+                    <TableRow key={retorno.id}>
+                      <TableCell className="whitespace-normal font-semibold">{retorno.texto}</TableCell>
+                      <TableCell className="whitespace-normal text-apagado">{textoPrevisto(retorno.dataPrevista)}</TableCell>
+                      <TableCell className="text-right">
+                        <Link className="casca-botao" href={hrefReagendar(retorno.pacienteId)}>
+                          {ROTULO_REAGENDAR}
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -60,11 +78,15 @@ export function Retornos({ retornos }: { retornos: RetornoVisivel[] }) {
 export function RegiaoMarcar() {
   return (
     <section className="retornos-secao" aria-labelledby="retornos-marcar-titulo">
-      <h2 id="retornos-marcar-titulo">{TITULO_MARCAR}</h2>
-      <p className="retornos-nota">{TEXTO_MARCAR}</p>
-      <Link className="casca-botao" href="/agenda">
-        {ROTULO_IR_AGENDAMENTOS}
-      </Link>
+      <Card>
+        <CardContent className="flex flex-col items-start gap-3">
+          <h2 id="retornos-marcar-titulo">{TITULO_MARCAR}</h2>
+          <p className="retornos-nota">{TEXTO_MARCAR}</p>
+          <Link className="casca-botao" href="/agenda">
+            {ROTULO_IR_AGENDAMENTOS}
+          </Link>
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -79,27 +101,24 @@ export function FormularioPrazo({ prazo }: { prazo: number }) {
 
   return (
     <section className="retornos-secao retornos-prazo" aria-labelledby="retornos-prazo-titulo">
-      <h2 id="retornos-prazo-titulo">{TITULO_PRAZO}</h2>
-      <p className="retornos-prazo-aviso">{textoPrazo(prazo)}</p>
-      {resultado.status === "vazio" ? null : (
-        <Alerta tipo={resultado.status} mensagem={resultado.mensagem} quando={resultado.quando} />
-      )}
-      <form className="retornos-form" action={acao} aria-busy={pendente}>
-        <label className="retornos-campo">
-          {ROTULO_PRAZO}
-          <input
-            name="diasAntecedencia"
-            type="number"
-            min={1}
-            step={1}
-            defaultValue={prazo}
-            required
-          />
-        </label>
-        <button className="retornos-botao" type="submit" disabled={pendente}>
-          {pendente ? PENDENTE_PRAZO : ROTULO_SALVAR_PRAZO}
-        </button>
-      </form>
+      <Card className="shadow-paper-md">
+        <CardContent className="flex flex-col gap-4">
+          <h2 id="retornos-prazo-titulo">{TITULO_PRAZO}</h2>
+          <p className="retornos-prazo-aviso">{textoPrazo(prazo)}</p>
+          {resultado.status === "vazio" ? null : (
+            <Alerta tipo={resultado.status} mensagem={resultado.mensagem} quando={resultado.quando} />
+          )}
+          <form className="retornos-form" action={acao} aria-busy={pendente}>
+            <Label className="retornos-campo">
+              {ROTULO_PRAZO}
+              <Input name="diasAntecedencia" type="number" min={1} step={1} defaultValue={prazo} required />
+            </Label>
+            <Button className="retornos-botao" type="submit" disabled={pendente}>
+              {pendente ? PENDENTE_PRAZO : ROTULO_SALVAR_PRAZO}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -116,13 +135,13 @@ export function FormularioMarcarRetorno({
   return (
     <form className="retornos-form retornos-form-marcar" action={acao} aria-busy={pendente}>
       <input type="hidden" name="agendamentoOrigemId" value={id} />
-      <label className="retornos-campo">
+      <Label className="retornos-campo">
         {ROTULO_DATA_PREVISTA}
-        <input name="dataPrevista" type="date" required />
-      </label>
-      <button className="retornos-botao" type="submit" disabled={pendente}>
+        <Input name="dataPrevista" type="date" required />
+      </Label>
+      <Button className="retornos-botao" type="submit" disabled={pendente}>
         {pendente ? PENDENTE_MARCAR : ROTULO_MARCAR_RETORNO}
-      </button>
+      </Button>
     </form>
   );
 }
