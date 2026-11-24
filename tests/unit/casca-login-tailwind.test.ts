@@ -25,7 +25,7 @@ describe("casca e login com Tailwind", () => {
     );
 
     expect(html).toContain('aria-current="page"');
-    expect(html).toContain("bg-acao");
+    expect(html).toContain("bg-sidebar-accent");
     expect(html).toContain("Pacientes");
   });
 
@@ -33,7 +33,8 @@ describe("casca e login com Tailwind", () => {
     const html = renderToStaticMarkup(createElement(FormLogin));
 
     expect(html).toContain("Entrar");
-    expect(html).toContain("bg-acao");
+    expect(html).toContain("bg-(--cor-login-acao)");
+    expect(html).toContain("hover:bg-(--cor-login-marca)");
     expect(html).toContain('type="submit"');
   });
 });

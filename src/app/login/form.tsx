@@ -10,7 +10,7 @@ import { estadoVazio } from "../formulario";
 import { IconeCadeado, IconeEmail, IconeErro, IconeEscudo, IconeOk, IconeOlho } from "./icones";
 
 const botaoEntrar =
-  "h-12 w-full rounded-[10px] border-0 bg-acao text-base leading-6 font-semibold text-white shadow-none hover:bg-marca active:translate-y-0 disabled:bg-acao disabled:opacity-100";
+  "h-12 w-full rounded-[10px] border-0 bg-(--cor-login-acao) text-base leading-6 font-semibold text-white shadow-none hover:bg-(--cor-login-marca) active:translate-y-0 disabled:bg-(--cor-login-acao) disabled:opacity-100";
 
 export function FormLogin() {
   const [estado, acao, pendente] = useActionState(entrar, estadoVazio);
@@ -65,7 +65,7 @@ export function FormLogin() {
             <label className="block text-sm leading-5 font-semibold text-tinta" htmlFor="email">
               E-mail
             </label>
-            <div className="flex h-11 items-center gap-2.5 rounded-[10px] border border-linha bg-white px-3.5 focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-marca">
+            <div className="flex h-11 items-center gap-2.5 rounded-[10px] border border-linha bg-white px-3.5 focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-(--cor-login-marca)">
               <IconeEmail />
               <input
                 id="email"
@@ -83,7 +83,7 @@ export function FormLogin() {
             <label className="block text-sm leading-5 font-semibold text-tinta" htmlFor="senha">
               Senha
             </label>
-            <div className="flex h-11 items-center gap-2.5 rounded-[10px] border border-linha bg-white px-3.5 focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-marca">
+            <div className="flex h-11 items-center gap-2.5 rounded-[10px] border border-linha bg-white px-3.5 focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-(--cor-login-marca)">
               <IconeCadeado />
               <input
                 id="senha"
@@ -111,7 +111,7 @@ export function FormLogin() {
       )}
 
       {sucesso ? null : (
-        <Link className="self-end text-xs leading-4 font-semibold text-link no-underline" href="/recuperar">
+        <Link className="self-end text-xs leading-4 font-semibold text-(--cor-login-link) no-underline" href="/recuperar">
           Esqueci a senha
         </Link>
       )}
