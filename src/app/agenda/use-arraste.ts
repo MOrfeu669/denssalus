@@ -37,6 +37,7 @@ export function useArrasteGrade(entrada: {
   chaves: string[];
   primeiraHora: number;
   alturaGrade: number;
+  pxPorMinuto: number;
   aoConcluir: () => void;
 }) {
   const gradeRef = useRef<HTMLDivElement>(null);
@@ -67,7 +68,8 @@ export function useArrasteGrade(entrada: {
 
     function calcular(g: Gesto, x: number, y: number): PreviewArraste {
       const atual = contexto.current;
-      const dy = y - g.origemY;
+      const escala = atual.pxPorMinuto > 0 ? atual.pxPorMinuto : 1;
+      const dy = (y - g.origemY) / escala;
       if (g.modo === "alongar") {
         const altura = Math.min(
           Math.max(MINIMO, encaixarMinuto(g.origemAltura + dy)),

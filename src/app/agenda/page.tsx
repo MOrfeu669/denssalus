@@ -2,14 +2,16 @@ import { listarAgendamentos, listarOpcoesAgendamento, verAgenda } from "../../do
 import type { FiltroAgenda } from "../../domain/agendamento/tipos";
 import type { Sessao } from "../../domain/auth/tipos";
 import { enviarPendentes, reenviarFalhas } from "../../domain/mensagem/casos";
+import { Agendamentos } from "../agendamentos/form";
 import { TelaFalha, TelaSemSessao } from "../agendamentos/estados";
+import "../agendamentos/tela.css";
 import { CascaAberta } from "../casca";
 import { dependenciasAgendamento, dependenciasMensagem } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
-import { Agendamentos } from "../agendamentos/form";
-import "../agendamentos/tela.css";
+import "./tela.css";
 import { Grade } from "./grade";
+import type { VisaoGrade } from "./posicao";
 import { TempoReal } from "./tempo-real";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +42,10 @@ function lerFiltro(query: Query): FiltroAgenda {
     dentistaId: primeiro(query.dentista) || null,
     cadeiraId: primeiro(query.cadeira) || null,
   };
+}
+
+function lerVisao(query: Query): VisaoGrade {
+  return primeiro(query.visao) === "semana" ? "semana" : "dia";
 }
 
 function caminhoAgenda(query: Query) {
@@ -92,44 +98,42 @@ async function conteudo(query: Query, sessao: Sessao) {
       pacientes: Object.fromEntries(pacientes.map((p) => [p.id, p.nome])),
       dentistas: Object.fromEntries(dentistas.map((d) => [d.id, d.nome])),
       cadeiras: Object.fromEntries(cadeiras.map((c) => [c.id, c.identificacao])),
+      procedimentos: Object.fromEntries(procedimentos.map((p) => [p.id, p.nome])),
     };
     const conhecido = (valor: string | undefined, ids: string[]) =>
       valor && ids.includes(valor) ? valor : "";
 
     return (
       <>
-        <h1>{TITULO}</h1>
-        <div className="flex flex-col gap-4">
-          <Agendamentos
-            agendamentos={lista.valor}
-            opcoes={opcoes.valor}
-            papel={sessao.usuario.papel}
-            usuarioId={sessao.usuario.id}
-            inicial={{
-              pacienteId: conhecido(primeiro(query.paciente), pacientes.map((item) => item.id)),
-              dentistaId: conhecido(
-                primeiro(query.dentista),
-                dentistas.map((item) => item.id),
-              ),
-              procedimentoId: conhecido(
-                primeiro(query.procedimento),
-                procedimentos.map((item) => item.id),
-              ),
-            }}
-          />
-          <Grade
-            grade={grade.valor}
-            data={filtro.data}
-            dentistaId={filtro.dentistaId}
-            cadeiraId={filtro.cadeiraId}
-            nomes={nomes}
-            papel={sessao.usuario.papel}
-            opcoes={{
-              dentistas: dentistas.map(({ id, nome }) => ({ id, nome })),
-              cadeiras,
-            }}
-          />
-        </div>
+        <Grade
+          grade={grade.valor}
+          data={filtro.data}
+          visaoInicial={lerVisao(query)}
+          dentistaId={filtro.dentistaId}
+          cadeiraId={filtro.cadeiraId}
+          nomes={nomes}
+          opcoes={{
+            dentistas: dentistas.map(({ id, nome }) => ({ id, nome })),
+            cadeiras,
+          }}
+        />
+        <Agendamentos
+          agendamentos={lista.valor}
+          opcoes={opcoes.valor}
+          papel={sessao.usuario.papel}
+          usuarioId={sessao.usuario.id}
+          inicial={{
+            pacienteId: conhecido(primeiro(query.paciente), pacientes.map((item) => item.id)),
+            dentistaId: conhecido(
+              primeiro(query.dentista),
+              dentistas.map((item) => item.id),
+            ),
+            procedimentoId: conhecido(
+              primeiro(query.procedimento),
+              procedimentos.map((item) => item.id),
+            ),
+          }}
+        />
         <TempoReal />
       </>
     );

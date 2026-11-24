@@ -1,0 +1,139 @@
+/* A casca pinta botão e formulário no miolo. A agenda redefine só os controles dela. */
+
+.casca .casca-miolo .agenda-tela form {
+  display: inline;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-primario {
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 8px;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-primario:hover:not(:disabled) {
+  background: #000000;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-icone,
+.casca .casca-miolo .agenda-tela button.agenda-secundario {
+  height: 40px;
+  border: 1px solid var(--paper-borda);
+  border-radius: 4px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-icone {
+  width: 40px;
+  padding: 0;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-secundario {
+  padding: 0 16px;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-icone:hover:not(:disabled),
+.casca .casca-miolo .agenda-tela button.agenda-secundario:hover:not(:disabled),
+.casca .casca-miolo .agenda-tela button.agenda-chamar:hover:not(:disabled) {
+  background: #f7f7f0;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-segmento {
+  height: 28px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--paper-ink-2);
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-segmento[aria-pressed="true"] {
+  background: #ffffff;
+  color: #111827;
+  font-weight: 500;
+  box-shadow: var(--paper-sombra-sm);
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-chamar {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--paper-campo-borda);
+  border-radius: 4px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-slot,
+.casca .casca-miolo .agenda-tela button.agenda-dia,
+.casca .casca-miolo .agenda-tela button.agenda-seta {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-slot {
+  width: 100%;
+  padding: 0;
+  border-radius: 0;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-slot.agenda-fora {
+  background: #f4f4ec;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-dia {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-dia[aria-pressed="true"] {
+  background: #111111;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.casca .casca-miolo .agenda-tela button.agenda-seta {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--paper-ink-2);
+}
+
+.agenda-slot .agenda-encaixe {
+  opacity: 0;
+}
+
+.agenda-slot:hover .agenda-encaixe,
+.agenda-slot:focus-visible .agenda-encaixe {
+  opacity: 1;
+}
+
+.casca .casca-miolo .agenda-tela a.agenda-evento {
+  color: inherit;
+  text-decoration: none;
+}

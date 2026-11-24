@@ -1,31 +1,13 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Papel } from "../../domain/auth/tipos";
-import type { StatusAgendamento } from "../../domain/agendamento/tipos";
-import { pedirOverlay, type DestinoOverlay } from "../agendamentos/pedido";
-import { TEXTO_GRADE_ATUALIZA } from "../agendamentos/texto";
-import { rotuloStatus } from "./rotulo";
-import { FaixaDatas } from "./faixa";
-import { hojeIso } from "./faixa-data";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { rotuloDiaLongo, rotuloIntervalo } from "./apresentacao";
 import type { VisaoGrade } from "./posicao";
 
 type Opcao = { id: string; rotulo: string };
 
-const PONTOS: Record<StatusAgendamento, string> = {
-  agendado: "border border-primary bg-card",
-  em_espera: "bg-aviso",
-  iniciado: "bg-primary",
-  concluido: "bg-ok",
-  cancelado: "bg-apagado",
-};
-
-const contorno =
-  "h-10 cursor-pointer rounded-paper-md border border-borda-papel bg-card px-3.5 text-sm font-semibold text-tinta shadow-paper-sm hover:border-campo-borda-hover hover:bg-papel";
-const cheio =
-  "h-10 cursor-pointer rounded-paper-md border-0 bg-primary px-3.5 text-sm font-semibold text-primary-foreground shadow-paper-sm hover:bg-(--paper-primary-hover)";
-const chip =
-  "h-8 cursor-pointer rounded-paper-md px-3 text-[13px] font-semibold shadow-paper-sm";
 export function BarraAgenda({
   data,
   visao,
@@ -33,6 +15,7 @@ export function BarraAgenda({
   cadeiraId,
   dentistas,
   cadeiras,
+  dias,
   onVisao,
   onFiltrar,
 }: {
@@ -42,149 +25,102 @@ export function BarraAgenda({
   cadeiraId: string | null;
   dentistas: Opcao[];
   cadeiras: Opcao[];
-  papel: Papel;
+  dias: string[];
   onVisao: (visao: VisaoGrade) => void;
   onFiltrar: (dentista: string, cadeira: string, data?: string) => void;
 }) {
-  const filtrado = Boolean(dentistaId || cadeiraId);
-
-  function abrir(destino: DestinoOverlay, origem: HTMLElement) {
-    pedirOverlay({ destino, origem });
-  }
+  const rotulo =
+    visao === "semana" && dias.length > 0
+      ? rotuloIntervalo(dias[0], dias[dias.length - 1])
+      : rotuloDiaLongo(data);
+  const passo = visao === "semana" ? "semana" : "dia";
 
   return (
-    <div className="flex flex-col gap-3.5">
-      <div className="flex flex-wrap items-center gap-2.5">
-        <Button type="button" variant="outline" className={contorno} onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", hojeIso())}>
-          Hoje
-        </Button>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <div role="group" aria-label="Visualização" className="inline-flex h-10 items-center rounded-paper-md border border-borda-papel bg-card p-1 shadow-paper-sm">
-            <BotaoVisao ativo={visao === "dia"} onClick={() => onVisao("dia")}>
-              Dia
-            </BotaoVisao>
-            <BotaoVisao ativo={visao === "semana"} onClick={() => onVisao("semana")}>
-              Semana
-            </BotaoVisao>
-          </div>
-        </div>
-      </div>
-
-      <FaixaDatas data={data} onEscolher={(proxima) => onFiltrar(dentistaId ?? "", cadeiraId ?? "", proxima)} />
-
-      <div className="flex flex-wrap items-start gap-2">
-        <div className="flex flex-col items-start gap-2">
-          <Chips
-            rotulo="Dentistas"
-            opcoes={dentistas}
-            ativo={dentistaId}
-            onEscolher={(id) => onFiltrar(id, cadeiraId ?? "")}
-          />
-          <Chips
-            rotulo="Cadeiras"
-            opcoes={cadeiras}
-            ativo={cadeiraId}
-            onEscolher={(id) => onFiltrar(dentistaId ?? "", id)}
-          />
-        </div>
-        <Button
-          type="button"
-          className={`${cheio} ml-auto`}
-          onClick={(evento) => abrir("novo", evento.currentTarget)}
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        className="agenda-icone"
+        aria-label={passo === "semana" ? "Semana anterior" : "Dia anterior"}
+        onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", deslocar(data, visao, -1))}
+      >
+        <ChevronLeft aria-hidden="true" />
+      </Button>
+      <Button
+        type="button"
+        className="agenda-secundario"
+        onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", hoje())}
+      >
+        Hoje
+      </Button>
+      <Button
+        type="button"
+        className="agenda-icone"
+        aria-label={passo === "semana" ? "Próxima semana" : "Próximo dia"}
+        onClick={() => onFiltrar(dentistaId ?? "", cadeiraId ?? "", deslocar(data, visao, 1))}
+      >
+        <ChevronRight aria-hidden="true" />
+      </Button>
+      <p className="m-0 font-heading text-[18px] leading-7 font-semibold text-tinta">{rotulo}</p>
+      <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div
+          role="group"
+          aria-label="Visualização"
+          className="inline-flex h-9 items-center rounded-controle bg-[#E6E6DA] p-1"
         >
-          Novo agendamento
-        </Button>
-        {filtrado ? (
+          <Button type="button" className="agenda-segmento" aria-pressed={visao === "dia"} onClick={() => onVisao("dia")}>
+            Dia
+          </Button>
           <Button
             type="button"
-            variant="ghost"
-            className="h-8 cursor-pointer border-0 bg-transparent px-2 text-[13px] font-semibold text-link shadow-none hover:bg-transparent hover:underline"
-            onClick={() => onFiltrar("", "")}
+            className="agenda-segmento"
+            aria-pressed={visao === "semana"}
+            onClick={() => onVisao("semana")}
           >
-            Limpar filtros
+            Semana
           </Button>
-        ) : null}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        {(Object.keys(PONTOS) as StatusAgendamento[]).map((status) => (
-          <span key={status} className="inline-flex items-center gap-1.5 text-xs leading-4 text-apagado">
-            <span className={`size-2 rounded-full ${PONTOS[status]}`} aria-hidden="true" />
-            {rotuloStatus(status)}
-          </span>
-        ))}
-        <p className="m-0 ml-auto flex items-center gap-2 text-xs leading-4 text-apagado">
-          <span className="relative grid size-3.5 place-items-center" aria-hidden="true">
-            <span className="absolute size-3.5 rounded-full border border-ok" />
-            <span className="size-2 rounded-full bg-ok" />
-          </span>
-          {TEXTO_GRADE_ATUALIZA}
-        </p>
+        </div>
+        <NativeSelect
+          className="w-[220px]"
+          aria-label="Dentistas"
+          value={dentistaId ?? ""}
+          onChange={(evento) => onFiltrar(evento.target.value, cadeiraId ?? "")}
+        >
+          <NativeSelectOption value="">{`Todos os dentistas (${dentistas.length})`}</NativeSelectOption>
+          {dentistas.map((item) => (
+            <NativeSelectOption key={item.id} value={item.id}>
+              {item.rotulo}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+        <NativeSelect
+          className="w-[200px]"
+          aria-label="Cadeiras"
+          value={cadeiraId ?? ""}
+          onChange={(evento) => onFiltrar(dentistaId ?? "", evento.target.value)}
+        >
+          <NativeSelectOption value="">Todas as cadeiras</NativeSelectOption>
+          {cadeiras.map((item) => (
+            <NativeSelectOption key={item.id} value={item.id}>
+              {item.rotulo}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
       </div>
     </div>
   );
 }
 
-function Chips({
-  rotulo,
-  opcoes,
-  ativo,
-  onEscolher,
-}: {
-  rotulo: string;
-  opcoes: Opcao[];
-  ativo: string | null;
-  onEscolher: (id: string) => void;
-}) {
-  return (
-    <div role="group" aria-label={rotulo} className="flex flex-wrap items-center gap-2">
-      <span className="text-[13px] leading-4 font-semibold text-apagado">{rotulo}</span>
-      {opcoes.map((opcao) => {
-        const ligado = ativo === opcao.id;
-        return (
-          <Button
-            key={opcao.id}
-            type="button"
-            variant="outline"
-            aria-pressed={ligado}
-            className={
-              ligado
-                ? `${chip} border border-primary bg-primary text-primary-foreground`
-                : `${chip} border border-borda-papel bg-card text-tinta hover:border-campo-borda-hover hover:bg-papel`
-            }
-            onClick={() => onEscolher(ligado ? "" : opcao.id)}
-          >
-            {opcao.rotulo}
-          </Button>
-        );
-      })}
-    </div>
-  );
+function hoje() {
+  const agora = new Date();
+  const par = (n: number) => String(n).padStart(2, "0");
+  return `${agora.getFullYear()}-${par(agora.getMonth() + 1)}-${par(agora.getDate())}`;
 }
 
-function BotaoVisao({
-  ativo,
-  onClick,
-  children,
-}: {
-  ativo: boolean;
-  onClick: () => void;
-  children: string;
-}) {
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      aria-pressed={ativo}
-      className={
-        ativo
-          ? "h-8 cursor-pointer rounded-paper-sm border-0 bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-none hover:bg-primary"
-          : "h-8 cursor-pointer rounded-paper-sm border-0 bg-transparent px-4 text-sm font-semibold text-tinta shadow-none hover:bg-papel"
-      }
-      onClick={onClick}
-    >
-      {children}
-    </Button>
-  );
+function deslocar(data: string, visao: VisaoGrade, sentido: 1 | -1) {
+  const partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data);
+  if (!partes) return data;
+  const dias = (visao === "semana" ? 7 : 1) * sentido;
+  const alvo = new Date(Number(partes[1]), Number(partes[2]) - 1, Number(partes[3]) + dias);
+  const par = (n: number) => String(n).padStart(2, "0");
+  return `${alvo.getFullYear()}-${par(alvo.getMonth() + 1)}-${par(alvo.getDate())}`;
 }
-
