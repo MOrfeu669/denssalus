@@ -21,11 +21,40 @@
   --paper-space-4: 16px;
   --paper-space-5: 24px;
   --paper-space-6: 32px;
+  --paper-warning: #D97706;
+  --paper-radius-sm: 4px;
+
+  /* Paper — papel, bordas e camadas */
+  --paper-fundo: #EFEFE4;
+  --paper-borda: #E2E2D1;
+  --paper-sombra-sm: 0 1px 2px rgb(17 17 17 / 6%);
+  --paper-sombra-md: 0 1px 3px rgb(17 17 17 / 8%), 0 4px 12px rgb(17 17 17 / 6%);
+  --paper-sombra-overlay: 0 12px 32px rgb(17 17 17 / 16%), 0 2px 6px rgb(17 17 17 / 8%);
+  --paper-overlay: rgb(17 17 17 / 40%);
+
+  /* Paper — campos (borda com 3:1 sobre superfície e papel) */
+  --paper-campo-fundo: var(--paper-surface);
+  --paper-campo-borda: #8A887A;
+  --paper-campo-borda-hover: #6F6D62;
+  --paper-campo-foco: var(--paper-secondary);
+  --paper-campo-erro: var(--paper-danger);
+
+  /* Paper — disabled */
+  --paper-disabled-fundo: #F4F4EC;
+  --paper-disabled-tinta: #8A887A;
+  --paper-disabled-borda: var(--paper-borda);
+  --paper-disabled-opacidade: 0.5;
+
+  /* Paper — lateral clara (para a casca, PR seguinte) */
+  --paper-lateral: var(--paper-surface);
+  --paper-lateral-tinta: var(--paper-text);
+  --paper-lateral-ativo: #EEEEEE;
+  --paper-lateral-borda: var(--paper-borda);
 
   /* Aliases semânticos do produto → Paper */
   --cor-marca: var(--paper-primary);
   --cor-acao: var(--paper-primary);
-  --cor-fundo: #F9FAFB;
+  --cor-fundo: var(--paper-fundo);
   --cor-texto: var(--paper-text);
   color-scheme: light;
   font-family: var(--font-sans), Roboto, "Segoe UI", sans-serif;
@@ -41,7 +70,7 @@
   --secondary: #F5F3FF;
   --secondary-foreground: #111827;
   --muted: #F3F4F6;
-  --muted-foreground: #6B7280;
+  --muted-foreground: #5B6170;
   --accent: #F5F3FF;
   --accent-foreground: #111827;
   --destructive: #DC2626;
@@ -268,16 +297,36 @@ main.largura {
   --color-destaque: var(--paper-secondary);
   --color-fundo: var(--cor-fundo);
   --color-tinta: var(--paper-text);
-  --color-apagado: #6B7280;
+  --color-apagado: #5B6170;
   --color-linha: var(--border);
   --color-link: var(--paper-link);
-  --color-placeholder: #6B7280;
+  --color-placeholder: #5B6170;
   --color-perigo: var(--paper-danger);
   --color-perigo-fundo: #FEF2F2;
   --color-perigo-tinta: #B91C1C;
   --color-ok: var(--paper-success);
   --color-ok-fundo: #F0FDF4;
   --color-ok-tinta: #15803D;
+  --color-aviso: var(--paper-warning);
+  --color-aviso-fundo: #FFFBEB;
+  --color-aviso-tinta: #B45309;
+  --color-papel: var(--paper-fundo);
+  --color-borda-papel: var(--paper-borda);
+  --color-overlay: var(--paper-overlay);
+  --color-campo: var(--paper-campo-fundo);
+  --color-campo-borda: var(--paper-campo-borda);
+  --color-campo-borda-hover: var(--paper-campo-borda-hover);
+  --color-desabilitado: var(--paper-disabled-fundo);
+  --color-desabilitado-tinta: var(--paper-disabled-tinta);
+  --color-lateral: var(--paper-lateral);
+  --color-lateral-tinta: var(--paper-lateral-tinta);
+  --color-lateral-ativo: var(--paper-lateral-ativo);
+  --color-lateral-borda: var(--paper-lateral-borda);
+  --radius-paper-sm: var(--paper-radius-sm);
+  --radius-paper-md: var(--paper-radius-md);
+  --shadow-paper-sm: var(--paper-sombra-sm);
+  --shadow-paper-md: var(--paper-sombra-md);
+  --shadow-paper-overlay: var(--paper-sombra-overlay);
   --font-heading: var(--font-heading);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

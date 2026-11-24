@@ -10,7 +10,8 @@ const PAPER = {
   secondary: "#8B5CF6",
   surface: "#FFFFFF",
   text: "#111827",
-  fundo: "#F9FAFB",
+  warning: "#D97706",
+  fundo: "#EFEFE4",
   tipografia: {
     sans: { loader: "Roboto", variavel: "--font-sans" },
     heading: { loader: "Montserrat", variavel: "--font-heading" },
@@ -19,6 +20,7 @@ const PAPER = {
 } as const;
 
 const CONTRASTE_AA_TEXTO = 4.5;
+const CONTRASTE_AA_COMPONENTE = 3;
 
 function propriedadesDoBloco(css: string, abertura: string): Map<string, string> {
   const inicio = css.indexOf(abertura);
@@ -95,13 +97,80 @@ describe("tokens Paper no tema", () => {
     expect(hexNormalizado(resolver(tema, "--paper-text"))).toBe(PAPER.text);
     expect(hexNormalizado(resolver(tema, "--primary"))).toBe(PAPER.primary);
     expect(hexNormalizado(resolver(tema, "--foreground"))).toBe(PAPER.text);
+    expect(hexNormalizado(resolver(tema, "--paper-warning"))).toBe(PAPER.warning);
+    expect(hexNormalizado(resolver(tema, "--color-aviso"))).toBe(PAPER.warning);
   });
 
-  it("dado link e placeholder no tema, quando medidos sobre superfície/fundo, então passam WCAG AA de texto", () => {
+  it("dado o fundo de papel, quando resolve o miolo, então fundo e background usam o papel quente", () => {
+    const css = readFileSync(resolve(raiz, "src/app/globals.css"), "utf8");
+    const tema = temaConsumivel(css);
+
+    expect(hexNormalizado(resolver(tema, "--paper-fundo"))).toBe(PAPER.fundo);
+    expect(hexNormalizado(resolver(tema, "--cor-fundo"))).toBe(PAPER.fundo);
+    expect(hexNormalizado(resolver(tema, "--background"))).toBe(PAPER.fundo);
+    expect(hexNormalizado(resolver(tema, "--color-fundo"))).toBe(PAPER.fundo);
+  });
+
+  it("dado raios, sombras, overlay, disabled e lateral, quando lê o tema, então os tokens existem", () => {
+    const css = readFileSync(resolve(raiz, "src/app/globals.css"), "utf8");
+    const tema = temaConsumivel(css);
+
+    expect(resolver(tema, "--radius-paper-sm")).toBe("4px");
+    expect(resolver(tema, "--radius-paper-md")).toBe("8px");
+    for (const nome of [
+      "--shadow-paper-sm",
+      "--shadow-paper-md",
+      "--shadow-paper-overlay",
+      "--color-overlay",
+      "--color-desabilitado",
+      "--color-desabilitado-tinta",
+      "--paper-disabled-opacidade",
+      "--color-lateral",
+      "--color-lateral-tinta",
+      "--color-lateral-ativo",
+      "--color-lateral-borda",
+      "--color-borda-papel",
+    ]) {
+      expect(resolver(tema, nome)).not.toBe("");
+    }
+    expect(hexNormalizado(resolver(tema, "--color-lateral"))).toBe(PAPER.surface);
+  });
+
+  it("dado tintas de estado sobre os fundos de estado, então passam WCAG AA de texto", () => {
+    const css = readFileSync(resolve(raiz, "src/app/globals.css"), "utf8");
+    const tema = temaConsumivel(css);
+    const pares: [string, string][] = [
+      ["--color-perigo-tinta", "--color-perigo-fundo"],
+      ["--color-ok-tinta", "--color-ok-fundo"],
+      ["--color-aviso-tinta", "--color-aviso-fundo"],
+    ];
+
+    for (const [frente, fundo] of pares) {
+      expect(
+        contraste(hexNormalizado(resolver(tema, frente)), hexNormalizado(resolver(tema, fundo))),
+      ).toBeGreaterThanOrEqual(CONTRASTE_AA_TEXTO);
+    }
+  });
+
+  it("dada a borda de campo, quando medida sobre superfície e papel, então passa 3:1 de componente", () => {
+    const css = readFileSync(resolve(raiz, "src/app/globals.css"), "utf8");
+    const tema = temaConsumivel(css);
+
+    for (const nome of ["--color-campo-borda", "--color-campo-borda-hover"]) {
+      const borda = hexNormalizado(resolver(tema, nome));
+      for (const fundo of [PAPER.surface, PAPER.fundo]) {
+        expect(contraste(borda, fundo)).toBeGreaterThanOrEqual(CONTRASTE_AA_COMPONENTE);
+      }
+    }
+  });
+
+  it("dado link, placeholder e texto apagado no tema, quando medidos sobre superfície/fundo, então passam WCAG AA de texto", () => {
     const css = readFileSync(resolve(raiz, "src/app/globals.css"), "utf8");
     const tema = temaConsumivel(css);
     const link = hexNormalizado(resolver(tema, "--color-link"));
     const placeholder = hexNormalizado(resolver(tema, "--color-placeholder"));
+    const apagado = hexNormalizado(resolver(tema, "--color-apagado"));
+    const mutedForeground = hexNormalizado(resolver(tema, "--muted-foreground"));
     const fundos = [PAPER.surface, PAPER.fundo];
 
     expect(hexNormalizado(resolver(tema, "--paper-secondary"))).toBe(PAPER.secondary);
@@ -110,6 +179,8 @@ describe("tokens Paper no tema", () => {
     for (const fundo of fundos) {
       expect(contraste(link, fundo)).toBeGreaterThanOrEqual(CONTRASTE_AA_TEXTO);
       expect(contraste(placeholder, fundo)).toBeGreaterThanOrEqual(CONTRASTE_AA_TEXTO);
+      expect(contraste(apagado, fundo)).toBeGreaterThanOrEqual(CONTRASTE_AA_TEXTO);
+      expect(contraste(mutedForeground, fundo)).toBeGreaterThanOrEqual(CONTRASTE_AA_TEXTO);
     }
   });
 });
