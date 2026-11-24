@@ -16,7 +16,7 @@ function Erro({ mensagem }: { mensagem: string }) {
   const semPermissao = mensagem === MENSAGEM_PAPEL;
   return (
     <div className="dashboard-tela">
-      <h1>Dashboard</h1>
+      <h1>Dashboard financeiro</h1>
       <div className="dashboard-alerta-tela">
         <Aviso tipo="erro" mensagem={mensagem} />
         <Link className="casca-botao" href={semPermissao ? "/" : "/dashboard"}>
@@ -37,18 +37,17 @@ export default async function Page() {
   if (!sessao) {
     return (
       <CascaAberta>
-        <h1>Dashboard</h1>
+        <h1>Dashboard financeiro</h1>
         <p className="casca-texto">Nenhuma sessão aberta.</p>
-        <Link className="casca-botao" href="/login">
-          Entrar
-        </Link>
+        <Link className="casca-botao" href="/login">Entrar</Link>
       </CascaAberta>
     );
   }
 
   let visao: VisaoDashboard;
+  const agora = new Date();
   try {
-    const lida = await obterResumo(dependenciasDashboard(), sessao, null, new Date());
+    const lida = await obterResumo(dependenciasDashboard(), sessao, null, agora);
     if (!lida.ok) return <Erro mensagem={lida.mensagem} />;
     visao = lida.valor;
   } catch (erro) {
@@ -57,12 +56,13 @@ export default async function Page() {
 
   return (
     <div className="dashboard-tela">
-      <h1>Dashboard</h1>
       <Painel
         papel={sessao.usuario.papel}
         resumo={visao.resumo}
+        apresentacao={visao.apresentacao}
         ocultos={visao.ocultos}
         periodoSalvo={visao.periodoSalvo}
+        agora={agora.toISOString()}
       />
     </div>
   );

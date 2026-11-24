@@ -14,7 +14,7 @@ import { sessaoAtual } from "../sessao";
 const SEM_SESSAO = "Nenhuma sessão aberta";
 
 export type Papel = "admin" | "dentista" | "recepcionista";
-export type FormatoExportacao = "pdf" | "excel";
+export type FormatoExportacao = "pdf" | "excel" | "csv";
 
 export type RespostaDashboard = { ok: true } | { ok: false; mensagem: string };
 export type RespostaExportacao =

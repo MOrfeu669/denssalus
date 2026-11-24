@@ -10,6 +10,7 @@ import {
   criarMaterial,
   historico,
   listarMateriais,
+  listarPainel,
   listarMateriaisDaConsulta,
   reabastecer,
   vincularMaterial,
@@ -39,6 +40,35 @@ const ENTRADA: EntradaMaterial = {
 const SETEMBRO = new Date("2026-09-02T12:00:00.000Z");
 const admin = sessao("admin");
 const dentista = sessao("dentista");
+
+describe("painel de estoque", () => {
+  it("dado dois lotes válidos e um material de outra clínica, quando abre o painel, então a validade é a que vence antes e a outra clínica não aparece", async () => {
+    const memoria = new Memoria();
+    memoria.material({ id: "m1", nome: "Resina", quantidadeMinima: 6 });
+    memoria.lote({ id: "l-tarde", materialId: "m1", validade: "2027-08-01", quantidade: 4, criadoEm: "2026-02-01T00:00:00.000Z" });
+    memoria.lote({ id: "l-cedo", materialId: "m1", validade: "2026-12-01", quantidade: 2, criadoEm: "2026-01-01T00:00:00.000Z" });
+    memoria.material({ id: "alheio", clinicaId: OUTRA_CLINICA, nome: "Luvas de outra clínica" });
+    memoria.lote({ id: "l-alheio", materialId: "alheio", validade: "2026-11-01", quantidade: 9 });
+    memoria.movimentacoes.push({
+      id: "mov-1",
+      materialId: "m1",
+      loteId: "l-cedo",
+      tipo: "baixa",
+      quantidade: 1,
+      usuarioId: "ator-admin",
+      agendamentoId: null,
+      registradoEm: "2026-10-20T09:00:00.000Z",
+    });
+
+    const painel = await listarPainel(memoria.deps(), admin, HOJE);
+
+    expect(painel.ok).toBe(true);
+    if (!painel.ok) return;
+    expect(painel.valor.map((item) => item.nome)).toEqual(["Resina"]);
+    expect(painel.valor[0]).toMatchObject({ quantidade: 6, validade: "2026-12-01" });
+    expect(painel.valor[0]?.movimentos.map((item) => item.id)).toEqual(["mov-1"]);
+  });
+});
 
 describe("cadastro e reabastecimento de materiais", () => {
   let memoria: Memoria;
@@ -407,7 +437,7 @@ describe("baixa na conclusão do atendimento", () => {
     );
 
     expect(criticos).toEqual([
-      { materialId: "m-luvas", nome: "Luvas Descartáveis", quantidade: 15 },
+      { materialId: "m-luvas", nome: "Luvas Descartáveis", quantidade: 15, minimo: 20 },
     ]);
   });
 });

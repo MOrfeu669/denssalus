@@ -1,41 +1,48 @@
 "use client";
 
+import { Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { CampoDashboard, ResumoDashboard } from "../../domain/dashboard/tipos";
+import type { ApresentacaoDashboard, CampoDashboard, ResumoDashboard } from "../../domain/dashboard/tipos";
 import { Aviso } from "../aviso";
-import {
-  exportarResumo,
-  salvarPreferencia,
-  type FormatoExportacao,
-  type Papel,
-  type RespostaDashboard,
-} from "./actions";
+import { exportarResumo, salvarPreferencia, type FormatoExportacao, type Papel, type RespostaDashboard } from "./actions";
 import { baixarArquivo } from "./baixar";
-import { Bloco, Valores, data, moeda } from "./blocos";
-import { CamposDoPapel, ROTULOS_CAMPO } from "./campos-papel";
+import { CamposDoPapel } from "./campos-papel";
+import { data, subtituloDashboard } from "./formato";
+import { GraficoDiario } from "./grafico";
+import { EstoqueCritico, Kpis, PorDentista, PorProcedimento, oculto } from "./secoes";
 
 type AvisoTela = { tipo: "erro" | "sucesso"; mensagem: string; quando: number };
+
+const PERIODOS = [
+  ["hoje", "Hoje"],
+  ["7dias", "7 dias"],
+  ["mes", "Mês"],
+] as const;
 
 export function Painel({
   papel,
   resumo,
+  apresentacao,
   ocultos,
   periodoSalvo,
+  agora,
 }: {
   papel: Papel;
   resumo: ResumoDashboard;
+  apresentacao: ApresentacaoDashboard;
   ocultos: CampoDashboard[];
   periodoSalvo: string;
+  agora: string;
 }) {
   const roteador = useRouter();
   const [pendente, setPendente] = useState(false);
   const [aviso, setAviso] = useState<AvisoTela | null>(null);
+  const [personalizado, setPersonalizado] = useState(periodoSalvo.includes("/"));
+  const instante = new Date(agora);
 
   async function executar(acao: () => Promise<RespostaDashboard>, sucesso: string) {
     setPendente(true);
@@ -53,13 +60,22 @@ export function Painel({
     }
   }
 
-  const escolherPeriodo = (periodo: string) =>
-    executar(() => salvarPreferencia(ocultos, periodo), "Período aplicado");
+  function escolherPeriodo(periodo: string) {
+    if (periodo === "personalizado") {
+      setPersonalizado(true);
+      return;
+    }
+    setPersonalizado(false);
+    void executar(() => salvarPreferencia(ocultos, periodo), "Período aplicado");
+  }
 
   function aplicarIntervalo(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     const dados = new FormData(evento.currentTarget);
-    escolherPeriodo(`${String(dados.get("inicio") ?? "")}/${String(dados.get("fim") ?? "")}`);
+    void executar(
+      () => salvarPreferencia(ocultos, `${String(dados.get("inicio") ?? "")}/${String(dados.get("fim") ?? "")}`),
+      "Período aplicado",
+    );
   }
 
   async function exportarComo(formato: FormatoExportacao) {
@@ -77,125 +93,64 @@ export function Painel({
   }
 
   const ocultar = (campo: CampoDashboard) =>
-    executar(() => salvarPreferencia([...ocultos, campo], periodoSalvo), "Bloco ocultado");
-  const bloco = { ocultos, pendente, ocultar };
-  const semDetalhe = resumo.porDentista.length === 0 && resumo.porProcedimento.length === 0;
+    void executar(() => salvarPreferencia([...ocultos, campo], periodoSalvo), "Bloco ocultado");
+  const ativo = personalizado ? "personalizado" : periodoSalvo;
+  const [inicioSalvo, fimSalvo] = periodoSalvo.split("/");
 
   return (
-    <div className="dashboard-painel">
-      {aviso ? <Aviso key={aviso.quando} tipo={aviso.tipo} mensagem={aviso.mensagem} /> : null}
-
-      <section className="dashboard-periodo" aria-labelledby="dashboard-titulo-periodo" aria-busy={pendente}>
-        <Card>
-          <CardContent className="flex flex-col gap-4">
-            <h2 id="dashboard-titulo-periodo">Período</h2>
-            <p className="dashboard-periodo-texto">{`Período: ${data(resumo.periodo.inicio)} a ${data(resumo.periodo.fim)}`}</p>
-            <div className="dashboard-acoes">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10"
-                aria-pressed={periodoSalvo === "mes"}
-                disabled={pendente}
-                onClick={() => escolherPeriodo("mes")}
-              >
-                Mês atual
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10"
-                aria-pressed={periodoSalvo === "7dias"}
-                disabled={pendente}
-                onClick={() => escolherPeriodo("7dias")}
-              >
-                Últimos 7 dias
-              </Button>
-            </div>
-            <form className="dashboard-form dashboard-form-linha" onSubmit={aplicarIntervalo}>
-              <Label className="dashboard-campo">
-                Início
-                <Input name="inicio" type="date" required />
-              </Label>
-              <Label className="dashboard-campo">
-                Fim
-                <Input name="fim" type="date" required />
-              </Label>
-              <Button type="submit" className="h-10 px-4 shadow-paper-sm" disabled={pendente}>
-                Aplicar período
-              </Button>
-            </form>
-            <div className="dashboard-acoes dashboard-exportar">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10"
-                disabled={pendente}
-                onClick={() => exportarComo("pdf")}
-              >
-                Exportar PDF
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10"
-                disabled={pendente}
-                onClick={() => exportarComo("excel")}
-              >
-                Exportar Excel
-              </Button>
-            </div>
-            <p className="dashboard-nota">Ocultar um bloco vale só para a sua visão.</p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <Bloco campo="faturamento" titulo={ROTULOS_CAMPO.faturamento} {...bloco}>
-        <p className="dashboard-numero">{moeda(resumo.faturado)}</p>
-      </Bloco>
-      <Bloco campo="detalhe" titulo={ROTULOS_CAMPO.detalhe} {...bloco}>
-        {semDetalhe ? <p className="dashboard-vazio">Nenhum faturamento no período</p> : null}
-        <Valores
-          titulo="Por dentista"
-          vazio="Nenhum faturamento por dentista no período"
-          itens={resumo.porDentista.map((item) => ({ id: item.dentistaId, valor: item.valor }))}
-        />
-        <Valores
-          titulo="Por procedimento"
-          vazio="Nenhum faturamento por procedimento no período"
-          itens={resumo.porProcedimento.map((item) => ({
-            id: item.procedimentoId,
-            valor: item.valor,
-          }))}
-        />
-      </Bloco>
-      <Bloco campo="recebido" titulo={ROTULOS_CAMPO.recebido} {...bloco}>
-        <p className="dashboard-numero">{moeda(resumo.recebido)}</p>
-      </Bloco>
-      <Bloco campo="despesa" titulo={ROTULOS_CAMPO.despesa} {...bloco}>
-        <p className="dashboard-numero">{moeda(resumo.despesaProtese)}</p>
-        <p className="dashboard-nota">Fora do faturamento.</p>
-      </Bloco>
-      <Bloco campo="ocupacao" titulo={ROTULOS_CAMPO.ocupacao} {...bloco}>
-        <p className="dashboard-numero">{`${resumo.ocupacao}%`}</p>
-      </Bloco>
-      <Bloco campo="estoque" titulo={ROTULOS_CAMPO.estoque} {...bloco}>
-        {resumo.estoque.length === 0 ? (
-          <p className="dashboard-vazio">Nenhum material abaixo do mínimo</p>
-        ) : (
-          <ul className="dashboard-alertas">
-            {resumo.estoque.map((item) => (
-              <li key={item.materialId} className="dashboard-alerta abaixo">
-                <Badge variant="destructive" className="border-perigo bg-card text-perigo-tinta">
-                  Abaixo do mínimo
-                </Badge>
-                <span>{`${item.nome} — ${item.quantidade} unidades restantes`}</span>
-              </li>
+    <div className="dashboard-painel" aria-busy={pendente}>
+      <header className="dashboard-cabeca">
+        <div>
+          <h1>Dashboard financeiro</h1>
+          <p className="dashboard-subtitulo">{subtituloDashboard(resumo.periodo.inicio, Number.isNaN(instante.getTime()) ? new Date() : instante)}</p>
+        </div>
+        <div className="dashboard-comandos">
+          <div className="dashboard-segmento" role="group" aria-label="Período">
+            {PERIODOS.map(([id, rotulo]) => (
+              <button key={id} type="button" className="papel-botao" aria-pressed={ativo === id} disabled={pendente} onClick={() => escolherPeriodo(id)}>
+                {rotulo}
+              </button>
             ))}
-          </ul>
+            <button type="button" className="papel-botao" aria-pressed={ativo === "personalizado"} disabled={pendente} onClick={() => escolherPeriodo("personalizado")}>
+              Personalizado
+            </button>
+          </div>
+          <button type="button" className="papel-botao papel-botao-secundario" disabled={pendente} onClick={() => exportarComo("csv")}>
+            <Download aria-hidden="true" /> Exportar CSV
+          </button>
+          <button type="button" className="papel-botao papel-botao-fantasma" disabled={pendente} onClick={() => exportarComo("pdf")}>PDF</button>
+          <button type="button" className="papel-botao papel-botao-fantasma" disabled={pendente} onClick={() => exportarComo("excel")}>Excel</button>
+        </div>
+      </header>
+      {aviso ? <Aviso key={aviso.quando} tipo={aviso.tipo} mensagem={aviso.mensagem} /> : null}
+      <p className="dashboard-periodo-texto">{`Período: ${data(resumo.periodo.inicio)} a ${data(resumo.periodo.fim)}`}</p>
+      {personalizado ? (
+        <form className="dashboard-form dashboard-form-linha" onSubmit={aplicarIntervalo}>
+          <Label className="dashboard-campo">
+            Início
+            <Input name="inicio" type="date" required defaultValue={inicioSalvo} aria-invalid={aviso?.tipo === "erro" ? true : undefined} />
+          </Label>
+          <Label className="dashboard-campo">
+            Fim
+            <Input name="fim" type="date" required defaultValue={fimSalvo} />
+          </Label>
+          <Button type="submit" className="h-10 px-4" disabled={pendente}>Aplicar período</Button>
+        </form>
+      ) : null}
+      <Kpis resumo={resumo} apresentacao={apresentacao} ocultos={ocultos} ocultar={ocultar} pendente={pendente} />
+      <div className="dashboard-meio">
+        {oculto(ocultos, "faturamento") ? null : (
+          <section className="dashboard-card" aria-labelledby="dashboard-diario">
+            <h2 id="dashboard-diario" className="dashboard-sr">Faturamento diário</h2>
+            <GraficoDiario dias={apresentacao.diario} meta={apresentacao.metaDiaria} hoje={agora.slice(0, 10)} />
+          </section>
         )}
-      </Bloco>
-
+        {oculto(ocultos, "detalhe") ? null : <PorDentista apresentacao={apresentacao} pendente={pendente} ocultar={ocultar} />}
+      </div>
+      <div className="dashboard-meio">
+        {oculto(ocultos, "detalhe") ? null : <PorProcedimento apresentacao={apresentacao} />}
+        <EstoqueCritico resumo={resumo} apresentacao={apresentacao} ocultos={ocultos} pendente={pendente} ocultar={ocultar} />
+      </div>
       {papel === "admin" ? <CamposDoPapel pendente={pendente} executar={executar} /> : null}
     </div>
   );
