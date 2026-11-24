@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { pedirRecuperacao } from "../auth/actions";
 import { estadoVazio } from "../formulario";
-import { IconeEmail } from "../login/icones";
 import { Alerta } from "./alerta";
 import { TEXTO_RECUPERAR as T } from "./texto";
 
@@ -13,10 +15,10 @@ export function FormRecuperar() {
   const sucesso = estado.status === "sucesso";
 
   return (
-    <form className="entrar-form" action={acao} aria-busy={pendente}>
-      <header className="entrar-cabecalho">
-        <h1 className="entrar-titulo">{T.titulo}</h1>
-        <p className="entrar-subtitulo">{T.subtitulo}</p>
+    <form className="recuperar-form" action={acao} aria-busy={pendente}>
+      <header className="recuperar-cabecalho">
+        <h1 className="recuperar-titulo">{T.titulo}</h1>
+        <p className="recuperar-subtitulo">{T.subtitulo}</p>
       </header>
 
       {pendente ? null : (
@@ -24,30 +26,32 @@ export function FormRecuperar() {
       )}
 
       {sucesso ? null : (
-        <div className="entrar-campos">
-          <div className="entrar-campo">
-            <label htmlFor="email">{T.rotuloEmail}</label>
-            <div className="entrar-caixa">
-              <IconeEmail />
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                placeholder={T.placeholderEmail}
-                required
-                readOnly={pendente}
-              />
-            </div>
+        <div className="recuperar-campos">
+          <div className="recuperar-campo">
+            <Label htmlFor="email">{T.rotuloEmail}</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="username"
+              placeholder={T.placeholderEmail}
+              required
+              readOnly={pendente}
+            />
           </div>
         </div>
       )}
 
       {sucesso ? null : (
-        <button className="entrar-botao" type="submit" disabled={pendente}>
-          {pendente ? <span className="entrar-spinner" aria-hidden="true" /> : null}
+        <Button type="submit" className="h-11 w-full text-base font-semibold" disabled={pendente}>
+          {pendente ? (
+            <span
+              className="size-3.5 animate-spin rounded-full border-2 border-transparent border-t-current border-r-current motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          ) : null}
           {pendente ? T.enviando : T.enviar}
-        </button>
+        </Button>
       )}
 
       <Link className="recuperar-voltar" href="/login">

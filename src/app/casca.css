@@ -3,10 +3,6 @@
   outline-offset: 2px;
 }
 
-.casca .casca-lateral :focus-visible {
-  outline-color: #fff;
-}
-
 .casca .casca-miolo h1 {
   margin: 0 0 var(--paper-space-1);
   font-family: var(--font-heading), Montserrat, sans-serif;
@@ -71,7 +67,7 @@
   place-items: center;
   border-radius: 50%;
   background: var(--muted);
-  color: #4b5563;
+  color: var(--color-apagado);
   font-size: 13px;
   font-weight: 600;
 }
@@ -83,7 +79,7 @@
 
 .casca .casca-passo-concluido .casca-passo-numero {
   background: var(--color-ok-tinta);
-  color: #fff;
+  color: var(--primary-foreground);
 }
 
 .casca .casca-passo-estado {
@@ -100,7 +96,7 @@
 
 .casca .casca-passo-atual .casca-passo-numero {
   background: var(--paper-primary);
-  color: #fff;
+  color: var(--primary-foreground);
 }
 
 .casca a.casca-botao {
@@ -114,7 +110,7 @@
   border: 0;
   border-radius: var(--paper-radius-md);
   background: var(--paper-primary);
-  color: #fff;
+  color: var(--primary-foreground);
   font-size: 15px;
   line-height: 24px;
   font-weight: 600;
@@ -242,7 +238,7 @@
   border: 0;
   border-radius: var(--paper-radius-md);
   background: var(--paper-primary);
-  color: #fff;
+  color: var(--primary-foreground);
   font-weight: 600;
   padding: var(--paper-space-3) var(--paper-space-4);
 }
@@ -307,7 +303,7 @@
 
 .casca .dente[aria-pressed="true"] {
   background: var(--paper-primary);
-  color: #fff;
+  color: var(--primary-foreground);
 }
 
 .casca .prontuario-nav {

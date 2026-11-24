@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useActionState, useState, type FormEvent } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { definirSenha } from "../../auth/actions";
 import { estadoVazio } from "../../formulario";
-import { IconeCadeado } from "../../login/icones";
 import { Alerta } from "../alerta";
 import { confirmacaoConfere } from "../confirmacao";
 import { TEXTO_NOVA_SENHA as T } from "../texto";
@@ -34,10 +37,10 @@ export function FormNovaSenha() {
     : { status: estado.status, mensagem: estado.mensagem, quando: estado.quando };
 
   return (
-    <form className="entrar-form" action={acao} onSubmit={aoEnviar} aria-busy={pendente}>
-      <header className="entrar-cabecalho">
-        <h1 className="entrar-titulo">{T.titulo}</h1>
-        <p className="entrar-subtitulo">{T.subtitulo}</p>
+    <form className="recuperar-form" action={acao} onSubmit={aoEnviar} aria-busy={pendente}>
+      <header className="recuperar-cabecalho">
+        <h1 className="recuperar-titulo">{T.titulo}</h1>
+        <p className="recuperar-subtitulo">{T.subtitulo}</p>
       </header>
 
       {pendente ? null : (
@@ -45,51 +48,53 @@ export function FormNovaSenha() {
       )}
 
       {sucesso ? null : (
-        <div className="entrar-campos">
-          <div className="entrar-campo">
-            <label htmlFor="senha">{T.rotuloSenha}</label>
-            <div className="entrar-caixa">
-              <IconeCadeado />
-              <input
-                id="senha"
-                name="senha"
-                type="password"
-                autoComplete="new-password"
-                placeholder={T.placeholderSenha}
-                minLength={6}
-                required
-                readOnly={pendente}
-              />
-            </div>
+        <div className="recuperar-campos">
+          <div className="recuperar-campo">
+            <Label htmlFor="senha">{T.rotuloSenha}</Label>
+            <Input
+              id="senha"
+              name="senha"
+              type="password"
+              autoComplete="new-password"
+              placeholder={T.placeholderSenha}
+              minLength={6}
+              required
+              readOnly={pendente}
+            />
           </div>
-          <div className="entrar-campo">
-            <label htmlFor="confirmacao">{T.rotuloConfirmacao}</label>
-            <div className="entrar-caixa">
-              <IconeCadeado />
-              <input
-                id="confirmacao"
-                name="confirmacao"
-                type="password"
-                autoComplete="new-password"
-                placeholder={T.placeholderConfirmacao}
-                minLength={6}
-                required
-                readOnly={pendente}
-              />
-            </div>
+          <div className="recuperar-campo">
+            <Label htmlFor="confirmacao">{T.rotuloConfirmacao}</Label>
+            <Input
+              id="confirmacao"
+              name="confirmacao"
+              type="password"
+              autoComplete="new-password"
+              placeholder={T.placeholderConfirmacao}
+              minLength={6}
+              required
+              readOnly={pendente}
+            />
           </div>
         </div>
       )}
 
       {sucesso ? (
-        <Link className="entrar-botao" href="/login">
+        <Link
+          className={cn(buttonVariants({ variant: "default" }), "h-11 w-full text-base font-semibold")}
+          href="/login"
+        >
           {T.entrar}
         </Link>
       ) : (
-        <button className="entrar-botao" type="submit" disabled={pendente}>
-          {pendente ? <span className="entrar-spinner" aria-hidden="true" /> : null}
+        <Button type="submit" className="h-11 w-full text-base font-semibold" disabled={pendente}>
+          {pendente ? (
+            <span
+              className="size-3.5 animate-spin rounded-full border-2 border-transparent border-t-current border-r-current motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          ) : null}
           {pendente ? T.salvando : T.salvar}
-        </button>
+        </Button>
       )}
     </form>
   );

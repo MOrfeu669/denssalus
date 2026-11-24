@@ -108,18 +108,16 @@ describe("botão Paper", () => {
     expect(classes).not.toContain("text-tinta");
   });
 
-  it("dado o botão de sair da casca, quando a tela cobre o contorno, então o hover da lateral permanece", () => {
-    const classes = cn(
-      buttonVariants({ variant: "outline" }),
-      "h-10 w-full rounded-md border-nevoa bg-transparent text-sm font-semibold text-white shadow-none hover:bg-sidebar-accent hover:text-white",
-    );
+  it("dado o botão de sair da lateral clara, quando usa o contorno Paper, então o texto escuro permanece", () => {
+    const classes = cn(buttonVariants({ variant: "outline" }), "h-10 w-full");
     const lista = classes.split(/\s+/);
-    expect(lista).toContain("bg-transparent");
-    expect(lista).toContain("text-white");
-    expect(lista).toContain("hover:bg-sidebar-accent");
-    expect(lista).not.toContain("hover:bg-papel");
-    expect(lista).not.toContain("bg-card");
-    expect(lista).not.toContain("text-tinta");
+    expect(lista).toContain("h-10");
+    expect(lista).toContain("border-borda-papel");
+    expect(lista).toContain("text-tinta");
+    expect(lista).toContain("hover:bg-papel");
+    expect(lista).not.toContain("text-white");
+    expect(lista).not.toContain("hover:bg-sidebar-accent");
+    expect(lista).not.toContain("bg-transparent");
   });
 
   it("dado o botão desabilitado ou inválido, quando ele renderiza, então o estado vai no elemento", () => {
