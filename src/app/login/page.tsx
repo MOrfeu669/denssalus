@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <main
       className={cn(
-        "m-0 grid min-h-screen max-w-none grid-cols-2 rounded-none border-0 bg-fundo p-0 text-tinta max-[960px]:flex max-[960px]:flex-col",
+        "[--cor-login-marca:#0f433d] [--cor-login-acao:#158172] [--cor-login-nevoa:#d3f3ec] [--cor-login-destaque:#3fbba8] [--cor-login-link:#14665b] m-0 grid min-h-screen max-w-none grid-cols-2 rounded-none border-0 bg-fundo p-0 text-tinta max-[960px]:flex max-[960px]:flex-col",
         inter.className,
       )}
     >
