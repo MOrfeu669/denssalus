@@ -112,6 +112,7 @@ async function conteudo(query: Query, sessao: Sessao) {
           dentistaId={filtro.dentistaId}
           cadeiraId={filtro.cadeiraId}
           nomes={nomes}
+          papel={sessao.usuario.papel}
           opcoes={{
             dentistas: dentistas.map(({ id, nome }) => ({ id, nome })),
             cadeiras,

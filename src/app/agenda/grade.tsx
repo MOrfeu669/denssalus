@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AgendamentoNaGrade, BloqueioAgenda, Grade as GradeAgenda } from "../../domain/agendamento/tipos";
+import type { Papel } from "../../domain/auth/tipos";
 import { pedirOverlay } from "../agendamentos/pedido";
 import { vazioDaGrade } from "../agendamentos/texto";
 import {
@@ -44,6 +45,7 @@ type Props = {
   dentistaId: string | null;
   cadeiraId: string | null;
   nomes: Nomes;
+  papel: Papel;
   opcoes: {
     dentistas: { id: string; nome: string }[];
     cadeiras: { id: string; identificacao: string }[];
@@ -52,7 +54,7 @@ type Props = {
 
 const diaDe = (iso: string) => iso.slice(0, 10);
 
-export function Grade({ grade, data, visaoInicial, dentistaId, cadeiraId, nomes, opcoes }: Props) {
+export function Grade({ grade, data, visaoInicial, dentistaId, cadeiraId, nomes, papel, opcoes }: Props) {
   const router = useRouter();
   const [visao, setVisao] = useState<VisaoGrade>(visaoInicial);
   useEffect(() => {
@@ -195,6 +197,7 @@ export function Grade({ grade, data, visaoInicial, dentistaId, cadeiraId, nomes,
             ocupados={ocupados}
             espera={espera}
             nomes={nomes}
+            papel={papel}
             onEscolher={(iso) => filtrar(dentistaId ?? "", cadeiraId ?? "", iso)}
           />
         ) : null}

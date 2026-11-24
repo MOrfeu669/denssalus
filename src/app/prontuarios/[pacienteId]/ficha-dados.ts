@@ -317,13 +317,6 @@ export function hrefAgendar(pacienteId: string): string {
   return `/agenda?${new URLSearchParams({ paciente: pacienteId })}`;
 }
 
-export function hrefRemarcar(pacienteId: string, inicio: string): string {
-  const params = new URLSearchParams({ paciente: pacienteId });
-  const data = /^(\d{4}-\d{2}-\d{2})/.exec(inicio)?.[1];
-  if (data) params.set("data", data);
-  return `/agenda?${params}`;
-}
-
 export function textoDoLembrete(inicio: string, canal: Canal | null, agora: Date): string {
   if (!canal) return "Este paciente não tem canal preferido. O lembrete automático não sai.";
   const quando = instanteDe(inicio);

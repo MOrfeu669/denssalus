@@ -9,7 +9,6 @@ import {
   facesDoNome,
   fileirasDeciduas,
   hrefAgendar,
-  hrefRemarcar,
   iniciais,
   linhaMeta,
   nomeDoDente,
@@ -20,6 +19,7 @@ import {
   saldoDevedor,
   textoDoLembrete,
 } from "../../src/app/prontuarios/[pacienteId]/ficha-dados";
+import { horarioRemarcado } from "../../src/app/prontuarios/[pacienteId]/remarcar-horario";
 
 const HOJE = new Date(2026, 10, 24, 12, 0, 0);
 
@@ -168,7 +168,15 @@ describe("ficha do paciente", () => {
     );
     expect(proxima?.id).toBe("futura");
     expect(hrefAgendar("p1")).toBe("/agenda?paciente=p1");
-    expect(hrefRemarcar("p1", "2026-11-26T14:00")).toBe("/agenda?paciente=p1&data=2026-11-26");
+    expect(horarioRemarcado("2026-11-26T14:00", "2026-11-26T14:40", "2026-12-02", "09:15")).toEqual({
+      inicio: "2026-12-02T09:15",
+      fim: "2026-12-02T09:55",
+    });
+    expect(horarioRemarcado("2026-11-26T23:30", "2026-11-27T00:00", "2026-11-28", "23:45")).toEqual({
+      inicio: "2026-11-28T23:45",
+      fim: "2026-11-29T00:15",
+    });
+    expect(horarioRemarcado("2026-11-26T14:00", "2026-11-26T14:40", "2026-02-31", "09:00")).toBeNull();
     expect(denteMaisRecente([
       { dente: 15, status: "confirmado", registradoEm: "2026-10-01T00:00:00.000Z" },
       { dente: 36, status: "confirmado", registradoEm: "2026-11-24T00:00:00.000Z" },

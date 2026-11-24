@@ -190,6 +190,7 @@ export async function mover(
     });
     if (!resultado.ok) return resultado;
     revalidatePath("/agenda");
+    revalidatePath(`/prontuarios/${resultado.valor.pacienteId}`);
     return { ok: true };
   } catch (causa) {
     return { ok: false, mensagem: falha(causa).mensagem };

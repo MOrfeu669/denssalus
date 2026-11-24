@@ -300,7 +300,6 @@ export function Vista({
           }
           canal={canalPreferido(paciente)}
           agoraIso={agora.toISOString()}
-          pacienteId={pacienteId}
           plano={plano ? { titulo: "Plano de tratamento", itens } : null}
           financeiro={financeiro}
           mostrarPlano={podeEscrever}

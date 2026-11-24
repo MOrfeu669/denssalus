@@ -23,6 +23,7 @@ import { MENSAGEM_REGISTROS_CONFIRMADOS } from "../../domain/odontograma/tipos";
 import { rotuloStatus, varianteStatus } from "../agenda/rotulo";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { bloquear, cancelar, chegar, criar, emergencia, iniciar } from "./actions";
+import { podeIniciarAtendimento } from "./permissao-atendimento";
 import { marcar } from "../retornos/actions";
 import { registrarEvolucao } from "../prontuarios/[pacienteId]/actions";
 import { FormularioMarcarRetorno } from "../retornos/form";
@@ -516,12 +517,8 @@ function podeIniciar(
   usuarioId: string,
   dentistas: OpcoesAgendamento["dentistas"],
 ): boolean {
-  const aberto = agendamento.status === "agendado" || agendamento.status === "em_espera";
-  if (!aberto) return false;
-  if (papel === "admin") return true;
-  return dentistas.some(
-    (dentista) => dentista.id === agendamento.dentistaId && dentista.usuarioId === usuarioId,
-  );
+  const dentista = dentistas.find((item) => item.id === agendamento.dentistaId);
+  return podeIniciarAtendimento(agendamento.status, papel, usuarioId, dentista?.usuarioId ?? null);
 }
 
 // Uma mensagem por vez: a mais recente. `detalhe` guarda id para a tela, não texto para a pessoa.

@@ -10,7 +10,7 @@ Mostrar o prontuário no visual da ficha: cabeçalho com alertas, abas e odontog
 - Alertas fixos lidos da anamnese já gravada: linha que começa com "Alergia" ou "Condição". Débito em aberto no mesmo cabeçalho.
 - Abas das seções que o papel já pode ver. A lateral resume alertas, próxima consulta, plano e financeiro.
 - Odontograma permanente com cinco faces (V, D, L, M, O). A cor da face sai do nome do procedimento confirmado ou do item pendente do plano. A decídua é só visual.
-- Botões da referência ligados ao que já existe: agendar e remarcar abrem a agenda com o paciente; registrar evolução e registrar procedimento usam os formulários atuais; ver todos expande os registros.
+- Botões da referência ligados ao que já existe: agendar abre a agenda com o paciente; remarcar move o horário do agendamento existente; registrar evolução e registrar procedimento usam os formulários atuais; ver todos expande os registros.
 
 ## Fora de escopo
 

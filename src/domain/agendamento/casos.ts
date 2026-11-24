@@ -237,7 +237,9 @@ export async function iniciarAtendimento(
     return { ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO };
   }
 
-  if (ator.usuario.papel !== "admin") {
+  if (ator.usuario.papel === "recepcionista") {
+    if (atual.status !== "em_espera") return { ok: false, mensagem: MENSAGEM_PAPEL };
+  } else if (ator.usuario.papel !== "admin") {
     const dentista = await deps.dentistas.buscarPorId(atual.dentistaId);
     const responsavel = ator.usuario.papel === "dentista" && dentista?.usuarioId === ator.usuario.id;
     if (!responsavel) return { ok: false, mensagem: MENSAGEM_PAPEL };

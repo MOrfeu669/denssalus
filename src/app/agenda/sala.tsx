@@ -4,16 +4,20 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import type { AgendamentoNaGrade } from "../../domain/agendamento/tipos";
+import type { Papel } from "../../domain/auth/tipos";
 import { iniciar } from "../agendamentos/actions";
+import { exibeChamar } from "../agendamentos/permissao-atendimento";
 import { estadoVazio } from "../formulario";
 import { iniciais } from "./apresentacao";
 
 export function SalaEspera({
   itens,
   nomes,
+  papel,
 }: {
   itens: AgendamentoNaGrade[];
   nomes: { pacientes: Record<string, string>; dentistas: Record<string, string> };
+  papel: Papel;
 }) {
   const roteador = useRouter();
   const alertaRef = useRef<HTMLParagraphElement>(null);
@@ -71,12 +75,14 @@ export function SalaEspera({
                     {dentista} · {hora}
                   </span>
                 </span>
-                <form action={acao}>
-                  <input type="hidden" name="id" value={item.id} />
-                  <Button type="submit" className="agenda-chamar" disabled={pendente}>
-                    {pendente ? "Chamando…" : "Chamar"}
-                  </Button>
-                </form>
+                {exibeChamar(papel) ? (
+                  <form action={acao}>
+                    <input type="hidden" name="id" value={item.id} />
+                    <Button type="submit" className="agenda-chamar" disabled={pendente}>
+                      {pendente ? "Chamando…" : "Chamar"}
+                    </Button>
+                  </form>
+                ) : null}
               </li>
             );
           })}

@@ -22,7 +22,7 @@ A Server Action não contorna estas invariantes. O detalhe fica na spec dona.
 
 - Um usuário tem um papel (`admin`, `dentista` ou `recepcionista`) e uma clínica. O Admin pode o que o Dentista pode. Dados clínicos pertencem à clínica; remover usuário só remove o vínculo de permissão.
 - Paciente não é usuário. Usuário de uma clínica não lê nem escreve dado de outra.
-- Agendamento nasce `agendado`. Ciclo: `agendado` → `em_espera` (opcional) → `iniciado` → `concluido`, com `cancelado` terminal. Só o dentista responsável, ou o Admin, marca `iniciado`. Salvar a Evolução conclui o atendimento.
+- Agendamento nasce `agendado`. Ciclo: `agendado` → `em_espera` (opcional) → `iniciado` → `concluido`, com `cancelado` terminal. O dentista responsável, ou o Admin, marca `iniciado`. A recepcionista marca `iniciado` só quando o paciente já está em espera. Salvar a Evolução conclui o atendimento.
 - Dois dentistas não ocupam a mesma cadeira no mesmo horário. O paciente não tem dois agendamentos ativos no mesmo horário, salvo emergência retroativa. As duas escritas conflitantes não podem as duas persistir.
 - Cadeira inativa, dentista inativo e dia fora de `dias_atendimento` bloqueiam agendamento novo. Emergência retroativa ignora essas validações. Desativar cadeira, remover dentista ou mudar o horário não cancela o que já estava marcado: o registro ganha alerta.
 - Não há reserva de material. A baixa ocorre na conclusão do atendimento (salvar a Evolução), em FEFO. Registrar procedimento no dente não baixa estoque.

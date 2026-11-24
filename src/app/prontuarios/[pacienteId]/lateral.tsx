@@ -1,11 +1,11 @@
 import { AlertTriangle, Check } from "lucide-react";
-import Link from "next/link";
 import { BadgeStatus } from "@/components/ui/badge";
 import type { Agendamento } from "../../../domain/agendamento/tipos";
 import type { Canal } from "../../../domain/paciente/tipos";
 import type { AlertaClinico, ItemVisual } from "./ficha-dados";
-import { hrefRemarcar, indiceEtapaAtual, moeda, rotuloConsulta } from "./ficha-dados";
+import { indiceEtapaAtual, moeda, rotuloConsulta } from "./ficha-dados";
 import { BotaoLembrete } from "./lembrete";
+import { RemarcarConsulta } from "./remarcar";
 
 export function LateralFicha({
   alertas,
@@ -14,7 +14,6 @@ export function LateralFicha({
   procedimento,
   canal,
   agoraIso,
-  pacienteId,
   plano,
   financeiro,
   mostrarPlano,
@@ -25,7 +24,6 @@ export function LateralFicha({
   procedimento: string | null;
   canal: Canal | null;
   agoraIso: string;
-  pacienteId: string;
   plano: { titulo: string; itens: ItemVisual[] } | null;
   financeiro: {
     pago: number;
@@ -74,7 +72,6 @@ export function LateralFicha({
         procedimento={procedimento}
         canal={canal}
         agoraIso={agoraIso}
-        pacienteId={pacienteId}
       />
 
       {mostrarPlano ? (
@@ -130,14 +127,12 @@ function Consulta({
   procedimento,
   canal,
   agoraIso,
-  pacienteId,
 }: {
   consulta: Agendamento | null;
   nomes: { dentista: string | null; cadeira: string | null };
   procedimento: string | null;
   canal: Canal | null;
   agoraIso: string;
-  pacienteId: string;
 }) {
   return (
     <section className="rounded-paper-md border border-borda-papel bg-card p-5 shadow-paper-sm" aria-labelledby="proxima-consulta">
@@ -154,7 +149,6 @@ function Consulta({
           procedimento={procedimento}
           canal={canal}
           agoraIso={agoraIso}
-          pacienteId={pacienteId}
         />
       ) : (
         <p className="mt-3 mb-0 text-sm text-paper-ink-2">Nenhuma consulta agendada.</p>
@@ -169,14 +163,12 @@ function ConsultaMarcada({
   procedimento,
   canal,
   agoraIso,
-  pacienteId,
 }: {
   consulta: Agendamento;
   nomes: { dentista: string | null; cadeira: string | null };
   procedimento: string | null;
   canal: Canal | null;
   agoraIso: string;
-  pacienteId: string;
 }) {
   const rotulo = rotuloConsulta(consulta.inicio, consulta.fim);
   const detalhe = [nomes.dentista ?? "Dentista indisponível", nomes.cadeira ? `Cadeira ${nomes.cadeira}` : null]
@@ -196,12 +188,12 @@ function ConsultaMarcada({
         </div>
       </div>
       <div className="mt-4 flex gap-2">
-        <Link
-          href={hrefRemarcar(pacienteId, consulta.inicio)}
-          className="inline-flex h-8 flex-1 items-center justify-center rounded-paper-sm border border-borda-papel bg-card px-2 text-[13px] font-medium text-tinta no-underline hover:bg-papel"
-        >
-          Remarcar
-        </Link>
+        <RemarcarConsulta
+          agendamentoId={consulta.id}
+          dentistaId={consulta.dentistaId}
+          inicio={consulta.inicio}
+          fim={consulta.fim}
+        />
         <BotaoLembrete inicio={consulta.inicio} canal={canal} agoraIso={agoraIso} />
       </div>
     </>

@@ -632,6 +632,40 @@ describe("criar agendamento", () => {
     expect(memoria.agendamentos.get("a1")).toEqual(agendamento);
   });
 
+  it("dado um paciente na sala de espera, quando a recepcionista chama, então o atendimento fica iniciado", async () => {
+    memoria.semearAgendamento({ id: "a1", status: "em_espera" });
+    const ator = sessao("recepcionista");
+
+    const resultado = await iniciarAtendimento(memoria.deps(), ator, "a1");
+
+    expect(resultado.ok && resultado.valor).toMatchObject({
+      status: "iniciado",
+      iniciadoPor: ator.usuario.id,
+      clinicaId: CLINICA_ID,
+    });
+    expect(memoria.agendamentos.size).toBe(1);
+    expect(memoria.agendamentos.get("a1")?.status).toBe("iniciado");
+  });
+
+  it("dado um paciente de outra clínica na sala de espera, quando a recepcionista chama, então não encontra e nada muda", async () => {
+    const alheio = memoria.semearAgendamento({ id: "alheio", clinicaId: OUTRA_CLINICA, status: "em_espera" });
+
+    const resultado = await iniciarAtendimento(memoria.deps(), sessao("recepcionista"), "alheio");
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO });
+    expect(memoria.agendamentos.get("alheio")).toEqual(alheio);
+  });
+
+  it("dado o agendamento em espera do Dr. Carlos, quando outro dentista chama, então recebe a mensagem de papel", async () => {
+    memoria.semearAgendamento({ id: "a1", status: "em_espera" });
+
+    const resultado = await iniciarAtendimento(memoria.deps(), sessao("dentista", true, USUARIO_ANA), "a1");
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_PAPEL });
+    expect(memoria.agendamentos.get("a1")?.status).toBe("em_espera");
+    expect(memoria.agendamentos.get("a1")?.iniciadoPor).toBeNull();
+  });
+
   it("dado o agendamento do Dr. Carlos, quando outro dentista inicia, então recebe a mensagem de papel", async () => {
     memoria.semearAgendamento({ id: "a1" });
 
@@ -939,6 +973,83 @@ describe("criar agendamento", () => {
     });
 
     expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_CADEIRA_OCUPADA });
+    expect(memoria.agendamentos.get(criado.valor.id)?.inicio).toBe(INICIO);
+  });
+
+  it("dado a consulta na ficha, quando remarca o horário, então o mesmo agendamento muda e não nasce outro", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("recepcionista"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("recepcionista"), {
+      id: criado.valor.id,
+      inicio: "2026-10-16T09:00",
+      fim: "2026-10-16T09:30",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado.ok).toBe(true);
+    expect(memoria.agendamentos.size).toBe(1);
+    expect([...memoria.agendamentos.keys()]).toEqual([criado.valor.id]);
+    expect(memoria.agendamentos.get(criado.valor.id)).toMatchObject({
+      inicio: "2026-10-16T09:00",
+      fim: "2026-10-16T09:30",
+      pacienteId: PACIENTE_JOAO,
+      clinicaId: CLINICA_ID,
+      status: "agendado",
+    });
+  });
+
+  it("dado a cadeira ocupada no horário novo, quando remarca na ficha, então bloqueia e o horário original permanece", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("admin"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+    await criarAgendamento(memoria.deps(), sessao("admin"), {
+      ...ENTRADA,
+      pacienteId: PACIENTE_MARIA,
+      dentistaId: DENTISTA_ANA,
+      inicio: "2026-10-16T11:00",
+      fim: "2026-10-16T11:30",
+    });
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("recepcionista"), {
+      id: criado.valor.id,
+      inicio: "2026-10-16T11:00",
+      fim: "2026-10-16T11:30",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_CADEIRA_OCUPADA });
+    expect(memoria.agendamentos.size).toBe(2);
+    expect(memoria.agendamentos.get(criado.valor.id)?.inicio).toBe(INICIO);
+  });
+
+  it("dado um agendamento de outra clínica, quando remarca na ficha, então não encontra e nada muda", async () => {
+    const alheio = memoria.semearAgendamento({ id: "alheio", clinicaId: OUTRA_CLINICA });
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("admin"), {
+      id: "alheio",
+      inicio: "2026-10-16T09:00",
+      fim: "2026-10-16T09:30",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_AGENDAMENTO_NAO_ENCONTRADO });
+    expect(memoria.agendamentos.get("alheio")).toEqual(alheio);
+    expect(memoria.agendamentos.size).toBe(1);
+  });
+
+  it("dado um usuário inativo, quando remarca na ficha, então recebe a mensagem de papel e nada muda", async () => {
+    const criado = await criarAgendamento(memoria.deps(), sessao("admin"), ENTRADA);
+    if (!criado.ok) throw new Error(criado.mensagem);
+
+    const resultado = await moverAgendamento(memoria.deps(), sessao("recepcionista", false), {
+      id: criado.valor.id,
+      inicio: "2026-10-16T09:00",
+      fim: "2026-10-16T09:30",
+      dentistaId: DENTISTA_CARLOS,
+    });
+
+    expect(resultado).toEqual({ ok: false, mensagem: MENSAGEM_PAPEL });
+    expect(memoria.agendamentos.size).toBe(1);
     expect(memoria.agendamentos.get(criado.valor.id)?.inicio).toBe(INICIO);
   });
 
