@@ -2,10 +2,25 @@
 
 import { ChevronDown, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useActionState, useEffect, useMemo, useRef, useState } from "react";
 import type { Procedimento } from "../../domain/procedimento/tipos";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrar, editar, excluir } from "./actions";
+import { AvisoLocal } from "./aviso";
+import { Campos, valorDe } from "./campos";
 import { filtrarProcedimentos, paginaDe } from "./filtrar";
 import { VinculoMateriais, type MaterialOpcao } from "./materiais";
 import { NOTA_ESTIMATIVA } from "./texto";
@@ -26,8 +41,7 @@ export function Procedimentos({
   cadastroAberto?: boolean;
 }) {
   const roteador = useRouter();
-  const botaoRef = useRef<HTMLButtonElement>(null);
-  const painelRef = useRef<HTMLElement>(null);
+  const nomeRef = useRef<HTMLInputElement>(null);
   const [cadastro, acaoCadastrar, pendenteCadastrar] = useActionState(cadastrar, estadoVazio);
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [exclusao, acaoExcluir, pendenteExcluir] = useActionState(excluir, estadoVazio);
@@ -58,104 +72,90 @@ export function Procedimentos({
     }
   }, [cadastro, edicao, exclusao, roteador]);
 
-  useEffect(() => {
-    if (aberto) painelRef.current?.focus();
-  }, [aberto]);
-
-  useEffect(() => {
-    if (!aberto) return;
-    function tecla(evento: KeyboardEvent) {
-      if (evento.key === "Escape" && !pendenteCadastrar) {
-        setAberto(false);
-        botaoRef.current?.focus();
-      }
-    }
-    document.addEventListener("keydown", tecla);
-    return () => document.removeEventListener("keydown", tecla);
-  }, [aberto, pendenteCadastrar]);
-
-  function fechar() {
-    if (pendenteCadastrar) return;
-    setAberto(false);
-    botaoRef.current?.focus();
-  }
-
   return (
     <>
-      <div className="procedimentos-cabeca">
-        <div>
-          <h1>Procedimentos</h1>
-          <p className="procedimentos-nota">{NOTA_ESTIMATIVA}</p>
+      <Dialog
+        open={aberto}
+        disablePointerDismissal={pendenteCadastrar}
+        onOpenChange={(proximo, detalhes) => {
+          if (!proximo && pendenteCadastrar) {
+            detalhes.cancel();
+            return;
+          }
+          setAberto(proximo);
+        }}
+      >
+        <div className="procedimentos-cabeca">
+          <div>
+            <h1>Procedimentos</h1>
+            <p className="procedimentos-nota">{NOTA_ESTIMATIVA}</p>
+          </div>
+          <DialogTrigger className="procedimentos-botao h-11 shrink-0 px-5 text-[15px] font-semibold">
+            Novo procedimento
+          </DialogTrigger>
         </div>
-        <button
-          ref={botaoRef}
-          type="button"
-          className="procedimentos-botao"
-          aria-haspopup="dialog"
-          aria-expanded={aberto}
-          aria-controls={aberto ? "procedimentos-cadastro" : undefined}
-          onClick={() => setAberto(true)}
+        {erroNoPainel ? null : (
+          <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+        )}
+        <DialogContent
+          initialFocus={nomeRef}
+          showCloseButton={false}
+          className="max-h-[calc(100dvh-4rem)] overflow-y-auto sm:max-w-3xl"
         >
-          Novo procedimento
-        </button>
-      </div>
-      {erroNoPainel ? null : (
-        <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
-      )}
-      {aberto ? (
-        <div className="procedimentos-overlay">
-          <div className="procedimentos-overlay-fundo" onClick={fechar} />
-          <section
-            ref={painelRef}
-            id="procedimentos-cadastro"
-            className="procedimentos-painel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="procedimentos-titulo-novo"
-            tabIndex={-1}
-          >
-            <div className="procedimentos-painel-topo">
-              <h2 id="procedimentos-titulo-novo">Novo procedimento</h2>
-              <button
-                type="button"
-                className="procedimentos-botao procedimentos-botao-secundario"
-                onClick={fechar}
-              >
-                Fechar
-              </button>
-            </div>
-            {erroNoPainel ? (
-              <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
-            ) : null}
-            <form
-              className="procedimentos-form"
-              key={cadastro.status === "sucesso" ? cadastro.quando : 0}
-              action={acaoCadastrar}
-              aria-busy={pendenteCadastrar}
+          <div className="flex items-start justify-between gap-3">
+            <DialogHeader className="pr-0">
+              <DialogTitle>Novo procedimento</DialogTitle>
+              <DialogDescription className="sr-only">{NOTA_ESTIMATIVA}</DialogDescription>
+            </DialogHeader>
+            <DialogClose
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 shrink-0 px-3"
+                  disabled={pendenteCadastrar}
+                />
+              }
             >
-              <VinculoMateriais materiais={materiais}>
-                <Campos />
-              </VinculoMateriais>
-              <button type="submit" className="procedimentos-botao" disabled={pendenteCadastrar}>
-                {pendenteCadastrar ? "Salvando…" : "Criar procedimento"}
-              </button>
-            </form>
-          </section>
-        </div>
-      ) : null}
+              Fechar
+            </DialogClose>
+          </div>
+          {erroNoPainel ? (
+            <AvisoLocal tipo={aviso.status} mensagem={aviso.mensagem} quando={aviso.quando} />
+          ) : null}
+          <form
+            className="procedimentos-form flex flex-col items-start gap-4"
+            key={cadastro.status === "sucesso" ? cadastro.quando : 0}
+            action={acaoCadastrar}
+            aria-busy={pendenteCadastrar}
+          >
+            <VinculoMateriais materiais={materiais}>
+              <Campos nomeRef={nomeRef} />
+            </VinculoMateriais>
+            <Button
+              type="submit"
+              className="procedimentos-botao h-11 px-5 text-[15px] font-semibold"
+              disabled={pendenteCadastrar}
+            >
+              {pendenteCadastrar ? "Salvando…" : "Criar procedimento"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
       <section className="procedimentos-secao" aria-labelledby="procedimentos-titulo-lista">
         <div className="procedimentos-secao-topo">
           <h2 id="procedimentos-titulo-lista">Procedimentos da clínica</h2>
-          <label className="procedimentos-busca">
+          <Label className="procedimentos-busca relative block font-normal">
             <Search className="procedimentos-busca-icone" aria-hidden="true" />
             <span className="sr-only">Buscar procedimentos</span>
-            <input
+            <Input
               type="search"
               value={busca}
               onChange={(evento) => setBusca(evento.target.value)}
               placeholder="Buscar procedimentos"
+              className="h-10 pl-10"
             />
-          </label>
+          </Label>
         </div>
         {procedimentos.length === 0 ? (
           <p className="procedimentos-vazio">Nenhum procedimento cadastrado nesta clínica.</p>
@@ -163,150 +163,101 @@ export function Procedimentos({
           <p className="procedimentos-vazio">Nenhum procedimento encontrado com essa busca.</p>
         ) : (
           <>
-            <ul className="procedimentos-lista">
-              {paginaAtual.itens.map((procedimento) => (
-                <li key={procedimento.id} className="procedimentos-item">
-                  <div className="procedimentos-linha">
-                    <div className="procedimentos-resumo">
-                      <span className="procedimentos-nome">{procedimento.nome}</span>
-                      <span className="procedimentos-meta">{meta(procedimento)}</span>
-                    </div>
-                    <div className="procedimentos-acoes">
-                      <button
-                        type="button"
-                        className="procedimentos-botao procedimentos-botao-secundario"
-                        onClick={() =>
-                          setEditandoId(editandoId === procedimento.id ? null : procedimento.id)
-                        }
-                        aria-label={`Editar procedimento ${procedimento.nome}`}
-                        aria-expanded={editandoId === procedimento.id}
-                      >
-                        Editar
-                      </button>
-                      {podeExcluir ? (
-                        <form action={acaoExcluir} aria-busy={pendenteExcluir}>
-                          <input type="hidden" name="id" value={procedimento.id} />
-                          <button
-                            type="submit"
-                            className="procedimentos-botao procedimentos-botao-perigo"
-                            disabled={pendenteExcluir}
-                            aria-label={`Excluir procedimento ${procedimento.nome}`}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Procedimento</TableHead>
+                  <TableHead>Tempo</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginaAtual.itens.map((procedimento) => (
+                  <Fragment key={procedimento.id}>
+                    <TableRow>
+                      <TableCell className="font-semibold whitespace-normal">{procedimento.nome}</TableCell>
+                      <TableCell>{procedimento.tempoMedioMinutos} min</TableCell>
+                      <TableCell>{valorDe(procedimento)}</TableCell>
+                      <TableCell className="text-right whitespace-normal">
+                        <span className="inline-flex flex-wrap items-center justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="procedimentos-botao procedimentos-botao-secundario h-10 px-3"
+                            onClick={() =>
+                              setEditandoId(editandoId === procedimento.id ? null : procedimento.id)
+                            }
+                            aria-label={`Editar procedimento ${procedimento.nome}`}
+                            aria-expanded={editandoId === procedimento.id}
                           >
-                            Excluir
-                          </button>
-                        </form>
-                      ) : null}
-                    </div>
-                  </div>
-                  {editandoId === procedimento.id ? (
-                    <form
-                      className="procedimentos-form"
-                      action={acaoEditar}
-                      aria-busy={pendenteEditar}
-                    >
-                      <input type="hidden" name="id" value={procedimento.id} />
-                      <VinculoMateriais materiais={materiais}>
-                        <Campos procedimento={procedimento} />
-                      </VinculoMateriais>
-                      <button
-                        type="submit"
-                        className="procedimentos-botao"
-                        disabled={pendenteEditar}
-                      >
-                        {pendenteEditar ? "Salvando…" : "Salvar procedimento"}
-                      </button>
-                    </form>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+                            Editar
+                          </Button>
+                          {podeExcluir ? (
+                            <form action={acaoExcluir} aria-busy={pendenteExcluir}>
+                              <input type="hidden" name="id" value={procedimento.id} />
+                              <Button
+                                type="submit"
+                                variant="destructive"
+                                className="procedimentos-botao procedimentos-botao-perigo h-10 px-3"
+                                disabled={pendenteExcluir}
+                                aria-label={`Excluir procedimento ${procedimento.nome}`}
+                              >
+                                Excluir
+                              </Button>
+                            </form>
+                          ) : null}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                    {editandoId === procedimento.id ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="whitespace-normal bg-papel">
+                          <form
+                            className="procedimentos-form flex flex-col items-start gap-4"
+                            action={acaoEditar}
+                            aria-busy={pendenteEditar}
+                          >
+                            <input type="hidden" name="id" value={procedimento.id} />
+                            <VinculoMateriais materiais={materiais}>
+                              <Campos procedimento={procedimento} />
+                            </VinculoMateriais>
+                            <Button
+                              type="submit"
+                              className="procedimentos-botao h-11 px-5 font-semibold"
+                              disabled={pendenteEditar}
+                            >
+                              {pendenteEditar ? "Salvando…" : "Salvar procedimento"}
+                            </Button>
+                          </form>
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                  </Fragment>
+                ))}
+              </TableBody>
+            </Table>
             <div className="procedimentos-paginacao">
               <p className="procedimentos-rodape">
                 Mostrando {paginaAtual.itens.length} de {paginaAtual.total}
               </p>
               {paginaAtual.temMais ? (
-                <button
+                <Button
                   type="button"
-                  className="procedimentos-mais"
+                  variant="outline"
+                  className="procedimentos-mais h-10 gap-2 px-4"
                   onClick={() => setPagina((atual) => atual + 1)}
                   aria-label="Mostrar mais procedimentos"
                 >
                   <ChevronDown aria-hidden="true" />
                   Ver mais
-                </button>
+                </Button>
               ) : null}
             </div>
           </>
         )}
       </section>
     </>
-  );
-}
-
-function AvisoLocal({
-  tipo,
-  mensagem,
-  quando,
-}: {
-  tipo: EstadoFormulario["status"];
-  mensagem: string;
-  quando: number;
-}) {
-  const ref = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    if (tipo !== "vazio" && mensagem) ref.current?.focus();
-  }, [tipo, mensagem, quando]);
-
-  if (tipo === "vazio" || !mensagem) return null;
-
-  return (
-    <p
-      ref={ref}
-      tabIndex={-1}
-      role={tipo === "erro" ? "alert" : "status"}
-      className={`procedimentos-aviso procedimentos-aviso-${tipo}`}
-    >
-      {mensagem}
-    </p>
-  );
-}
-
-function meta(procedimento: Procedimento): string {
-  const valor = procedimento.valorMedio.toFixed(2).replace(".", ",");
-  return `${procedimento.tempoMedioMinutos} min · R$ ${valor}`;
-}
-
-function Campos({ procedimento }: { procedimento?: Procedimento }) {
-  return (
-    <div className="procedimentos-campos">
-      <label className="procedimentos-campo procedimentos-campo-nome">
-        Nome
-        <input name="nome" defaultValue={procedimento?.nome} required />
-      </label>
-      <label className="procedimentos-campo">
-        Tempo médio (min)
-        <input
-          name="tempoMedioMinutos"
-          type="number"
-          min={1}
-          step={1}
-          defaultValue={procedimento?.tempoMedioMinutos}
-          required
-        />
-      </label>
-      <label className="procedimentos-campo">
-        Valor médio
-        <input
-          name="valorMedio"
-          type="number"
-          min={0}
-          step={0.01}
-          defaultValue={procedimento?.valorMedio}
-          required
-        />
-      </label>
-    </div>
   );
 }
 

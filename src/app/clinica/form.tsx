@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 import type { DetalheClinica } from "../../domain/clinica/tipos";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { adicionar, alternar, criar, salvarHorario } from "./actions";
 import { Alerta, BotaoAcao } from "./alerta";
@@ -11,6 +15,7 @@ import { Funcionamento, type CamposFuncionamento } from "./funcionamento";
 import { CLINICA_CADEIRAS_VAZIO, CLINICA_SEM_CLINICA, mensagemComDetalhe } from "./texto";
 
 const DIAS_PADRAO = ["segunda", "terca", "quarta", "quinta", "sexta"];
+const campo = "w-full flex-col items-stretch gap-2 font-semibold";
 
 export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
   const roteador = useRouter();
@@ -35,18 +40,18 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
           </h2>
           <p className="clinica-intro">{CLINICA_SEM_CLINICA}</p>
           <form action={acaoCriar} aria-busy={pendenteCriar} className="clinica-form">
-            <label className="clinica-campo">
+            <Label className={`clinica-campo ${campo}`}>
               Nome da clínica
-              <input name="nome" required />
-            </label>
+              <Input name="nome" required />
+            </Label>
             <Funcionamento
               campos={{ dias: DIAS_PADRAO, abertura: "08:00", fechamento: "18:00" }}
               sugestao
             />
-            <label className="clinica-campo">
+            <Label className={`clinica-campo ${campo}`}>
               Cadeiras
-              <input name="cadeiras" type="number" min={1} step={1} defaultValue={1} required />
-            </label>
+              <Input name="cadeiras" type="number" min={1} step={1} defaultValue={1} required />
+            </Label>
             <div className="clinica-acoes">
               <BotaoAcao rotulo="Criar clínica" pendente="Salvando…" className="clinica-botao" />
             </div>
@@ -73,10 +78,10 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
               Dados da clínica
             </h2>
             <p className="clinica-ajuda">Identificação exibida no sistema.</p>
-            <label className="clinica-campo">
+            <Label className={`clinica-campo ${campo}`}>
               Nome da clínica
-              <input value={clinica.nome} readOnly aria-readonly="true" />
-            </label>
+              <Input value={clinica.nome} readOnly aria-readonly="true" />
+            </Label>
           </section>
           <section className="clinica-cartao" aria-labelledby="clinica-funcionamento">
             <h2 id="clinica-funcionamento" className="clinica-subtitulo">
@@ -115,34 +120,43 @@ export function Clinica({ detalhe }: { detalhe: DetalheClinica | null }) {
                 rotulo="Adicionar cadeira"
                 pendente="Adicionando…"
                 className="clinica-botao-sec"
+                variante="outline"
               />
             </form>
           </div>
           {cadeiras.length === 0 ? (
             <p className="clinica-vazio">{CLINICA_CADEIRAS_VAZIO}</p>
           ) : (
-            <ul className="clinica-lista">
-              {cadeiras.map((cadeira) => (
-                <li
-                  key={cadeira.id}
-                  className={cadeira.ativa ? "clinica-linha" : "clinica-linha clinica-linha-inativa"}
-                >
-                  <span className="clinica-cadeira">
-                    <span className="clinica-nome">{cadeira.identificacao}</span>
-                    <span className="clinica-cadeira-estado">
-                      {cadeira.ativa
-                        ? "Disponível para agendamento"
-                        : "Indisponível para novos agendamentos"}
-                    </span>
-                  </span>
-                  <form action={acaoAlternar} className="clinica-desativar">
-                    <input type="hidden" name="id" value={cadeira.id} />
-                    <input type="hidden" name="ligar" value={cadeira.ativa ? "false" : "true"} />
-                    <Interruptor ligado={cadeira.ativa} nome={cadeira.identificacao} />
-                  </form>
-                </li>
-              ))}
-            </ul>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cadeira</TableHead>
+                  <TableHead>Situação</TableHead>
+                  <TableHead className="text-right">Ativa</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {cadeiras.map((cadeira) => (
+                  <TableRow key={cadeira.id} className={cadeira.ativa ? undefined : "opacity-70"}>
+                    <TableCell className="font-semibold whitespace-normal">{cadeira.identificacao}</TableCell>
+                    <TableCell className="whitespace-normal">
+                      <Badge variant={cadeira.ativa ? "success" : "warning"} className="h-auto whitespace-normal">
+                        {cadeira.ativa
+                          ? "Disponível para agendamento"
+                          : "Indisponível para novos agendamentos"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <form action={acaoAlternar} className="clinica-desativar">
+                        <input type="hidden" name="id" value={cadeira.id} />
+                        <input type="hidden" name="ligar" value={cadeira.ativa ? "false" : "true"} />
+                        <Interruptor ligado={cadeira.ativa} nome={cadeira.identificacao} />
+                      </form>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </section>
       </div>

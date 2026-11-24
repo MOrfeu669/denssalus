@@ -1,35 +1,56 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type Ref } from "react";
 import { useFormStatus } from "react-dom";
-import { IconeErro, IconeOk } from "../login/icones";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { IconeErro } from "../login/icones";
+import { IconeSucesso } from "../icone-sucesso";
 
 type Props = {
   status: "vazio" | "erro" | "sucesso";
   mensagem: string;
   quando: number;
+  ref?: Ref<HTMLDivElement | null>;
 };
 
-/** Aviso no visual do login. Recebe o foco depois da ação. */
-export function Alerta({ status, mensagem, quando }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
+/** Aviso da tela. Recebe o foco depois da ação. */
+export function Alerta({ status, mensagem, quando, ref }: Props) {
+  const interno = useRef<HTMLDivElement>(null);
   const mostrar = status !== "vazio" && Boolean(mensagem);
 
+  function definir(no: HTMLDivElement | null) {
+    interno.current = no;
+    if (typeof ref === "function") ref(no);
+    else if (ref) ref.current = no;
+  }
+
   useEffect(() => {
-    if (mostrar) ref.current?.focus();
+    if (!mostrar) return;
+    const id = window.setTimeout(() => interno.current?.focus(), 50);
+    return () => window.clearTimeout(id);
   }, [mostrar, mensagem, quando]);
 
   if (!mostrar) return null;
 
+  const erro = status === "erro";
+
   return (
     <div
-      ref={ref}
+      ref={definir}
       tabIndex={-1}
-      role={status === "erro" ? "alert" : "status"}
-      className={`clinica-alerta clinica-alerta-${status}`}
+      role={erro ? "alert" : "status"}
+      className={cn(
+        "clinica-alerta mb-6 flex max-w-xl items-start gap-3 rounded-paper-md border p-4 outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-destaque",
+        erro
+          ? "clinica-alerta-erro border-perigo bg-perigo-fundo"
+          : "clinica-alerta-sucesso border-ok bg-ok-fundo",
+      )}
     >
-      {status === "erro" ? <IconeErro /> : <IconeOk cor="#178A4C" />}
-      <strong>{mensagem}</strong>
+      {erro ? <IconeErro /> : <IconeSucesso />}
+      <strong className={cn("text-sm leading-5 font-semibold", erro ? "text-perigo-tinta" : "text-ok-tinta")}>
+        {mensagem}
+      </strong>
     </div>
   );
 }
@@ -40,16 +61,24 @@ export function BotaoAcao({
   pendente,
   className,
   nomeAcessivel,
+  variante = "default",
 }: {
   rotulo: string;
   pendente: string;
   className: string;
   nomeAcessivel?: string;
+  variante?: "default" | "outline" | "destructive";
 }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className={className} disabled={pending} aria-label={nomeAcessivel}>
+    <Button
+      type="submit"
+      variant={variante}
+      className={cn("h-11 px-5 text-[15px] leading-6 font-semibold", className)}
+      disabled={pending}
+      aria-label={nomeAcessivel}
+    >
       {pending ? pendente : rotulo}
-    </button>
+    </Button>
   );
 }

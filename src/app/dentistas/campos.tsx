@@ -1,28 +1,39 @@
+import type { Ref } from "react";
 import type { Dentista } from "../../domain/dentista/tipos";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export function Campos({ dentista }: { dentista?: Dentista }) {
+const campo = "dentistas-campo w-full min-w-0 flex-col items-stretch gap-2 font-semibold";
+
+export function Campos({
+  dentista,
+  nomeRef,
+}: {
+  dentista?: Dentista;
+  nomeRef?: Ref<HTMLInputElement>;
+}) {
   return (
     <>
-      <label className="dentistas-campo">
+      <Label className={campo}>
         Nome
-        <input name="nome" defaultValue={dentista?.nome} required />
-      </label>
-      <label className="dentistas-campo">
+        <Input ref={nomeRef} name="nome" defaultValue={dentista?.nome} required />
+      </Label>
+      <Label className={campo}>
         CRO
-        <input name="cro" defaultValue={dentista?.cro} required />
-      </label>
-      <label className="dentistas-campo">
+        <Input name="cro" defaultValue={dentista?.cro} required />
+      </Label>
+      <Label className={campo}>
         Telefone
-        <input name="telefone" type="tel" defaultValue={dentista?.telefone} required />
-      </label>
-      <label className="dentistas-campo">
+        <Input name="telefone" type="tel" defaultValue={dentista?.telefone} required />
+      </Label>
+      <Label className={campo}>
         CPF
-        <input name="cpf" defaultValue={dentista?.cpf} required />
-      </label>
-      <label className="dentistas-campo dentistas-campo-largo">
+        <Input name="cpf" defaultValue={dentista?.cpf} required />
+      </Label>
+      <Label className={`${campo} dentistas-campo-largo sm:col-span-2`}>
         Especialidades (separadas por vírgula)
-        <input name="especialidades" defaultValue={dentista?.especialidades.join(", ")} />
-      </label>
+        <Input name="especialidades" defaultValue={dentista?.especialidades.join(", ")} />
+      </Label>
     </>
   );
 }
