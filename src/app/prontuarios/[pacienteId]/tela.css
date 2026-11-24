@@ -1,37 +1,3 @@
-.casca .casca-miolo nav.prontuario-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--paper-space-1);
-  margin: 0 0 var(--paper-space-5);
-  padding: 0 0 var(--paper-space-3);
-  border-bottom: 1px solid var(--paper-borda);
-}
-
-.casca .casca-miolo nav.prontuario-nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 0 var(--paper-space-2);
-  border: 1px solid transparent;
-  border-radius: var(--paper-radius-sm);
-  background: transparent;
-  color: var(--paper-text);
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.casca .casca-miolo nav.prontuario-nav a:hover {
-  border-color: var(--paper-borda);
-  background: var(--paper-surface);
-}
-
-.casca .casca-miolo nav.prontuario-nav a:focus-visible {
-  outline: 3px solid var(--paper-secondary);
-  outline-offset: 2px;
-}
-
 .casca .casca-miolo .prontuario-secao {
   margin: 0 0 var(--paper-space-4);
   padding: var(--paper-space-5);
@@ -71,67 +37,64 @@
   text-decoration: line-through;
 }
 
-.casca .casca-miolo .prontuario-voltar {
-  display: flex;
-  margin-top: var(--paper-space-4);
-}
-
-.casca .casca-miolo .prontuario-voltar a {
-  color: var(--paper-link);
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: var(--paper-radius-sm);
-}
-
-.casca .casca-miolo .prontuario-voltar a:hover {
-  text-decoration: underline;
-}
-
-.casca .casca-miolo .prontuario-secao button[data-slot="button"]:not(.dente) {
-  height: 40px;
-  padding: 0 var(--paper-space-4);
-  box-shadow: var(--paper-sombra-sm);
-  font-weight: 600;
+.casca .casca-miolo .ficha h1 {
+  margin: 0;
 }
 
 .casca .casca-miolo .odontograma {
-  display: flex;
-  flex-direction: column;
-  gap: var(--paper-space-2);
+  overflow-x: auto;
 }
 
 .casca .casca-miolo .odontograma-fileira {
   display: flex;
-  gap: var(--paper-space-1);
-  align-items: center;
+  gap: 6px;
+  align-items: flex-end;
+  width: max-content;
+  min-width: 100%;
+  justify-content: center;
+}
+
+.casca .casca-miolo .odontograma-fileira.inferior {
+  align-items: flex-start;
 }
 
 .casca .casca-miolo .odontograma-meio {
-  align-self: stretch;
-  width: 0;
-  margin: 0 var(--paper-space-1);
-  border-left: 2px solid var(--paper-primary);
+  align-self: center;
+  width: 1px;
+  height: 36px;
+  margin: 0 8px;
+  background: #c9c8ba;
+}
+
+.casca .casca-miolo .odontograma-divisoria {
+  height: 0;
+  margin: 8px 0;
+  border-top: 1px dashed #c9c8ba;
 }
 
 .casca .casca-miolo .odontograma button.dente {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid var(--paper-borda);
-  border-radius: var(--paper-radius-sm);
-  background: var(--paper-surface);
-  color: var(--paper-text);
-  box-shadow: var(--paper-sombra-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 44px;
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--paper-ink-2);
+  box-shadow: none;
   font-family: var(--font-mono), "PT Mono", ui-monospace, monospace;
   font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
+  font-weight: 400;
+  line-height: 16px;
+  cursor: pointer;
 }
 
-.casca .casca-miolo .odontograma button.dente:hover:not([aria-pressed="true"]) {
-  border-color: var(--paper-campo-borda-hover);
-  background: var(--paper-fundo);
-  color: var(--paper-text);
+.casca .casca-miolo .odontograma button.dente:hover {
+  background: var(--paper-subtle);
+  color: var(--paper-ink-2);
 }
 
 .casca .casca-miolo .odontograma button.dente:focus-visible {
@@ -139,21 +102,51 @@
   outline-offset: 2px;
 }
 
-.casca .casca-miolo .odontograma button.dente.com-registro {
-  border-color: var(--paper-warning);
-  background: var(--color-aviso-fundo);
-  color: var(--color-aviso-tinta);
+.casca .casca-miolo .odontograma button.dente[data-com-registro="true"] .dente-numero {
+  color: var(--paper-text);
 }
 
-.casca .casca-miolo .odontograma button.dente[aria-pressed="true"] {
-  border-color: var(--paper-primary);
-  background: var(--paper-primary);
-  color: var(--paper-surface);
+.casca .casca-miolo .odontograma button.dente[aria-pressed="true"] .dente-numero {
+  color: var(--paper-link);
 }
 
-.casca .casca-miolo .odontograma button.dente:disabled {
-  border-color: var(--paper-borda);
-  background: var(--paper-disabled-fundo);
-  color: var(--paper-disabled-tinta);
+.casca .casca-miolo .dente-figura {
+  display: block;
+  overflow: visible;
+}
+
+.face-livre { fill: #ffffff; }
+.face-ausente { fill: #f4f4ec; }
+.face-carie { fill: #fca5a5; }
+.face-rest { fill: #bfdbfe; }
+.face-plan { fill: #fde68a; }
+
+.amostra {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.amostra-carie { background: #fca5a5; box-shadow: inset 0 0 0 1px #dc2626; }
+.amostra-rest { background: #bfdbfe; box-shadow: inset 0 0 0 1px #2563eb; }
+.amostra-plan { background: #fde68a; box-shadow: inset 0 0 0 1px #d97706; }
+.amostra-canal { width: 12px; height: 12px; border-radius: 999px; background: #8b5cf6; }
+.amostra-coroa { background: transparent; box-shadow: inset 0 0 0 2px #111827; }
+.amostra-ausente {
+  background:
+    linear-gradient(to top right, transparent 44%, #4b4a42 46%, #4b4a42 54%, transparent 56%),
+    linear-gradient(to top left, transparent 44%, #4b4a42 46%, #4b4a42 54%, transparent 56%);
+}
+
+.casca .casca-miolo .ficha-registros [data-slot="table-container"] {
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
+}
+
+.casca .casca-miolo .ficha [role="tab"]:focus-visible,
+.casca .casca-miolo .ficha a:focus-visible {
+  outline: 3px solid var(--paper-secondary);
+  outline-offset: 2px;
 }

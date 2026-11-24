@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
+import { listarOpcoesAgendamento } from "../../../domain/agendamento/casos";
 import { listarOdontograma } from "../../../domain/odontograma/casos";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
 import { listarDebitos } from "../../../domain/debito/casos";
@@ -15,6 +15,7 @@ import { listarProcedimentos } from "../../../domain/procedimento/casos";
 import { abrirProntuario, listarAuditoria } from "../../../domain/prontuario/casos";
 import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
 import {
+  dependenciasAgendamento,
   dependenciasDebito,
   dependenciasDocumento,
   dependenciasEstoque,
@@ -27,19 +28,11 @@ import { falha } from "../../falha";
 import { sessaoAtual } from "../../sessao";
 import { CascaAberta } from "../../casca";
 import "./tela.css";
-import { FormularioAnamnese, FormularioEvolucao } from "./form";
-import { SecaoDebitos } from "./debitos";
-import { SecaoDocumentos, type DocumentoItem } from "./documentos";
-import { rotuloStatus, varianteStatus } from "../../agenda/rotulo";
-import { dataAgendamento } from "./formato";
-import { Odontograma } from "./odontograma";
+import { type DocumentoItem } from "./documentos";
 import { carregarImagens } from "./carregar-imagens";
-import { SecaoImagens } from "./imagens";
-import { SecaoPlano } from "./plano";
 import { carregarProteses } from "./carregar-proteses";
-import { SecaoProteses } from "./proteses";
-import { Auditoria, Historico, VisaoGeral } from "./secoes";
 import type { ProcedimentoOpcao } from "./tipos-odontograma";
+import { Vista } from "./vista";
 
 type ResultadoOdontograma =
   | { ok: true; valor: RegistroOdontograma[] }
@@ -127,6 +120,19 @@ async function carregarProcedimentos(
   }
 }
 
+async function carregarNomes(sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>) {
+  try {
+    const opcoes = await listarOpcoesAgendamento(dependenciasAgendamento(), sessao);
+    if (!opcoes.ok) return { dentistas: {}, cadeiras: {} };
+    return {
+      dentistas: Object.fromEntries(opcoes.valor.dentistas.map((item) => [item.id, item.nome])),
+      cadeiras: Object.fromEntries(opcoes.valor.cadeiras.map((item) => [item.id, item.identificacao])),
+    };
+  } catch {
+    return { dentistas: {}, cadeiras: {} };
+  }
+}
+
 async function carregarMateriais(
   sessao: NonNullable<Awaited<ReturnType<typeof sessaoAtual>>>,
   agendamentoId: string,
@@ -206,188 +212,29 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
       materiaisDasConsultas.set(consulta.id, await carregarMateriais(sessao, consulta.id));
     }
   }
-  const todosAgendamentos = historico.map(({ id, inicio, status }) => ({ id, inicio, status }));
-  const agendamentosAbertos = historico
-    .filter((item) => ["agendado", "em_espera", "iniciado"].includes(item.status))
-    .map(({ id, inicio, status }) => ({ id, inicio, status }));
+  const nomes = await carregarNomes(sessao);
 
   return (
-    <>
-      <h1>Prontuário de {paciente.nome}</h1>
-      <nav className="prontuario-nav" aria-label="Seções do prontuário">
-        <a href="#visao-geral">Visão geral</a>
-        {podeEscrever ? <a href="#anamnese">Anamnese</a> : null}
-        <a href="#historico">Histórico</a>
-        {podeEscrever ? <a href="#evolucoes">Evoluções</a> : null}
-        {podeEscrever ? <a href="#odontograma">Odontograma</a> : null}
-        {podeEscrever ? <a href="#plano">Plano de tratamento</a> : null}
-        <a href="#debitos">Débitos</a>
-        {podeEscrever ? <a href="#documentos">Documentos</a> : null}
-        {podeEscrever ? <a href="#raio-x">Raio X e imagens</a> : null}
-        <a href="#proteses">Próteses</a>
-        {papel === "admin" ? <a href="#auditoria">Trilha de auditoria</a> : null}
-      </nav>
-
-      <VisaoGeral paciente={paciente} />
-
-      {podeEscrever ? (
-        <section className="prontuario-secao" aria-labelledby="anamnese">
-          <h2 id="anamnese">Anamnese</h2>
-          <FormularioAnamnese pacienteId={pacienteId} conteudo={anamnese?.conteudo ?? ""} />
-          {anamnese ? null : <p>Nenhuma anamnese registrada.</p>}
-        </section>
-      ) : null}
-
-      <Historico historico={historico} />
-
-      {podeEscrever ? (
-        <section className="prontuario-secao" aria-labelledby="evolucoes">
-          <h2 id="evolucoes">Evoluções</h2>
-          {consultas.length === 0 ? <p>Nenhuma consulta iniciada ou concluída.</p> : null}
-          <ul className="lista">
-            {consultas.map((consulta) => {
-              const inicio = dataAgendamento(consulta.inicio);
-              const atual = evolucoes.find((item) => item.agendamentoId === consulta.id);
-              return (
-                <li key={consulta.id}>
-                  <span className="inline-flex flex-wrap items-center gap-2">
-                    {inicio}
-                    <Badge variant={varianteStatus(consulta.status)}>{rotuloStatus(consulta.status)}</Badge>
-                  </span>
-                  <FormularioEvolucao
-                    pacienteId={pacienteId}
-                    agendamentoId={consulta.id}
-                    rotulo={inicio}
-                    texto={atual?.texto ?? ""}
-                    materiais={atual ? undefined : materiaisDasConsultas.get(consulta.id)}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
-
-      {podeEscrever ? (
-        <section className="prontuario-secao" aria-labelledby="odontograma">
-          <h2 id="odontograma">Odontograma</h2>
-          {odontograma.ok ? (
-            <Odontograma
-              pacienteId={pacienteId}
-              registros={odontograma.valor}
-              procedimentos={procedimentos}
-              agendamentos={todosAgendamentos}
-              imagens={imagens.ok ? imagens.ativas : []}
-              proteses={proteses.ok ? proteses.proteses : []}
-              podeEscrever={podeEscrever}
-            />
-          ) : (
-            <p role="alert" tabIndex={-1}>
-              {odontograma.mensagem}
-            </p>
-          )}
-        </section>
-      ) : null}
-
-      {podeEscrever ? (
-        <section className="prontuario-secao" aria-labelledby="plano">
-          <h2 id="plano">Plano de tratamento</h2>
-          {planos.ok ? (
-            <SecaoPlano
-              pacienteId={pacienteId}
-              planos={planos.valor}
-              procedimentos={procedimentos}
-              agendamentos={agendamentosAbertos}
-              podeEscrever={podeEscrever}
-            />
-          ) : (
-            <p role="alert" tabIndex={-1}>
-              {planos.mensagem}
-            </p>
-          )}
-        </section>
-      ) : null}
-
-      <section className="prontuario-secao" aria-labelledby="debitos">
-        <h2 id="debitos">Débitos</h2>
-        {debitos.ok ? (
-          <SecaoDebitos pacienteId={pacienteId} debitos={debitos.valor} papel={papel} />
-        ) : (
-          <p role="alert" tabIndex={-1}>
-            {debitos.mensagem}
-          </p>
-        )}
-      </section>
-
-      {podeEscrever ? (
-        <section className="prontuario-secao" aria-labelledby="documentos">
-          <h2 id="documentos">Documentos</h2>
-          {documentos.ok ? (
-            <SecaoDocumentos
-              pacienteId={pacienteId}
-              papel={papel}
-              usuarioId={sessao.usuario.id}
-              documentos={documentos.documentos}
-              modelos={documentos.modelos}
-              importados={documentos.importados}
-            />
-          ) : (
-            <p role="alert" tabIndex={-1}>
-              {documentos.mensagem}
-            </p>
-          )}
-        </section>
-      ) : null}
-
-      {podeEscrever ? (
-        <section className="prontuario-secao" aria-labelledby="raio-x">
-          <h2 id="raio-x">Raio X e imagens</h2>
-          {imagens.ok ? (
-            <SecaoImagens
-              pacienteId={pacienteId}
-              ativas={imagens.ativas}
-              pendentes={imagens.pendentes}
-              agendamentos={todosAgendamentos}
-              podeEscrever={podeEscrever}
-            />
-          ) : (
-            <p role="alert" tabIndex={-1}>
-              {imagens.mensagem}
-            </p>
-          )}
-        </section>
-      ) : null}
-
-      <section className="prontuario-secao" aria-labelledby="proteses">
-        <h2 id="proteses">Próteses</h2>
-        {proteses.ok ? (
-          <SecaoProteses
-            pacienteId={pacienteId}
-            proteses={proteses.proteses}
-            responsaveis={proteses.responsaveis}
-            procedimentos={procedimentos}
-            agendamentos={agendamentosAbertos}
-            papel={papel}
-            limite={proteses.limite}
-            laboratorios={proteses.laboratorios}
-          />
-        ) : (
-          <p role="alert" tabIndex={-1}>
-            {proteses.mensagem}
-          </p>
-        )}
-      </section>
-
-      {auditoria?.ok ? <Auditoria registros={auditoria.valor} /> : null}
-      {auditoria && !auditoria.ok ? (
-        <p role="alert" tabIndex={-1}>
-          {auditoria.mensagem}
-        </p>
-      ) : null}
-
-      <p className="prontuario-voltar">
-        <Link href="/pacientes">Voltar</Link>
-      </p>
-    </>
+    <Vista
+      pacienteId={pacienteId}
+      paciente={paciente}
+      anamnese={anamnese}
+      historico={historico}
+      evolucoes={evolucoes}
+      papel={papel}
+      usuarioId={sessao.usuario.id}
+      podeEscrever={podeEscrever}
+      odontograma={odontograma}
+      procedimentos={procedimentos}
+      planos={planos}
+      debitos={debitos}
+      documentos={documentos}
+      imagens={imagens}
+      proteses={proteses}
+      materiais={materiaisDasConsultas}
+      auditoria={auditoria}
+      nomes={nomes}
+      agora={new Date()}
+    />
   );
 }
