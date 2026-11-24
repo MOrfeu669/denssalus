@@ -25,7 +25,7 @@ describe("casca e login com Tailwind", () => {
     );
 
     expect(html).toContain('aria-current="page"');
-    expect(html).toContain("bg-acao");
+    expect(html).toContain("bg-sidebar-accent");
     expect(html).toContain("Pacientes");
   });
 
