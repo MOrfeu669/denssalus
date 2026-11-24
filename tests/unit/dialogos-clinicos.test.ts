@@ -5,12 +5,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Agendamento, OpcoesAgendamento } from "../../src/domain/agendamento/tipos";
-import type { PacienteLinha } from "../../src/app/pacientes/form";
-
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: () => undefined, push: () => undefined }),
+  useRouter: () => ({ refresh: () => undefined, push: () => undefined, replace: () => undefined }),
+  usePathname: () => "/pacientes",
 }));
 
 vi.mock("../../src/app/agendamentos/actions", () => ({
@@ -38,6 +37,18 @@ vi.mock("../../src/app/pacientes/actions", () => ({
 import { Agendamentos } from "../../src/app/agendamentos/form";
 import { pedirOverlay } from "../../src/app/agendamentos/pedido";
 import { Pacientes } from "../../src/app/pacientes/form";
+import type { PaginaLista } from "../../src/app/pacientes/tipos-lista";
+
+const paginaVazia: PaginaLista = {
+  linhas: [],
+  totalFiltrado: 0,
+  totalClinica: 0,
+  pagina: 1,
+  porPagina: 10,
+  contagens: { todos: 0, em_tratamento: 0, com_debito: 0, retorno_pendente: 0, aniversariantes: 0 },
+};
+
+const consultaVazia = { termo: "", chip: "todos" as const, pagina: 1, porPagina: 10 };
 
 const roots: Root[] = [];
 
@@ -83,19 +94,6 @@ function botaoCom(texto: string) {
   return [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes(texto));
 }
 
-const paciente: PacienteLinha = {
-  id: "pac-1",
-  clinicaId: "c1",
-  nome: "João Pereira",
-  idade: 34,
-  canais: [{ canal: "whatsapp", contato: "11999990000", preferido: true }],
-  cpf: null,
-  endereco: null,
-  dataNascimento: null,
-  sexo: null,
-  responsavel: null,
-};
-
 const opcoes: OpcoesAgendamento = {
   pacientes: [{ id: "pac-1", nome: "João Pereira" }],
   dentistas: [{ id: "den-1", nome: "Ana Lima", usuarioId: "user-2" }],
@@ -127,8 +125,8 @@ const agendamento: Agendamento = {
 
 describe("diálogo de pacientes", () => {
   it("dado a lista, quando Novo paciente abre, então o foco entra no diálogo fora da casca", async () => {
-    const host = await montar(createElement(Pacientes, { pacientes: [paciente] }));
-    const gatilho = botaoCom("Novo paciente");
+    const host = await montar(createElement(Pacientes, { pagina: paginaVazia, consulta: consultaVazia }));
+    const gatilho = botaoCom("Cadastrar paciente");
     expect(gatilho?.getAttribute("aria-haspopup")).toBe("dialog");
     expect(gatilho?.getAttribute("aria-expanded")).toBe("false");
     expect(dialogoVisivel()).toBeNull();
@@ -152,8 +150,8 @@ describe("diálogo de pacientes", () => {
   });
 
   it("dado o diálogo aberto, quando Esc é pressionado, então ele fecha e o foco volta ao botão", async () => {
-    await montar(createElement(Pacientes, { pacientes: [paciente] }));
-    const gatilho = botaoCom("Novo paciente");
+    await montar(createElement(Pacientes, { pagina: paginaVazia, consulta: consultaVazia }));
+    const gatilho = botaoCom("Cadastrar paciente");
     gatilho?.focus();
     await act(async () => {
       gatilho?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
@@ -172,8 +170,8 @@ describe("diálogo de pacientes", () => {
   });
 
   it("dado o diálogo aberto, quando Fechar é acionado, então ele fecha e o foco volta ao botão", async () => {
-    await montar(createElement(Pacientes, { pacientes: [paciente] }));
-    const gatilho = botaoCom("Novo paciente");
+    await montar(createElement(Pacientes, { pagina: paginaVazia, consulta: consultaVazia }));
+    const gatilho = botaoCom("Cadastrar paciente");
     gatilho?.focus();
     await act(async () => {
       gatilho?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));

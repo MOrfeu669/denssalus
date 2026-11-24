@@ -58,7 +58,7 @@ function ItemNav({ item, contador }: { item: ItemMenu; contador?: number }) {
     >
       {Icone ? <Icone className="size-[18px] shrink-0" aria-hidden="true" /> : null}
       <span className="truncate">{item.rotulo}</span>
-      {contador && contador > 0 ? (
+      {item.href !== "/mensagens" && contador && contador > 0 ? (
         <span className="ml-auto inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-paper-tint-neutral px-1.5 text-xs font-medium text-paper-ink-2 tabular-nums">
           {contador > 99 ? "99+" : contador}
         </span>
