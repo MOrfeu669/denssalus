@@ -1,13 +1,39 @@
 ---
-description: Convenções de interface com shadcn/ui e Tailwind
+description: Design e composição de telas — autonomia visual com precisão de layers
 globs: src/{app,components}/**/*
 alwaysApply: false
 ---
 
 # Front
 
-- Tela em `src/app/`. Componente da coleção shadcn/ui em `src/components/ui`. Estilo com Tailwind.
-- Antes de criar botão, diálogo, campo, interruptor, select ou aba, use o que já está em `src/components/ui`. Falta o bloco: invoque a skill `ui` e adicione só esse componente.
-- Não instale outro kit de interface. Não reescreva o CSS de uma tela que a tarefa não abriu.
-- A página permanece Server Component. `"use client"` fica no bloco que abre, fecha ou guarda estado.
-- O formulário envia pela Server Action. O componente não acessa o banco.
+## Arquitetura (fixa)
+
+- Tela e Server Action em `src/app/`. Domínio fora do componente. Sem acesso a banco na UI.
+- Página que busca dado = Server Component. `"use client"` só no bloco com estado ou interação.
+- Formulário envia pela Server Action. Coleção base: shadcn/ui + Tailwind em `src/components/ui`.
+- Falta um controle da coleção: invoque a skill `ui` e adicione só esse. Vocabulário do domínio não muda.
+
+## Autonomia de design
+
+- Escolha tipografia, ritmo, cor, profundidade e atmosfera que sirvam ao fluxo clínico (clareza sob pressão, leitura rápida, hierarquia óbvia).
+- Não copie layout genérico de dashboard SaaS. Prefira composição com intenção: uma âncora visual por viewport, um propósito por seção.
+- Reutilize tokens e padrões da casca quando existirem; invente o detalhe da tela quando a spec não fixar o visual.
+- CSS local (`tela.css`) e Tailwind podem coexistir. Ao redesenhar, unifique no que a tela pedir — sem forçar kit inteiro de uma vez.
+- Motion só quando comunica estado (entrar, confirmar, alertar). Sem ruído decorativo.
+
+## Precisão de layers
+
+Trate a tela como pilha explícita. Ao ajustar, mude **um layer por vez** e diga qual:
+
+| Layer | Responsabilidade | Ajuste típico |
+| --- | --- | --- |
+| `fundo` | atmosfera, gradiente, textura | cor/opacidade do plano, não do conteúdo |
+| `superficie` | painéis, grade, casca | padding, gap, radius, borda, sombra |
+| `conteudo` | texto, campos, lista, células | type scale, leading, largura de linha |
+| `acao` | CTA, filtros, controles | tamanho de alvo, ordem, ênfase |
+| `overlay` | modal, popover, toast, alerta | z-index, foco, dismiss, contraste |
+
+- z-index sobe só no `overlay` (e âncoras fixas da casca). Conteúdo não compete com modal.
+- Espaço e alinhamento: prefira escala consistente (ex. 4/8) a valores soltos; desvio pontual precisa de motivo.
+- Em pedido de ajuste fino (“sobe 4px”, “menos contraste no fundo”), altere só o layer nomeado; não redesenhe a tela inteira.
+- Estados obrigatórios em toda tela: carregando, vazio, erro, sucesso — com foco previsível depois da ação.

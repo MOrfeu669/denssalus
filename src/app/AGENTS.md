@@ -28,6 +28,8 @@ O único endpoint HTTP da aplicação é `GET` em `src/app/auth/callback/route.t
 
 Fluxos visíveis, na ordem das fases: login, configuração da clínica, cadastro de dentista e de paciente, agenda. Cada fluxo termina num estado visível de sucesso (sessão aberta, clínica salva, cadastro na lista, horário na grade).
 
+O visual da tela é decisão do agente, desde que o fluxo e o vocabulário da spec se mantenham. Detalhe de composição, tipografia, cor e layers: ver `.cursor/rules/frontend.mdc`.
+
 - A agenda alterna entre dia e semana. Não há visão de mês.
 - Agendamento `cancelado` aparece na grade, riscado.
 - Cadeira desativada, dentista removido ou horário fora do funcionamento aparecem com alerta (cor destacada ou sinal "!"). Não somem da grade.
@@ -48,11 +50,11 @@ Fluxos visíveis, na ordem das fases: login, configuração da clínica, cadastr
 
 ## Componentes
 
-A coleção aceita é shadcn/ui, estilizada com Tailwind. O componente fica em `src/components/ui`. Não há segundo kit.
+Base: shadcn/ui + Tailwind em `src/components/ui`. Composição e atmosfera da tela são livres; não há segundo kit de componentes.
 
-- Invoque a skill `ui` ao criar ou alterar um bloco visual.
-- Use o componente que já está na coleção. Falta o bloco: entre só esse.
-- A tela que já tem CSS próprio conserva esse CSS até a tarefa mudar o visual dela.
+- Invoque a skill `ui` ao criar ou alterar um bloco da coleção (botão, diálogo, campo, etc.).
+- Use o controle que já está na coleção. Falta o bloco: entre só esse.
+- Layout, tipografia e CSS da tela (`tela.css` ou Tailwind na composição) o agente define. Ao redesenhar, pode unificar; em ajuste fino, mude só o layer pedido (`fundo`, `superficie`, `conteudo`, `acao`, `overlay`).
 
 ## Como implementar
 
@@ -62,7 +64,7 @@ A coleção aceita é shadcn/ui, estilizada com Tailwind. O componente fica em `
 4. Cada tela cobre carregando, vazio, erro e sucesso.
 5. Interação nova tem nome acessível e foco previsível depois da ação.
 6. Manter cada arquivo até ~200 linhas. Acima de ~300, extrair o bloco de UI ou o hook.
-7. Onde a spec ainda tem `PENDENTE`, não escolha o comportamento da tela. Pare e confirme no chat.
+7. Comportamento com `PENDENTE` na spec: pare e confirme. Visual sem `PENDENTE`: decida e avance.
 
 ## Verificar
 
