@@ -21,11 +21,11 @@ const PONTOS: Record<StatusAgendamento, string> = {
 };
 
 const contorno =
-  "h-10 cursor-pointer rounded-paper-md! border! border-borda-papel! bg-card! px-3.5! text-sm font-semibold! text-tinta! shadow-paper-sm! hover:border-campo-borda-hover! hover:bg-papel!";
+  "h-10 cursor-pointer rounded-paper-md border border-borda-papel bg-card px-3.5 text-sm font-semibold text-tinta shadow-paper-sm hover:border-campo-borda-hover hover:bg-papel";
 const cheio =
-  "h-10 cursor-pointer rounded-paper-md! border-0! bg-primary! px-3.5! text-sm font-semibold! text-primary-foreground! shadow-paper-sm! hover:bg-(--paper-primary-hover)!";
+  "h-10 cursor-pointer rounded-paper-md border-0 bg-primary px-3.5 text-sm font-semibold text-primary-foreground shadow-paper-sm hover:bg-(--paper-primary-hover)";
 const chip =
-  "h-8 cursor-pointer rounded-paper-md! px-3! text-[13px] font-semibold! shadow-paper-sm!";
+  "h-8 cursor-pointer rounded-paper-md px-3 text-[13px] font-semibold shadow-paper-sm";
 export function BarraAgenda({
   data,
   visao,
@@ -98,7 +98,7 @@ export function BarraAgenda({
           <Button
             type="button"
             variant="ghost"
-            className="h-8 cursor-pointer border-0! bg-transparent! px-2! text-[13px] font-semibold! text-link! shadow-none hover:bg-transparent! hover:underline"
+            className="h-8 cursor-pointer border-0 bg-transparent px-2 text-[13px] font-semibold text-link shadow-none hover:bg-transparent hover:underline"
             onClick={() => onFiltrar("", "")}
           >
             Limpar filtros
@@ -149,8 +149,8 @@ function Chips({
             aria-pressed={ligado}
             className={
               ligado
-                ? `${chip} border! border-primary! bg-primary! text-primary-foreground!`
-                : `${chip} border! border-borda-papel! bg-card! text-tinta! hover:border-campo-borda-hover! hover:bg-papel!`
+                ? `${chip} border border-primary bg-primary text-primary-foreground`
+                : `${chip} border border-borda-papel bg-card text-tinta hover:border-campo-borda-hover hover:bg-papel`
             }
             onClick={() => onEscolher(ligado ? "" : opcao.id)}
           >
@@ -178,8 +178,8 @@ function BotaoVisao({
       aria-pressed={ativo}
       className={
         ativo
-          ? "h-8 cursor-pointer rounded-paper-sm! border-0! bg-primary! px-4! text-sm font-semibold! text-primary-foreground! shadow-none hover:bg-primary!"
-          : "h-8 cursor-pointer rounded-paper-sm! border-0! bg-transparent! px-4! text-sm font-semibold! text-tinta! shadow-none hover:bg-papel!"
+          ? "h-8 cursor-pointer rounded-paper-sm border-0 bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-none hover:bg-primary"
+          : "h-8 cursor-pointer rounded-paper-sm border-0 bg-transparent px-4 text-sm font-semibold text-tinta shadow-none hover:bg-papel"
       }
       onClick={onClick}
     >

@@ -113,7 +113,7 @@ export function FormularioPrazo({ prazo }: { prazo: number }) {
               {ROTULO_PRAZO}
               <Input name="diasAntecedencia" type="number" min={1} step={1} defaultValue={prazo} required />
             </Label>
-            <Button className="retornos-botao" type="submit" disabled={pendente}>
+            <Button className="h-10 px-4 shadow-paper-sm" type="submit" disabled={pendente}>
               {pendente ? PENDENTE_PRAZO : ROTULO_SALVAR_PRAZO}
             </Button>
           </form>
@@ -139,7 +139,7 @@ export function FormularioMarcarRetorno({
         {ROTULO_DATA_PREVISTA}
         <Input name="dataPrevista" type="date" required />
       </Label>
-      <Button className="retornos-botao" type="submit" disabled={pendente}>
+      <Button className="h-10 px-4 shadow-paper-sm" type="submit" disabled={pendente}>
         {pendente ? PENDENTE_MARCAR : ROTULO_MARCAR_RETORNO}
       </Button>
     </form>

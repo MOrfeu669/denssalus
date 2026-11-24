@@ -144,7 +144,6 @@ function FormularioDaProtese({
         <Button
           type="submit"
           variant={rotulo === "Descontinuar pedido" ? "destructive" : "default"}
-          className={rotulo === "Descontinuar pedido" ? "prontuario-perigo" : undefined}
           disabled={pendente}
         >
           {rotulo}

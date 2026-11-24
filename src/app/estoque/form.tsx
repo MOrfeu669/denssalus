@@ -69,7 +69,7 @@ export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
       <div className="estoque-cabeca">
         <h1>Estoque</h1>
         <Dialog open={aberto} onOpenChange={aoAbrir}>
-          <DialogTrigger render={<Button type="button" className="estoque-botao h-10 px-4" />}>
+          <DialogTrigger render={<Button type="button" className="h-10 px-4 shadow-paper-sm" />}>
             Novo material
           </DialogTrigger>
           <DialogContent
@@ -156,7 +156,7 @@ export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
                     <Button
                       type="submit"
                       variant="outline"
-                      className="estoque-botao-secundario"
+                      className="h-10"
                       disabled={pendenteReabastecer}
                     >
                       {pendenteReabastecer ? "Salvando…" : "Reabastecer"}

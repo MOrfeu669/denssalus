@@ -94,7 +94,7 @@ export function Painel({
               <Button
                 type="button"
                 variant="outline"
-                className="dashboard-botao-secundario"
+                className="h-10"
                 aria-pressed={periodoSalvo === "mes"}
                 disabled={pendente}
                 onClick={() => escolherPeriodo("mes")}
@@ -104,7 +104,7 @@ export function Painel({
               <Button
                 type="button"
                 variant="outline"
-                className="dashboard-botao-secundario"
+                className="h-10"
                 aria-pressed={periodoSalvo === "7dias"}
                 disabled={pendente}
                 onClick={() => escolherPeriodo("7dias")}
@@ -121,7 +121,7 @@ export function Painel({
                 Fim
                 <Input name="fim" type="date" required />
               </Label>
-              <Button type="submit" className="dashboard-botao" disabled={pendente}>
+              <Button type="submit" className="h-10 px-4 shadow-paper-sm" disabled={pendente}>
                 Aplicar período
               </Button>
             </form>
@@ -129,7 +129,7 @@ export function Painel({
               <Button
                 type="button"
                 variant="outline"
-                className="dashboard-botao-secundario"
+                className="h-10"
                 disabled={pendente}
                 onClick={() => exportarComo("pdf")}
               >
@@ -138,7 +138,7 @@ export function Painel({
               <Button
                 type="button"
                 variant="outline"
-                className="dashboard-botao-secundario"
+                className="h-10"
                 disabled={pendente}
                 onClick={() => exportarComo("excel")}
               >

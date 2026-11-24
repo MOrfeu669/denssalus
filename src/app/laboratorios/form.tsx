@@ -11,10 +11,10 @@ import { estadoVazio } from "../formulario";
 import { cadastrar } from "./actions";
 
 const campo =
-  "h-10 border-campo-borda! bg-campo! shadow-paper-sm hover:border-campo-borda-hover! focus-visible:border-destaque! focus-visible:outline-destaque! disabled:border-borda-papel! disabled:bg-desabilitado! disabled:text-desabilitado-tinta! aria-invalid:border-perigo!";
+  "h-10 border-campo-borda bg-campo shadow-paper-sm hover:border-campo-borda-hover focus-visible:border-destaque focus-visible:outline-destaque disabled:border-borda-papel disabled:bg-desabilitado disabled:text-desabilitado-tinta aria-invalid:border-perigo";
 
 const botao =
-  "h-10 border-transparent! bg-primary! px-4 text-primary-foreground! shadow-paper-sm hover:bg-(--paper-primary-hover)! disabled:opacity-50!";
+  "h-10 border-transparent bg-primary px-4 text-primary-foreground shadow-paper-sm hover:bg-(--paper-primary-hover) disabled:opacity-50";
 
 export function FormularioLaboratorio({ nomes }: { nomes: string[] }) {
   const roteador = useRouter();

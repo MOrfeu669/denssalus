@@ -107,56 +107,6 @@
   color: var(--paper-text);
 }
 
-.casca .casca-miolo .dashboard-tela input[data-slot="input"],
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"] {
-  width: 100%;
-  height: 40px;
-  margin: 0;
-  padding: 0 var(--paper-space-3);
-  border: 1px solid var(--paper-campo-borda);
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-campo-fundo);
-  color: var(--paper-text);
-  font-size: 14px;
-  font-weight: 400;
-  box-shadow: var(--paper-sombra-sm);
-}
-
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"] {
-  padding-right: var(--paper-space-6);
-}
-
-.casca .casca-miolo .dashboard-tela input[data-slot="input"]:hover,
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"]:hover {
-  border-color: var(--paper-campo-borda-hover);
-}
-
-.casca .casca-miolo .dashboard-tela input[data-slot="input"]:focus-visible,
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"]:focus-visible {
-  border-color: var(--paper-campo-foco);
-  outline: 3px solid var(--paper-campo-foco);
-  outline-offset: 2px;
-}
-
-.casca .casca-miolo .dashboard-tela input[data-slot="input"]:disabled,
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"]:disabled {
-  cursor: not-allowed;
-  border-color: var(--paper-borda);
-  background: var(--paper-disabled-fundo);
-  color: var(--paper-disabled-tinta);
-  box-shadow: none;
-}
-
-.casca .casca-miolo .dashboard-tela input[data-slot="input"][aria-invalid="true"],
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"][aria-invalid="true"] {
-  border: 2px solid var(--paper-danger);
-}
-
-.casca .casca-miolo .dashboard-tela input[data-slot="input"][aria-invalid="true"]:focus-visible,
-.casca .casca-miolo .dashboard-tela select[data-slot="native-select"][aria-invalid="true"]:focus-visible {
-  outline-color: var(--paper-danger);
-}
-
 .casca .dashboard-campos-papel {
   display: flex;
   flex-direction: column;
@@ -235,72 +185,10 @@
   box-shadow: none;
 }
 
-.casca .casca-miolo .dashboard-tela button[data-slot="button"] {
-  width: fit-content;
-  height: 40px;
-  margin: 0;
-  padding: 0 var(--paper-space-4);
-  border: 1px solid transparent;
-  border-radius: var(--paper-radius-md);
-  background: var(--paper-primary);
-  color: var(--primary-foreground);
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: var(--paper-sombra-sm);
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"]:hover:not(:disabled) {
-  background: var(--paper-primary-hover);
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"]:focus-visible {
-  outline: 3px solid var(--paper-secondary);
-  outline-offset: 2px;
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"]:disabled {
-  opacity: var(--paper-disabled-opacidade);
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"][aria-invalid="true"] {
-  border-color: var(--paper-danger);
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-secundario {
-  border-color: var(--paper-borda);
-  background: var(--paper-surface);
-  color: var(--paper-text);
-  box-shadow: none;
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-secundario:hover:not(:disabled) {
-  border-color: var(--paper-campo-borda-hover);
-  background: var(--paper-fundo);
-  color: var(--paper-text);
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-secundario[aria-pressed="true"] {
+.casca .casca-miolo .dashboard-tela button[aria-pressed="true"] {
   border-color: var(--paper-primary);
   background: var(--paper-primary);
   color: var(--primary-foreground);
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-discreto {
-  height: 32px;
-  padding: 0 var(--paper-space-3);
-  border-color: transparent;
-  background: transparent;
-  color: var(--paper-text);
-  box-shadow: none;
-}
-
-.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-discreto:hover:not(:disabled) {
-  background: var(--paper-fundo);
-  color: var(--paper-text);
 }
 
 .casca .dashboard-alertas {

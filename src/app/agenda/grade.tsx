@@ -157,8 +157,8 @@ export function Grade({ grade, data, dentistaId, cadeiraId, nomes, papel, opcoes
                       key={hora}
                       type="button"
                       className={cn(
-                        "absolute left-0! z-0 w-full! cursor-pointer border-x-0! border-b-0! border-t! border-borda-papel! bg-transparent! p-0! shadow-none hover:bg-papel!",
-                        foraDoExpediente(hora, grade.horarioAbertura, grade.horarioFechamento) && "bg-desabilitado!",
+                        "absolute left-0 z-0 w-full cursor-pointer border-x-0 border-b-0 border-t border-borda-papel bg-transparent p-0 shadow-none hover:bg-papel",
+                        foraDoExpediente(hora, grade.horarioAbertura, grade.horarioFechamento) && "bg-desabilitado",
                       )}
                       style={{ top: indice * ALTURA_HORA, height: ALTURA_HORA }}
                       aria-label={
