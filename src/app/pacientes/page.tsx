@@ -1,29 +1,23 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { MENSAGEM_PAPEL, type Sessao } from "../../domain/auth/tipos";
-import { lerBaseDaClinica } from "../../domain/inicio/casos";
-import { listarPacientes } from "../../domain/paciente/casos";
-import { idadeEm } from "../../domain/paciente/regras";
 import { CascaAberta } from "../casca";
-import { dependenciasInicio, dependenciasPaciente } from "../dependencias";
 import { falha } from "../falha";
 import { sessaoAtual } from "../sessao";
-import { Pacientes, type PacienteLinha } from "./form";
+import { lerConsulta } from "./consulta";
+import { Pacientes } from "./form";
+import { consultarLista } from "./ler";
 import "./tela.css";
 
 export const dynamic = "force-dynamic";
 
+type Query = Record<string, string | string[] | undefined>;
+
+const primeiro = (valor: string | string[] | undefined) => (Array.isArray(valor) ? valor[0] : valor);
+
 async function abrirSessao(): Promise<{ ok: true; sessao: Sessao | null } | { ok: false; mensagem: string }> {
   try {
     return { ok: true, sessao: await sessaoAtual() };
-  } catch (erro) {
-    return falha(erro);
-  }
-}
-
-async function lerBase(sessao: Sessao) {
-  try {
-    return await lerBaseDaClinica(dependenciasInicio(), sessao);
   } catch (erro) {
     return falha(erro);
   }
@@ -73,7 +67,7 @@ function Moldura({ children }: { children: ReactNode }) {
   return <div className="pacientes-tela">{children}</div>;
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams: Promise<Query> }) {
   const aberta = await abrirSessao();
   if (!aberta.ok) {
     return (
@@ -92,18 +86,17 @@ export default async function Page() {
     );
   }
 
-  const base = await lerBase(sessao);
-  if (!base.ok && base.mensagem === MENSAGEM_PAPEL) {
-    return (
-      <Moldura>
-        <SemPermissao />
-      </Moldura>
-    );
-  }
+  const query = await searchParams;
+  const consulta = lerConsulta({
+    q: primeiro(query.q),
+    chip: primeiro(query.chip),
+    pagina: primeiro(query.pagina),
+    linhas: primeiro(query.linhas),
+  });
 
   let resultado;
   try {
-    resultado = await listarPacientes(dependenciasPaciente(), sessao);
+    resultado = await consultarLista(sessao, consulta);
   } catch (erro) {
     resultado = falha(erro);
   }
@@ -116,15 +109,9 @@ export default async function Page() {
     );
   }
 
-  const hoje = new Date();
-  const pacientes: PacienteLinha[] = resultado.valor.map((paciente) => ({
-    ...paciente,
-    idade: paciente.dataNascimento ? idadeEm(paciente.dataNascimento, hoje) : null,
-  }));
-
   return (
     <Moldura>
-      <Pacientes pacientes={pacientes} />
+      <Pacientes pagina={resultado.valor} consulta={consulta} />
     </Moldura>
   );
 }
