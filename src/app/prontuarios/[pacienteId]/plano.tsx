@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
 import type { ItemPlano, PlanoComItens, StatusPlano } from "../../../domain/plano/tipos";
 import {
@@ -78,7 +79,12 @@ function Plano({
   const editavel = podeEscrever && plano.status !== "concluido";
   return (
     <li>
-      <h3>{`Plano ${STATUS_PLANO[plano.status]}`}</h3>
+      <h3 className="inline-flex flex-wrap items-center gap-2">
+        Plano
+        <Badge variant={plano.status === "concluido" ? "success" : plano.status === "em_andamento" ? "default" : "secondary"}>
+          {STATUS_PLANO[plano.status]}
+        </Badge>
+      </h3>
       <p>Valor total: {moeda(plano.valorTotal)}</p>
       {plano.itens.length === 0 ? (
         <p>Nenhum item neste plano.</p>

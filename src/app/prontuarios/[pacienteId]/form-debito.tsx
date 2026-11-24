@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { FORMAS_PAGAMENTO, type FormaPagamento } from "../../../domain/debito/tipos";
 import { Aviso } from "../../aviso";
 import { estadoVazio, type EstadoFormulario } from "../../formulario";
@@ -41,13 +45,13 @@ export function FormularioDesconto({
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="debitoId" value={debitoId} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Desconto
-          <input type="number" name="desconto" min="0" step="0.01" required />
-        </label>
-        <button type="submit" disabled={pendente}>
+          <Input type="number" name="desconto" min="0" step="0.01" required />
+        </Label>
+        <Button type="submit" disabled={pendente}>
           Aplicar desconto
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -67,24 +71,24 @@ export function FormularioQuitar({
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="debitoId" value={debitoId} />
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Forma de pagamento
-          <select name="forma" defaultValue="" required>
-            <option value="">Selecione</option>
+          <NativeSelect name="forma" defaultValue="" required>
+            <NativeSelectOption value="">Selecione</NativeSelectOption>
             {FORMAS_PAGAMENTO.map((forma) => (
-              <option key={forma} value={forma}>
+              <NativeSelectOption key={forma} value={forma}>
                 {NOME_FORMA[forma]}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </label>
-        <label>
+          </NativeSelect>
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Data
-          <input type="date" name="data" required />
-        </label>
-        <button type="submit" disabled={pendente}>
+          <Input type="date" name="data" required />
+        </Label>
+        <Button type="submit" disabled={pendente}>
           Quitar
-        </button>
+        </Button>
       </form>
     </>
   );

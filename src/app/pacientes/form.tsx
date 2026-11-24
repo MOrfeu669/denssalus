@@ -2,7 +2,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useId, useState, type ReactNode } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { dataValida, menorDeIdade } from "../../domain/paciente/regras";
 import type { Canal, CanalComunicacao, Paciente } from "../../domain/paciente/tipos";
 import { estadoVazio } from "../formulario";
@@ -21,7 +35,6 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
   const [edicao, acaoEditar, pendenteEditar] = useActionState(editar, estadoVazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [aberto, setAberto] = useState(false);
-  const botaoRef = useRef<HTMLButtonElement>(null);
   const aviso = cadastro.quando >= edicao.quando ? cadastro : edicao;
   const erroNoPainel = aberto && aviso === cadastro && cadastro.status === "erro";
 
@@ -30,22 +43,12 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
     if (cadastro.status === "sucesso") setAberto(false);
   }, [edicao, cadastro]);
 
-  useEffect(() => {
-    if (!aberto) return;
-    function tecla(evento: KeyboardEvent) {
-      if (evento.key === "Escape" && !pendenteCadastrar) {
-        setAberto(false);
-        botaoRef.current?.focus();
-      }
+  function aoMudar(proximo: boolean, detalhes: { cancel: () => void }) {
+    if (!proximo && pendenteCadastrar) {
+      detalhes.cancel();
+      return;
     }
-    document.addEventListener("keydown", tecla);
-    return () => document.removeEventListener("keydown", tecla);
-  }, [aberto, pendenteCadastrar]);
-
-  function fechar() {
-    if (pendenteCadastrar) return;
-    setAberto(false);
-    botaoRef.current?.focus();
+    setAberto(proximo);
   }
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
   }, [cadastro, edicao, roteador]);
 
   return (
-    <>
+    <Dialog open={aberto} onOpenChange={aoMudar} disablePointerDismissal={pendenteCadastrar}>
       <div className="pacientes-topo">
         <div>
           <h1>Pacientes</h1>
@@ -61,16 +64,9 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
             Nome completo e ao menos um canal de comunicação são obrigatórios.
           </p>
         </div>
-        <button
-          ref={botaoRef}
-          type="button"
-          className="pacientes-botao"
-          aria-haspopup="dialog"
-          aria-expanded={aberto}
-          onClick={() => setAberto(true)}
-        >
+        <DialogTrigger render={<Button type="button" className="pacientes-principal h-10" />}>
           Novo paciente
-        </button>
+        </DialogTrigger>
       </div>
       {erroNoPainel ? null : <Alerta estado={aviso} />}
       <div className="pacientes-colunas">
@@ -85,15 +81,16 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
                   <div className="pacientes-linha">
                     <Resumo paciente={paciente} />
                     <div className="pacientes-acoes">
-                      <button
+                      <Button
                         type="button"
-                        className="pacientes-botao pacientes-botao-secundario"
+                        variant="outline"
+                        className="h-10"
                         aria-expanded={editandoId === paciente.id}
                         onClick={() => setEditandoId(editandoId === paciente.id ? null : paciente.id)}
                         aria-label={`Editar paciente ${paciente.nome}`}
                       >
                         Editar paciente
-                      </button>
+                      </Button>
                       <Link
                         className="pacientes-link"
                         href={`/prontuarios/${paciente.id}`}
@@ -116,44 +113,41 @@ export function Pacientes({ pacientes }: { pacientes: PacienteLinha[] }) {
           )}
         </section>
       </div>
-      {aberto ? (
-        <div className="pacientes-overlay">
-          <div className="pacientes-overlay-fundo" onClick={fechar} />
-          <div
-            className="pacientes-painel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="pacientes-novo-titulo"
-            tabIndex={-1}
-          >
-            <div className="pacientes-painel-topo">
-              <h2 id="pacientes-novo-titulo">Novo paciente</h2>
-              <button type="button" className="pacientes-botao pacientes-botao-secundario" onClick={fechar}>
-                Fechar
-              </button>
-            </div>
-            {erroNoPainel ? <Alerta estado={cadastro} /> : null}
-            <form
-              className="pacientes-form"
-              key={cadastro.status === "sucesso" ? cadastro.quando : 0}
-              action={acaoCadastrar}
-              aria-busy={pendenteCadastrar}
-            >
-              <Campos />
-              <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" />
-            </form>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[calc(100vh-3rem)] overflow-y-auto sm:max-w-3xl"
+      >
+        <DialogHeader className="flex-row items-start justify-between pr-0">
+          <div className="flex flex-col gap-2">
+            <DialogTitle id="pacientes-novo-titulo">Novo paciente</DialogTitle>
+            <DialogDescription>
+              Nome completo e ao menos um canal de comunicação são obrigatórios.
+            </DialogDescription>
           </div>
-        </div>
-      ) : null}
-    </>
+          <DialogClose className={buttonVariants({ variant: "outline", className: "h-8 shrink-0" })}>
+            Fechar
+          </DialogClose>
+        </DialogHeader>
+        {erroNoPainel ? <Alerta estado={cadastro} /> : null}
+        <form
+          className="pacientes-form"
+          key={cadastro.status === "sucesso" ? cadastro.quando : 0}
+          action={acaoCadastrar}
+          aria-busy={pendenteCadastrar}
+        >
+          <Campos />
+          <Enviar pendente={pendenteCadastrar} texto="Cadastrar paciente" principal />
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function Enviar({ pendente, texto }: { pendente: boolean; texto: string }) {
+function Enviar({ pendente, texto, principal = false }: { pendente: boolean; texto: string; principal?: boolean }) {
   return (
-    <button type="submit" className="pacientes-botao" disabled={pendente}>
+    <Button type="submit" className={principal ? "pacientes-principal h-10 self-start" : "h-10 self-start"} disabled={pendente}>
       {pendente ? "Salvando…" : texto}
-    </button>
+    </Button>
   );
 }
 
@@ -171,7 +165,7 @@ function Resumo({ paciente }: { paciente: PacienteLinha }) {
         {paciente.canais.map((item, indice) => (
           <li key={indice}>
             {ROTULO_CANAL[item.canal]} {item.contato}
-            {item.preferido ? <span className="pacientes-selo">Preferido</span> : null}
+            {item.preferido ? <Badge variant="secondary">Preferido</Badge> : null}
           </li>
         ))}
       </ul>
@@ -184,13 +178,13 @@ function Resumo({ paciente }: { paciente: PacienteLinha }) {
 
 function Campo({ rotulo, nota, children }: { rotulo: string; nota?: string; children: ReactNode }) {
   return (
-    <label className="pacientes-campo">
+    <Label className="pacientes-campo flex-col items-stretch gap-1.5">
       <span>
         {rotulo}
         {nota ? <span className="pacientes-nota"> ({nota})</span> : null}
       </span>
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -227,42 +221,42 @@ function Campos({ paciente }: { paciente?: PacienteLinha }) {
   return (
     <>
       <Campo rotulo="Nome completo" nota="obrigatório">
-        <input {...ligar("nome")} required />
+        <Input {...ligar("nome")} required />
       </Campo>
       <Canais inicial={paciente?.canais} />
       <div className="pacientes-grade">
         <Campo rotulo="CPF" nota="opcional">
-          <input {...ligar("cpf")} inputMode="numeric" />
+          <Input {...ligar("cpf")} inputMode="numeric" />
         </Campo>
         <Campo rotulo="Data de nascimento" nota="opcional">
-          <input {...ligar("dataNascimento")} type="date" />
+          <Input {...ligar("dataNascimento")} type="date" />
         </Campo>
       </div>
       <Campo rotulo="Endereço" nota="opcional">
-        <input {...ligar("endereco")} />
+        <Input {...ligar("endereco")} />
       </Campo>
       <Campo rotulo="Sexo" nota="opcional">
-        <select {...ligar("sexo")}>
-          <option value="">Não informado</option>
+        <NativeSelect {...ligar("sexo")}>
+          <NativeSelectOption value="">Não informado</NativeSelectOption>
           {(["masculino", "feminino", "outro"] as const).map((sexo) => (
-            <option key={sexo} value={sexo}>
+            <NativeSelectOption key={sexo} value={sexo}>
               {ROTULO_SEXO[sexo]}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
+        </NativeSelect>
       </Campo>
       {menor ? (
         <fieldset className="pacientes-grupo">
           <legend>Responsável legal (obrigatório para menor de 18 anos)</legend>
           <Campo rotulo="Nome completo do responsável" nota="obrigatório">
-            <input {...ligar("responsavelNome")} required />
+            <Input {...ligar("responsavelNome")} required />
           </Campo>
           <div className="pacientes-grade">
             <Campo rotulo="CPF do responsável" nota="obrigatório">
-              <input {...ligar("responsavelCpf")} inputMode="numeric" required />
+              <Input {...ligar("responsavelCpf")} inputMode="numeric" required />
             </Campo>
             <Campo rotulo="Telefone do responsável" nota="opcional">
-              <input {...ligar("responsavelTelefone")} type="tel" />
+              <Input {...ligar("responsavelTelefone")} type="tel" />
             </Campo>
           </div>
         </fieldset>
@@ -300,18 +294,18 @@ function Canais({ inicial }: { inicial?: CanalComunicacao[] }) {
       <input type="hidden" name="canais" value={JSON.stringify(linhas)} />
       {linhas.map((linha, indice) => (
         <div key={indice} className="pacientes-canal">
-          <select
+          <NativeSelect
             value={linha.canal}
             onChange={(evento) => alterar(indice, { canal: evento.target.value as Canal })}
             aria-label={`Canal ${indice + 1}`}
           >
             {CANAIS_ORDEM.map((canal) => (
-              <option key={canal} value={canal}>
+              <NativeSelectOption key={canal} value={canal}>
                 {ROTULO_CANAL[canal]}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-          <input
+          </NativeSelect>
+          <Input
             value={linha.contato}
             onChange={(evento) => alterar(indice, { contato: evento.target.value })}
             aria-label={`Contato do canal ${indice + 1}`}
@@ -326,24 +320,26 @@ function Canais({ inicial }: { inicial?: CanalComunicacao[] }) {
             Preferido
           </label>
           {linhas.length > 1 ? (
-            <button
+            <Button
               type="button"
-              className="pacientes-botao pacientes-botao-secundario"
+              variant="outline"
+              className="h-10"
               onClick={() => remover(indice)}
               aria-label={`Remover canal ${indice + 1}`}
             >
               Remover canal
-            </button>
+            </Button>
           ) : null}
         </div>
       ))}
-      <button
+      <Button
         type="button"
-        className="pacientes-botao pacientes-botao-secundario"
+        variant="outline"
+        className="h-10 self-start"
         onClick={() => setLinhas((atual) => [...atual, { canal: "email", contato: "", preferido: false }])}
       >
         Adicionar canal
-      </button>
+      </Button>
     </fieldset>
   );
 }

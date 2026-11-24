@@ -39,9 +39,9 @@ function Fileira({
     </button>
   );
   return (
-    <div role="group" aria-label={titulo} style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+    <div role="group" aria-label={titulo} className="odontograma-fileira">
       {dentes.slice(0, metade).map(botao)}
-      <span aria-hidden="true" style={{ borderLeft: "2px solid currentColor", alignSelf: "stretch" }} />
+      <span aria-hidden="true" className="odontograma-meio" />
       {dentes.slice(metade).map(botao)}
     </div>
   );
@@ -98,7 +98,7 @@ export function Odontograma({
 
   return (
     <>
-      <div role="group" aria-label="Dentes">
+      <div role="group" aria-label="Dentes" className="odontograma">
         <Fileira
           titulo="superior direito e superior esquerdo"
           dentes={superior}

@@ -139,10 +139,10 @@ function Trilho({
               aria-label={
                 rotulo === "Ano" ? item.slice(0, 4) : rotulo === "Meses" ? nomeMes(item) : `${rotuloDia(item).semana} ${rotuloDia(item).numero}`
               }
-              className={`grid shrink-0 place-items-center rounded-xl border ${
+              className={`grid shrink-0 place-items-center rounded-paper-md border shadow-paper-sm ${
                 selecionado
-                  ? "border-acao! bg-acao! text-white!"
-                  : "border-linha! bg-white! text-tinta!"
+                  ? "border-primary! bg-primary! text-primary-foreground!"
+                  : "border-borda-papel! bg-card! text-tinta! hover:border-campo-borda-hover!"
               } ${papel === "amostra" ? "opacity-100" : papel === "lado" ? "opacity-40" : "opacity-0"}`}
               style={{ width: passoPx - 8, height: rotulo === "Ano" ? 40 : rotulo === "Meses" ? 36 : 52 }}
               onClick={() => {

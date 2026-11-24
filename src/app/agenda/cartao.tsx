@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { AgendamentoNaGrade, StatusAgendamento } from "../../domain/agendamento/tipos";
 import { horarioDoDia } from "../agendamentos/texto";
 import type { VisaoGrade } from "./posicao";
-import { rotuloStatus } from "./rotulo";
+import { rotuloStatus, varianteStatus } from "./rotulo";
 
 type Nomes = {
   pacientes: Record<string, string>;
@@ -12,12 +13,12 @@ type Nomes = {
   cadeiras: Record<string, string>;
 };
 
-const CORES: Record<StatusAgendamento, { cartao: string; selo: string }> = {
-  agendado: { cartao: "border-acao bg-nevoa", selo: "bg-white text-marca" },
-  em_espera: { cartao: "border-[#c4841d] bg-[#fff6e8]", selo: "bg-white text-[#8a5a10]" },
-  iniciado: { cartao: "border-marca bg-[#e7f6f3]", selo: "bg-acao text-white" },
-  concluido: { cartao: "border-ok bg-ok-fundo", selo: "bg-ok-fundo text-ok-tinta" },
-  cancelado: { cartao: "border-linha bg-fundo", selo: "bg-white text-apagado" },
+const CORES: Record<StatusAgendamento, string> = {
+  agendado: "border-borda-papel border-l-primary bg-card",
+  em_espera: "border-aviso bg-aviso-fundo",
+  iniciado: "border-primary bg-secondary",
+  concluido: "border-ok bg-ok-fundo",
+  cancelado: "border-borda-papel bg-papel",
 };
 
 export function Cabecalho({
@@ -34,21 +35,23 @@ export function Cabecalho({
   if (visao === "semana") {
     const rotulo = rotuloDoDia(id);
     return (
-      <div className="flex items-center gap-2 border-b border-linha px-3 py-2">
+      <div className="flex items-center gap-2 border-b border-borda-papel px-3 py-2">
         <div>
-          <p className="m-0 text-sm leading-4 font-semibold text-tinta">{rotulo.nome}</p>
+          <p className="m-0 font-heading text-sm leading-4 font-semibold text-tinta">{rotulo.nome}</p>
           <p className="m-0 text-xs leading-4 text-apagado">{rotulo.sub}</p>
         </div>
         {id === hoje ? (
-          <span className="rounded-full bg-nevoa px-2 text-[11px] leading-5 font-semibold text-marca">Hoje</span>
+          <Badge variant="secondary" className="h-5 px-1.5 text-[11px]">
+            Hoje
+          </Badge>
         ) : null}
       </div>
     );
   }
   return (
-    <div className="flex items-center gap-2.5 border-b border-linha px-3 py-3">
+    <div className="flex items-center gap-2.5 border-b border-borda-papel bg-papel px-3 py-3">
       <span
-        className="grid size-7 shrink-0 place-items-center rounded-full bg-nevoa text-[11px] font-bold text-marca"
+        className="grid size-7 shrink-0 place-items-center rounded-paper-sm border border-borda-papel bg-card text-[11px] font-bold text-tinta"
         aria-hidden="true"
       >
         {iniciais(nome)}
@@ -83,16 +86,14 @@ export function Cartao({
   const dentista = nomes.dentistas[item.dentistaId] ?? item.dentistaId;
   const cadeira = nomes.cadeiras[item.cadeiraId] ?? item.cadeiraId;
   const horario = horarioDoDia(item.inicio, item.fim);
-  const visual = item.alerta
-    ? { cartao: "border-[#b26a00] bg-[#fff4e0]", selo: "bg-white text-[#8a5a10]" }
-    : CORES[item.status];
+  const visual = item.alerta ? "border-aviso bg-aviso-fundo" : CORES[item.status];
   const detalhe = visao === "dia" ? `${horario} · ${cadeira}` : `${horario} · ${dentista} · ${cadeira}`;
   return (
     <Link
       href={href}
       className={cn(
-        "absolute right-1 left-1 z-10 flex flex-col gap-0.5 overflow-hidden rounded-[10px] border border-l-4 px-2 py-1 text-xs leading-4 text-tinta no-underline",
-        visual.cartao,
+        "absolute right-1 left-1 z-10 flex flex-col gap-0.5 overflow-hidden rounded-paper-sm border border-l-4 px-2 py-1 text-xs leading-4 text-tinta no-underline shadow-paper-sm",
+        visual,
         podeMover && "cursor-grab touch-none",
         arrastando && "cursor-grabbing",
       )}
@@ -119,9 +120,9 @@ export function Cartao({
     >
       <span className="flex items-start justify-between gap-1">
         <span className={cn("truncate font-bold", item.status === "cancelado" && "line-through")}>{paciente}</span>
-        <span className={cn("shrink-0 rounded-full px-2 text-[11px] leading-4 font-semibold", visual.selo)}>
+        <Badge variant={item.alerta ? "warning" : varianteStatus(item.status)} className="h-5 px-1.5 text-[11px]">
           {rotuloStatus(item.status)}
-        </span>
+        </Badge>
       </span>
       <span className={cn("truncate text-apagado", item.status === "cancelado" && "line-through")}>{detalhe}</span>
       {item.alerta ? (
@@ -173,11 +174,10 @@ export function Bloqueio({
   const texto = [visao === "semana" ? dentista : null, horario, motivo].filter(Boolean).join(" · ");
   return (
     <div
-      className="absolute right-1 left-1 z-10 flex flex-col justify-center overflow-hidden rounded-[10px] border border-l-4 border-tinta px-2 py-1 text-xs leading-4 text-tinta"
+      className="agenda-bloqueio absolute right-1 left-1 z-10 flex flex-col justify-center overflow-hidden rounded-paper-sm border border-l-4 border-tinta px-2 py-1 text-xs leading-4 text-tinta"
       style={{
         top: faixa.topoMinutos + 1,
         height: Math.max(faixa.alturaMinutos - 2, 1),
-        backgroundImage: "repeating-linear-gradient(-45deg, #e8eef0, #e8eef0 6px, #d5dee3 6px, #d5dee3 8px)",
       }}
       aria-label={`Bloqueio, ${texto}`}
     >

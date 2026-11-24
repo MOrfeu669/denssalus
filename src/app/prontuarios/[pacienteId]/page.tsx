@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { MENSAGEM_PAPEL } from "../../../domain/auth/tipos";
 import { listarOdontograma } from "../../../domain/odontograma/casos";
 import type { RegistroOdontograma } from "../../../domain/odontograma/tipos";
@@ -29,7 +30,7 @@ import "./tela.css";
 import { FormularioAnamnese, FormularioEvolucao } from "./form";
 import { SecaoDebitos } from "./debitos";
 import { SecaoDocumentos, type DocumentoItem } from "./documentos";
-import { rotuloStatus } from "../../agenda/rotulo";
+import { rotuloStatus, varianteStatus } from "../../agenda/rotulo";
 import { dataAgendamento } from "./formato";
 import { Odontograma } from "./odontograma";
 import { carregarImagens } from "./carregar-imagens";
@@ -249,8 +250,9 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
               const atual = evolucoes.find((item) => item.agendamentoId === consulta.id);
               return (
                 <li key={consulta.id}>
-                  <span>
-                    {inicio} · {rotuloStatus(consulta.status)}
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {inicio}
+                    <Badge variant={varianteStatus(consulta.status)}>{rotuloStatus(consulta.status)}</Badge>
                   </span>
                   <FormularioEvolucao
                     pacienteId={pacienteId}
@@ -383,7 +385,7 @@ export default async function Page({ params }: { params: Promise<{ pacienteId: s
         </p>
       ) : null}
 
-      <p className="nav">
+      <p className="prontuario-voltar">
         <Link href="/pacientes">Voltar</Link>
       </p>
     </>

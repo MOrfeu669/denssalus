@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Agendamento } from "../../../domain/agendamento/tipos";
 import type { Paciente } from "../../../domain/paciente/tipos";
 import { idadeEm } from "../../../domain/paciente/regras";
 import type { RegistroAuditoria } from "../../../domain/prontuario/tipos";
-import { rotuloStatus } from "../../agenda/rotulo";
+import { rotuloStatus, varianteStatus } from "../../agenda/rotulo";
 import { dataAgendamento, dataNascimento, instante } from "./formato";
 
 const ROTULO_CANAL = { sms: "SMS", email: "E-mail", whatsapp: "WhatsApp" } as const;
@@ -35,7 +37,7 @@ export function VisaoGeral({ paciente }: { paciente: Paciente }) {
           </li>
         ) : null}
       </ul>
-      <p className="nav">
+      <p className="prontuario-voltar">
         <Link href="/pacientes">Editar a visão geral em Pacientes</Link>
       </p>
     </section>
@@ -49,16 +51,24 @@ export function Historico({ historico }: { historico: Agendamento[] }) {
       {historico.length === 0 ? (
         <p>Nenhum agendamento para este paciente.</p>
       ) : (
-        <ul className="lista">
-          {historico.map((agendamento) => (
-            <li
-              key={agendamento.id}
-              className={agendamento.status === "cancelado" ? "riscado" : undefined}
-            >
-              {dataAgendamento(agendamento.inicio)} · {rotuloStatus(agendamento.status)}
-            </li>
-          ))}
-        </ul>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Data</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {historico.map((agendamento) => (
+              <TableRow key={agendamento.id} className={agendamento.status === "cancelado" ? "riscado" : undefined}>
+                <TableCell className="whitespace-normal">{dataAgendamento(agendamento.inicio)}</TableCell>
+                <TableCell className="whitespace-normal">
+                  <Badge variant={varianteStatus(agendamento.status)}>{rotuloStatus(agendamento.status)}</Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </section>
   );
@@ -71,15 +81,30 @@ export function Auditoria({ registros }: { registros: RegistroAuditoria[] }) {
       {registros.length === 0 ? (
         <p>Nenhum registro na trilha.</p>
       ) : (
-        <ul className="lista">
-          {registros.map((registro) => (
-            <li key={registro.id}>
-              {registro.entidade} · {registro.acao} · autor {registro.usuarioId} ·{" "}
-              {instante(registro.registradoEm)} · anterior:{" "}
-              {registro.conteudoAnterior ?? "sem conteúdo anterior"}
-            </li>
-          ))}
-        </ul>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Entidade</TableHead>
+              <TableHead>Ação</TableHead>
+              <TableHead>Autor</TableHead>
+              <TableHead>Quando</TableHead>
+              <TableHead>Anterior</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {registros.map((registro) => (
+              <TableRow key={registro.id}>
+                <TableCell className="whitespace-normal">{registro.entidade}</TableCell>
+                <TableCell className="whitespace-normal">{registro.acao}</TableCell>
+                <TableCell className="whitespace-normal">{registro.usuarioId}</TableCell>
+                <TableCell className="whitespace-normal">{instante(registro.registradoEm)}</TableCell>
+                <TableCell className="whitespace-normal">
+                  {registro.conteudoAnterior ?? "sem conteúdo anterior"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </section>
   );

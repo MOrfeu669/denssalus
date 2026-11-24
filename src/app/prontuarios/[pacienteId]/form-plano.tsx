@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { ItemPlano } from "../../../domain/plano/tipos";
 import { Aviso } from "../../aviso";
 import { estadoVazio, type EstadoFormulario } from "../../formulario";
@@ -33,43 +37,37 @@ function Campos({
   const semOpcao = atual !== "" && !agendamentos.some((opcao) => opcao.id === atual);
   return (
     <>
-      <label>
+      <Label className="flex-col items-stretch gap-1.5">
         Procedimento
-        <select name="procedimentoId" defaultValue={item?.procedimentoId ?? ""} required>
-          <option value="">Selecione</option>
+        <NativeSelect name="procedimentoId" defaultValue={item?.procedimentoId ?? ""} required>
+          <NativeSelectOption value="">Selecione</NativeSelectOption>
           {procedimentos.map((procedimento) => (
-            <option key={procedimento.id} value={procedimento.id}>
+            <NativeSelectOption key={procedimento.id} value={procedimento.id}>
               {procedimento.nome}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
-      </label>
-      <label>
+        </NativeSelect>
+      </Label>
+      <Label className="flex-col items-stretch gap-1.5">
         Dentes
-        <input type="text" name="dentes" defaultValue={item?.dentes.join(", ") ?? ""} />
-      </label>
-      <label>
+        <Input type="text" name="dentes" defaultValue={item?.dentes.join(", ") ?? ""} />
+      </Label>
+      <Label className="flex-col items-stretch gap-1.5">
         Valor
-        <input
-          type="number"
-          name="valor"
-          min="0"
-          step="0.01"
-          defaultValue={item ? item.valor : ""}
-        />
-      </label>
-      <label>
+        <Input type="number" name="valor" min="0" step="0.01" defaultValue={item ? item.valor : ""} />
+      </Label>
+      <Label className="flex-col items-stretch gap-1.5">
         Agendamento
-        <select name="agendamentoId" defaultValue={atual}>
-          <option value="">Sem agendamento</option>
-          {semOpcao ? <option value={atual}>{atual.slice(0, 8)}</option> : null}
+        <NativeSelect name="agendamentoId" defaultValue={atual}>
+          <NativeSelectOption value="">Sem agendamento</NativeSelectOption>
+          {semOpcao ? <NativeSelectOption value={atual}>{atual.slice(0, 8)}</NativeSelectOption> : null}
           {agendamentos.map((agendamento) => (
-            <option key={agendamento.id} value={agendamento.id}>
+            <NativeSelectOption key={agendamento.id} value={agendamento.id}>
               {`${dataAgendamento(agendamento.inicio)} · ${agendamento.status} · ${agendamento.id.slice(0, 8)}`}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
-      </label>
+        </NativeSelect>
+      </Label>
     </>
   );
 }
@@ -81,9 +79,9 @@ export function FormularioCriarPlano({ pacienteId }: { pacienteId: string }) {
       <Aviso tipo={resposta.status} mensagem={resposta.mensagem} />
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
-        <button type="submit" disabled={pendente}>
+        <Button type="submit" disabled={pendente}>
           Criar plano
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -103,9 +101,9 @@ export function FormularioEmAndamento({
       <form action={executar} aria-busy={pendente}>
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="planoId" value={planoId} />
-        <button type="submit" disabled={pendente}>
+        <Button type="submit" variant="outline" className="prontuario-contorno" disabled={pendente}>
           Em andamento
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -130,9 +128,9 @@ export function FormularioAdicionarItem({
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="planoId" value={planoId} />
         <Campos procedimentos={procedimentos} agendamentos={agendamentos} />
-        <button type="submit" disabled={pendente}>
+        <Button type="submit" disabled={pendente}>
           Adicionar item
-        </button>
+        </Button>
       </form>
     </>
   );
@@ -157,9 +155,9 @@ export function FormularioEditarItem({
         <input type="hidden" name="pacienteId" value={pacienteId} />
         <input type="hidden" name="itemId" value={item.id} />
         <Campos procedimentos={procedimentos} agendamentos={agendamentos} item={item} />
-        <button type="submit" disabled={pendente}>
+        <Button type="submit" disabled={pendente}>
           Salvar item
-        </button>
+        </Button>
       </form>
     </>
   );

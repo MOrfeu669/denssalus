@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { Papel } from "../../domain/auth/tipos";
 import type { Agendamento, OpcoesAgendamento } from "../../domain/agendamento/tipos";
 import {
@@ -35,16 +38,16 @@ export function FormularioEvolucao({
   pendente: boolean;
 }) {
   return (
-    <form action={acao} aria-busy={pendente} className="agendamentos-evolucao">
+    <form action={acao} aria-busy={pendente} className="flex w-full basis-full flex-col items-stretch gap-2">
       <input type="hidden" name="pacienteId" value={agendamento.pacienteId} />
       <input type="hidden" name="agendamentoId" value={agendamento.id} />
-      <label>
+      <Label className="flex-col items-stretch gap-1.5">
         {CAMPO_EVOLUCAO}
-        <textarea name="texto" rows={4} required />
-      </label>
-      <button type="submit" disabled={pendente}>
+        <Textarea name="texto" rows={4} required />
+      </Label>
+      <Button type="submit" className="h-10 self-start" disabled={pendente}>
         {rotuloDoBotao(ROTULO_EVOLUCAO, PENDENTE_EVOLUCAO, pendente)}
-      </button>
+      </Button>
     </form>
   );
 }

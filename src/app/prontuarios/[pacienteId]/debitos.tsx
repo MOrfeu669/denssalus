@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import type { DebitoComPagamento } from "../../../domain/debito/tipos";
 import { FormularioDesconto, FormularioQuitar, NOME_FORMA } from "./form-debito";
 
@@ -28,11 +29,7 @@ function Debito({
   pacienteId: string;
   papel: Papel;
 }) {
-  const partes = [
-    `Valor ${moeda(debito.valor)}`,
-    `Desconto ${moeda(debito.desconto)}`,
-    STATUS_DEBITO[debito.status],
-  ];
+  const partes = [`Valor ${moeda(debito.valor)}`, `Desconto ${moeda(debito.desconto)}`];
   if (debito.pagamento) {
     partes.push(NOME_FORMA[debito.pagamento.forma], dataBr(debito.pagamento.data));
   }
@@ -40,6 +37,7 @@ function Debito({
   return (
     <li>
       <span>{partes.join(" · ")}</span>
+      <Badge variant={debito.status === "quitado" ? "success" : "warning"}>{STATUS_DEBITO[debito.status]}</Badge>
       {emAberto && papel !== "recepcionista" ? (
         <FormularioDesconto pacienteId={pacienteId} debitoId={debito.id} />
       ) : null}

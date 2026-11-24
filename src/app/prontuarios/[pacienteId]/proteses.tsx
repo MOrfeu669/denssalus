@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { protesesDoDente } from "../../../domain/protese/regras";
 import type { Protese } from "../../../domain/protese/tipos";
 import {
@@ -57,7 +58,7 @@ function Item({
   return (
     <li>
       <span>{partes.join(" · ")}</span>
-      {protese.alertaAtraso ? <strong> Atraso</strong> : null}
+      {protese.alertaAtraso ? <Badge variant="warning">Atraso</Badge> : null}
       <Acoes protese={protese} pacienteId={pacienteId} agendamentos={agendamentos} />
     </li>
   );

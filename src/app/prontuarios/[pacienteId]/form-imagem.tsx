@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { MENSAGEM_TAMANHO, TETO_BYTES } from "../../../domain/imagem/tipos";
 import { createClient } from "../../../lib/supabase/client";
 import { Aviso } from "../../aviso";
@@ -79,36 +83,36 @@ export function FormularioImagem({
     <>
       <Aviso key={aviso.quando} tipo={aviso.status} mensagem={aviso.mensagem} />
       <form ref={formulario} onSubmit={enviar} aria-busy={pendente}>
-        <label>
+        <Label className="flex-col items-stretch gap-1.5">
           Arquivo
-          <input type="file" name="arquivo" required />
-        </label>
-        <label>
+          <Input type="file" name="arquivo" required />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Tipo de caso
-          <input type="text" name="tipoCaso" required />
-        </label>
-        <label>
+          <Input type="text" name="tipoCaso" required />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Descrição
-          <input type="text" name="descricao" required />
-        </label>
-        <label>
+          <Input type="text" name="descricao" required />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Dente (opcional)
-          <input type="number" name="dente" inputMode="numeric" />
-        </label>
-        <label>
+          <Input type="number" name="dente" inputMode="numeric" />
+        </Label>
+        <Label className="flex-col items-stretch gap-1.5">
           Consulta (opcional)
-          <select name="agendamentoId" defaultValue="">
-            <option value="">Nenhuma</option>
+          <NativeSelect name="agendamentoId" defaultValue="">
+            <NativeSelectOption value="">Nenhuma</NativeSelectOption>
             {agendamentos.map((agendamento) => (
-              <option key={agendamento.id} value={agendamento.id}>
+              <NativeSelectOption key={agendamento.id} value={agendamento.id}>
                 {`${dataAgendamento(agendamento.inicio)} · ${agendamento.status} · ${agendamento.id.slice(0, 8)}`}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </label>
-        <button type="submit" disabled={pendente}>
+          </NativeSelect>
+        </Label>
+        <Button type="submit" disabled={pendente}>
           Anexar imagem
-        </button>
+        </Button>
       </form>
     </>
   );
