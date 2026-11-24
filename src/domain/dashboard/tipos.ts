@@ -17,16 +17,38 @@ export type ResumoDashboard = {
   porDentista: { dentistaId: string; valor: number }[];
   porProcedimento: { procedimentoId: string; valor: number }[];
   ocupacao: number;
-  estoque: { materialId: string; nome: string; quantidade: number }[];
+  estoque: { materialId: string; nome: string; quantidade: number; minimo: number }[];
+};
+
+export type DiaFaturado = { data: string; valor: number };
+
+export type ApresentacaoDashboard = {
+  diario: DiaFaturado[];
+  metaDiaria: number | null;
+  aReceber: { valor: number; debitos: number };
+  dentistas: { dentistaId: string; nome: string; especialidade: string; valor: number }[];
+  procedimentos: {
+    procedimentoId: string;
+    nome: string;
+    quantidade: number;
+    valor: number;
+    participacao: number;
+  }[];
+  variacaoFaturado: number | null;
+  variacaoOcupacao: number | null;
+  parteRecebida: number | null;
+  trabalhosProtese: number;
 };
 
 export type VisaoDashboard = {
   resumo: ResumoDashboard;
+  apresentacao: ApresentacaoDashboard;
   ocultos: CampoDashboard[];
   periodoSalvo: string;
 };
 
 export type PedidoPeriodo =
+  | { tipo: "hoje" }
   | { tipo: "mes" }
   | { tipo: "7dias" }
   | { tipo: "intervalo"; inicio: string; fim: string };

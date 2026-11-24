@@ -91,7 +91,7 @@ function preencherCadastro(dialog: HTMLElement) {
 describe("diálogo de novo material", () => {
   it("dado o botão Novo material, quando o diálogo abre, então o foco entra no nome e o formulário conserva os names", async () => {
     await montar(createElement(Estoque, { materiais: [luva] }));
-    const gatilho = [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes("Novo material"));
+    const gatilho = [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes("Cadastrar material"));
     expect(gatilho?.getAttribute("aria-haspopup")).toBe("dialog");
     expect(gatilho?.getAttribute("aria-expanded")).toBe("false");
     expect(dialogoVisivel()).toBeNull();
@@ -105,7 +105,7 @@ describe("diálogo de novo material", () => {
     expect(dialog).toBeTruthy();
     expect(dialog?.getAttribute("aria-modal")).toBe("true");
     const rotulo = dialog?.getAttribute("aria-labelledby");
-    expect(document.getElementById(rotulo ?? "")?.textContent).toBe("Novo material");
+    expect(document.getElementById(rotulo ?? "")?.textContent).toBe("Cadastrar material");
     expect(dialog?.contains(document.activeElement)).toBe(true);
     expect((document.activeElement as HTMLInputElement).name).toBe("nome");
     for (const nome of ["nome", "quantidade", "quantidadeMinima", "validade"]) {
@@ -116,7 +116,7 @@ describe("diálogo de novo material", () => {
 
   it("dado o diálogo aberto, quando Esc é pressionado, então ele fecha e o foco volta ao gatilho", async () => {
     await montar(createElement(Estoque, { materiais: [luva] }));
-    const gatilho = [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes("Novo material"));
+    const gatilho = [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes("Cadastrar material"));
     await act(async () => {
       gatilho?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     });
@@ -135,7 +135,7 @@ describe("diálogo de novo material", () => {
 
   it("dado o cadastro pendente, quando Esc é pressionado, então o diálogo permanece aberto", async () => {
     await montar(createElement(Estoque, { materiais: [luva] }));
-    const gatilho = [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes("Novo material"));
+    const gatilho = [...document.querySelectorAll("button")].find((botao) => botao.textContent?.includes("Cadastrar material"));
     await act(async () => {
       gatilho?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     });

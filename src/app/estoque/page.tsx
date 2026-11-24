@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { MENSAGEM_PAPEL } from "../../domain/auth/tipos";
-import { historico, listarMateriais } from "../../domain/estoque/casos";
+import { listarPainel } from "../../domain/estoque/casos";
 import { Aviso } from "../aviso";
 import { CascaAberta } from "../casca";
 import { dependenciasEstoque } from "../dependencias";
 import { falha } from "../falha";
-import { instante } from "../prontuarios/[pacienteId]/formato";
 import { sessaoAtual } from "../sessao";
 import { Estoque, type MaterialTela } from "./form";
 import "./tela.css";
@@ -49,34 +48,29 @@ export default async function Page() {
   const hoje = new Date();
   let materiais: MaterialTela[];
   try {
-    const deps = dependenciasEstoque();
-    const lista = await listarMateriais(deps, sessao, hoje);
+    const lista = await listarPainel(dependenciasEstoque(), sessao, hoje);
     if (!lista.ok) return <Erro mensagem={lista.mensagem} />;
-    materiais = [];
-    for (const material of lista.valor) {
-      const movimentos = await historico(deps, sessao, material.id, hoje);
-      if (!movimentos.ok) return <Erro mensagem={movimentos.mensagem} />;
-      materiais.push({
-        id: material.id,
-        nome: material.nome,
-        quantidade: material.quantidade,
-        quantidadeMinima: material.quantidadeMinima,
-        historico: movimentos.valor.map((item) => ({
-          id: item.id,
-          tipo: item.tipo,
-          quantidade: item.quantidade,
-          usuario: item.usuarioId ?? "—",
-          registradoEm: instante(item.registradoEm),
-        })),
-      });
-    }
+    materiais = lista.valor.map((material) => ({
+      id: material.id,
+      nome: material.nome,
+      quantidade: material.quantidade,
+      quantidadeMinima: material.quantidadeMinima,
+      validade: material.validade,
+      historico: material.movimentos.map((item) => ({
+        id: item.id,
+        tipo: item.tipo,
+        quantidade: item.quantidade,
+        usuario: item.usuarioId ?? "Automático",
+        registradoEm: item.registradoEm,
+      })),
+    }));
   } catch (erro) {
     return <Erro mensagem={falha(erro).mensagem} />;
   }
 
   return (
     <div className="estoque-tela">
-      <Estoque materiais={materiais} />
+      <Estoque materiais={materiais} hoje={hoje.toISOString().slice(0, 10)} />
     </div>
   );
 }
