@@ -3,7 +3,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin: 0 0 20px;
+  margin: 0 0 var(--paper-space-5);
   padding: 16px;
   border: 1px solid;
   border-radius: var(--paper-radius-md);
@@ -55,7 +55,7 @@
   display: grid;
   grid-template-columns: 160px minmax(0, 640px);
   justify-content: center;
-  gap: 20px;
+  gap: var(--paper-space-5);
   align-items: start;
   margin: 0 0 24px;
 }
@@ -85,7 +85,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--paper-space-3);
 }
 
 .casca .usuarios-filtro-item {
@@ -108,7 +108,7 @@
 .casca .usuarios-busca-icone {
   position: absolute;
   top: 50%;
-  left: 14px;
+  left: var(--paper-space-3);
   width: 16px;
   height: 16px;
   transform: translateY(-50%);
@@ -119,7 +119,7 @@
 .casca .usuarios-busca input {
   width: 100%;
   height: 44px;
-  padding: 0 14px 0 40px;
+  padding: 0 var(--paper-space-3) 0 var(--paper-space-6);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);
   background: var(--paper-surface);
@@ -251,7 +251,7 @@
 .casca .usuarios-campo {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--paper-space-2);
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
@@ -262,7 +262,7 @@
 .casca .usuarios-campo select {
   width: 100%;
   height: 44px;
-  padding: 0 14px;
+  padding: 0 var(--paper-space-3);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);
   background: var(--paper-surface);
@@ -280,7 +280,7 @@
   width: fit-content;
   height: 44px;
   margin: 0;
-  padding: 0 20px;
+  padding: 0 var(--paper-space-5);
   border: 0;
   border-radius: var(--paper-radius-md);
   background: var(--paper-primary);
@@ -306,7 +306,7 @@
   width: fit-content;
   height: 36px;
   margin: 0;
-  padding: 0 14px;
+  padding: 0 var(--paper-space-3);
   border: 1px solid var(--paper-primary);
   border-radius: var(--paper-radius-md);
   background: var(--paper-surface);
@@ -331,7 +331,7 @@
   width: fit-content;
   height: 36px;
   margin: 0;
-  padding: 0 14px;
+  padding: 0 var(--paper-space-3);
   border: 1px solid var(--color-perigo);
   border-radius: var(--paper-radius-md);
   background: var(--color-perigo-fundo);
@@ -366,7 +366,7 @@
   align-items: center;
   gap: 12px;
   min-height: 56px;
-  padding: 10px 0;
+  padding: var(--paper-space-3) 0;
   border-bottom: 1px solid var(--muted);
 }
 
@@ -442,7 +442,7 @@
 
 .casca .usuarios-nota {
   margin: 16px 0 0;
-  padding: 12px 14px;
+  padding: 12px var(--paper-space-3);
   border-radius: var(--paper-radius-md);
   background: var(--cor-fundo);
   font-size: 13px;

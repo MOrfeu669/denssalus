@@ -18,14 +18,14 @@
 }
 
 .casca .casca-quem {
-  margin: 0 0 28px;
+  margin: 0 0 var(--paper-space-6);
   font-size: 14px;
   line-height: 20px;
   color: var(--color-apagado);
 }
 
 .casca .casca-texto {
-  margin: 0 0 20px;
+  margin: 0 0 var(--paper-space-5);
   max-width: 560px;
   font-size: 16px;
   line-height: 24px;
@@ -82,7 +82,7 @@
 }
 
 .casca .casca-passo-concluido .casca-passo-numero {
-  background: var(--color-ok);
+  background: var(--color-ok-tinta);
   color: #fff;
 }
 
@@ -110,7 +110,7 @@
   width: fit-content;
   height: 44px;
   margin: 0;
-  padding: 0 20px;
+  padding: 0 var(--paper-space-5);
   border: 0;
   border-radius: var(--paper-radius-md);
   background: var(--paper-primary);
@@ -143,7 +143,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--paper-space-3);
-  margin: 0 0 20px;
+  margin: 0 0 var(--paper-space-5);
   padding: var(--paper-space-4);
   border: 1px solid var(--color-perigo);
   border-radius: var(--paper-radius-md);
@@ -160,7 +160,7 @@
 
 .casca .casca-aviso {
   max-width: 560px;
-  margin: 0 0 20px;
+  margin: 0 0 var(--paper-space-5);
   padding: var(--paper-space-4);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);
@@ -170,7 +170,7 @@
 }
 
 .casca .casca-atalhos {
-  margin-top: 28px;
+  margin-top: var(--paper-space-6);
   max-width: 720px;
 }
 
@@ -195,7 +195,7 @@
 }
 
 .casca .casca-miolo h2 {
-  margin: 28px 0 var(--paper-space-2);
+  margin: var(--paper-space-6) 0 var(--paper-space-2);
   font-family: var(--font-heading), Montserrat, sans-serif;
   font-size: 18px;
   line-height: 26px;
@@ -205,7 +205,7 @@
   display: grid;
   gap: var(--paper-space-3);
   margin: var(--paper-space-4) 0;
-  padding: 20px;
+  padding: var(--paper-space-5);
   background: var(--paper-surface);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);
@@ -229,7 +229,7 @@
 .casca .casca-miolo input,
 .casca .casca-miolo select,
 .casca .casca-miolo textarea {
-  padding: 10px var(--paper-space-3);
+  padding: var(--paper-space-3);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);
   background: var(--paper-surface);
@@ -244,7 +244,7 @@
   background: var(--paper-primary);
   color: #fff;
   font-weight: 600;
-  padding: 10px var(--paper-space-4);
+  padding: var(--paper-space-3) var(--paper-space-4);
 }
 
 .casca .casca-miolo button[type="button"] {
@@ -314,7 +314,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--paper-space-2) var(--paper-space-4);
-  margin: 0 0 20px;
+  margin: 0 0 var(--paper-space-5);
 }
 
 .casca .prontuario-nav a {
@@ -325,7 +325,7 @@
 
 .casca .prontuario-secao {
   margin: 0 0 var(--paper-space-4);
-  padding: 20px;
+  padding: var(--paper-space-5);
   background: var(--paper-surface);
   border: 1px solid var(--color-linha);
   border-radius: var(--paper-radius-md);

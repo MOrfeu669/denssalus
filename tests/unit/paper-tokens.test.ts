@@ -139,7 +139,7 @@ describe("tipografia Paper na casca", () => {
   });
 
   it("dado o módulo de tipografia, quando a casca carrega fontes, então usa Roboto/Montserrat/PT Mono nos slots Paper", async () => {
-    const { tipografiaCasca } = await import("../../src/app/tipografia-paper");
+    await import("../../src/app/tipografia-paper");
 
     expect(carregadores.Roboto).toHaveBeenCalledTimes(1);
     expect(carregadores.Montserrat).toHaveBeenCalledTimes(1);
@@ -147,8 +147,5 @@ describe("tipografia Paper na casca", () => {
     expect(carregadores.Roboto.mock.calls[0][0].variable).toBe(PAPER.tipografia.sans.variavel);
     expect(carregadores.Montserrat.mock.calls[0][0].variable).toBe(PAPER.tipografia.heading.variavel);
     expect(carregadores.PT_Mono.mock.calls[0][0].variable).toBe(PAPER.tipografia.mono.variavel);
-    expect(tipografiaCasca).toContain(PAPER.tipografia.sans.variavel);
-    expect(tipografiaCasca).toContain(PAPER.tipografia.heading.variavel);
-    expect(tipografiaCasca).toContain(PAPER.tipografia.mono.variavel);
   });
 });

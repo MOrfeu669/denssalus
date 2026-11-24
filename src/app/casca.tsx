@@ -51,7 +51,7 @@ export async function Casca({
             <Button
               type="submit"
               variant="outline"
-              className="h-10 w-full rounded-md border-nevoa bg-transparent text-sm leading-5 font-semibold text-white shadow-none hover:bg-acao hover:text-white"
+              className="h-10 w-full rounded-md border-nevoa bg-transparent text-sm leading-5 font-semibold text-white shadow-none hover:bg-sidebar-accent hover:text-white"
             >
               Sair
             </Button>
