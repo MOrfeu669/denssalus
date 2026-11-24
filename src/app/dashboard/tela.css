@@ -1,60 +1,37 @@
-/* Dashboard. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
+/* Dashboard. Seletores mais específicos que `.casca .casca-miolo` para o
+   campo e o botão mostrarem hover, foco, disabled e erro com token Paper. */
 
 .casca .dashboard-tela {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--paper-space-5);
   max-width: 880px;
 }
 
-.casca .dashboard-tela > h1 {
+.casca .casca-miolo .dashboard-tela > h1,
+.casca .casca-miolo .dashboard-tela h2,
+.casca .casca-miolo .dashboard-tela h3 {
   margin: 0;
-  color: #0f433d;
+  color: var(--paper-text);
 }
 
-/* Página em rolagem vertical: um bloco abaixo do outro. */
+.casca .casca-miolo .dashboard-tela h2 {
+  font-family: var(--font-heading), Montserrat, sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.casca .casca-miolo .dashboard-tela h3 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
 .casca .dashboard-painel {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.casca .dashboard-periodo,
-.casca .dashboard-bloco,
-.casca .dashboard-papel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 24px;
-  border: 1px solid #cbd4d9;
-  border-radius: 14px;
-  background: #fff;
-  color: #0f1a20;
-}
-
-.casca .dashboard-periodo h2,
-.casca .dashboard-bloco h2,
-.casca .dashboard-papel h2 {
-  margin: 0;
-  font-size: 18px;
-  line-height: 26px;
-  font-weight: 700;
-  color: #0f433d;
-}
-
-.casca .dashboard-bloco-topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.casca .dashboard-bloco h3 {
-  margin: 0 0 8px;
-  font-size: 15px;
-  line-height: 22px;
-  font-weight: 700;
-  color: #0f1a20;
+  gap: var(--paper-space-4);
 }
 
 .casca .dashboard-periodo-texto {
@@ -62,106 +39,48 @@
   font-size: 16px;
   line-height: 24px;
   font-weight: 600;
+  color: var(--paper-text);
 }
 
 .casca .dashboard-numero {
   margin: 0;
-  font-size: 28px;
-  line-height: 36px;
+  font-family: var(--font-heading), Montserrat, sans-serif;
+  font-size: 32px;
+  line-height: 40px;
   font-weight: 700;
-  color: #0f433d;
+  color: var(--paper-text);
 }
 
-.casca .dashboard-nota {
+.casca .dashboard-nota,
+.casca .dashboard-vazio {
   margin: 0;
   font-size: 14px;
   line-height: 20px;
-  color: #475760;
+  color: var(--color-apagado);
 }
 
 .casca .dashboard-vazio {
-  margin: 0;
-  font-size: 15px;
-  line-height: 22px;
-  color: #475760;
+  font-size: 16px;
+  line-height: 24px;
 }
 
-/* Valores por dentista e por procedimento */
-.casca .dashboard-detalhe + .dashboard-detalhe {
-  margin-top: 8px;
-}
-
-.casca .dashboard-valores {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.casca .dashboard-valores li.dashboard-valor-linha {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4px 16px;
-  margin: 0;
-  padding: 10px 14px;
-  border: 1px solid #e2e8ec;
-  border-radius: 10px;
-  background: #f6f8f9;
-  font-size: 15px;
-  line-height: 22px;
-  color: #0f1a20;
-}
-
-.casca .dashboard-valor-linha span {
-  overflow-wrap: anywhere;
-}
-
-/* Materiais abaixo do mínimo: vermelho, com nome e quantidade. */
-.casca .dashboard-valores li.dashboard-alerta,
-.casca .dashboard-valores li.alerta {
-  justify-content: flex-start;
-  border: 1px solid #d4372c;
-  border-left-width: 6px;
-  background: #fef0ef;
-  color: #ad2a21;
-  font-weight: 600;
-}
-
-/* Ocupação */
-.casca .dashboard-barra {
-  height: 10px;
-  border-radius: 999px;
-  background: #e2e8ec;
-  overflow: hidden;
-}
-
-.casca .dashboard-barra-cheia {
-  height: 100%;
-  border-radius: 999px;
-  background: #158172;
-}
-
-/* Ações e campos */
 .casca .dashboard-acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--paper-space-2);
 }
 
 .casca .dashboard-exportar {
-  padding-top: 14px;
-  border-top: 1px solid #e2e8ec;
+  padding-top: var(--paper-space-4);
+  border-top: 1px solid var(--paper-borda);
 }
 
-.casca .dashboard-tela form.dashboard-form {
+.casca .casca-miolo .dashboard-tela form.dashboard-form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--paper-space-4);
   margin: 0;
   padding: 0;
   border: 0;
@@ -169,152 +88,247 @@
   background: transparent;
 }
 
-.casca .dashboard-tela form.dashboard-form-linha {
+.casca .casca-miolo .dashboard-tela form.dashboard-form-linha {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px;
+  gap: var(--paper-space-3);
 }
 
 .casca .dashboard-campo {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: var(--paper-space-1);
+  min-width: 11rem;
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #0f1a20;
+  color: var(--paper-text);
 }
 
-.casca .dashboard-campo input,
-.casca .dashboard-campo select {
-  height: 44px;
+.casca .casca-miolo .dashboard-tela input[data-slot="input"],
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"] {
+  width: 100%;
+  height: 40px;
   margin: 0;
-  padding: 0 12px;
-  border: 1px solid #cbd4d9;
-  border-radius: 10px;
-  background: #fff;
-  color: #0f1a20;
-  font: inherit;
-  font-size: 15px;
+  padding: 0 var(--paper-space-3);
+  border: 1px solid var(--paper-campo-borda);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-campo-fundo);
+  color: var(--paper-text);
+  font-size: 14px;
   font-weight: 400;
+  box-shadow: var(--paper-sombra-sm);
 }
 
-.casca .dashboard-campo input:focus-visible,
-.casca .dashboard-campo select:focus-visible,
-.casca .dashboard-marca input:focus-visible {
-  outline: 2px solid #158172;
-  outline-offset: 1px;
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"] {
+  padding-right: var(--paper-space-6);
+}
+
+.casca .casca-miolo .dashboard-tela input[data-slot="input"]:hover,
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"]:hover {
+  border-color: var(--paper-campo-borda-hover);
+}
+
+.casca .casca-miolo .dashboard-tela input[data-slot="input"]:focus-visible,
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"]:focus-visible {
+  border-color: var(--paper-campo-foco);
+  outline: 3px solid var(--paper-campo-foco);
+  outline-offset: 2px;
+}
+
+.casca .casca-miolo .dashboard-tela input[data-slot="input"]:disabled,
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"]:disabled {
+  cursor: not-allowed;
+  border-color: var(--paper-borda);
+  background: var(--paper-disabled-fundo);
+  color: var(--paper-disabled-tinta);
+  box-shadow: none;
+}
+
+.casca .casca-miolo .dashboard-tela input[data-slot="input"][aria-invalid="true"],
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"][aria-invalid="true"] {
+  border: 2px solid var(--paper-danger);
+}
+
+.casca .casca-miolo .dashboard-tela input[data-slot="input"][aria-invalid="true"]:focus-visible,
+.casca .casca-miolo .dashboard-tela select[data-slot="native-select"][aria-invalid="true"]:focus-visible {
+  outline-color: var(--paper-danger);
 }
 
 .casca .dashboard-campos-papel {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--paper-space-2);
   margin: 0;
-  padding: 12px 16px;
-  border: 1px solid #cbd4d9;
-  border-radius: 10px;
+  padding: var(--paper-space-3) var(--paper-space-4);
+  border: 1px solid var(--paper-borda);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-fundo);
 }
 
 .casca .dashboard-campos-papel legend {
-  padding: 0 6px;
+  padding: 0 var(--paper-space-1);
   font-size: 14px;
   font-weight: 600;
-  color: #0f433d;
+  color: var(--paper-text);
 }
 
 .casca .dashboard-marca {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  line-height: 22px;
-  color: #0f1a20;
-}
-
-.casca .dashboard-marca input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  padding: 0;
-  accent-color: #158172;
-}
-
-.casca .dashboard-tela button.dashboard-botao {
-  width: fit-content;
-  height: 44px;
-  margin: 0;
-  padding: 0 20px;
-  border: 1px solid #158172;
-  border-radius: 10px;
-  background: #158172;
-  color: #fff;
-  font: inherit;
-  font-size: 15px;
+  gap: var(--paper-space-2);
+  font-size: 16px;
   line-height: 24px;
-  font-weight: 600;
-  cursor: pointer;
+  font-weight: 400;
+  color: var(--paper-text);
 }
 
-.casca .dashboard-tela button.dashboard-botao:hover:not(:disabled) {
-  background: #0f433d;
-  border-color: #0f433d;
+.casca .casca-miolo .dashboard-tela input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 
-.casca .dashboard-tela button.dashboard-botao:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.casca .casca-miolo .dashboard-tela [data-slot="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--paper-campo-borda);
+  border-radius: var(--paper-radius-sm);
+  background: var(--paper-campo-fundo);
+  box-shadow: var(--paper-sombra-sm);
 }
 
-.casca .dashboard-tela button.dashboard-botao-secundario {
-  height: 40px;
-  background: #fff;
-  color: #0f433d;
-  font-size: 14px;
+.casca .casca-miolo .dashboard-tela [data-slot="checkbox"][data-checked] {
+  border-color: var(--paper-primary);
+  background: var(--paper-primary);
+  color: var(--primary-foreground);
 }
 
-.casca .dashboard-tela button.dashboard-botao-secundario:hover:not(:disabled) {
-  background: #d3f3ec;
-  border-color: #158172;
-  color: #0f433d;
+.casca .casca-miolo .dashboard-tela [data-slot="checkbox"]:hover {
+  border-color: var(--paper-campo-borda-hover);
 }
 
-.casca .dashboard-tela button.dashboard-botao-secundario[aria-pressed="true"] {
-  background: #158172;
-  border-color: #158172;
-  color: #fff;
-}
-
-.casca .dashboard-tela button.dashboard-botao-discreto {
-  height: 36px;
-  padding: 0 14px;
-  border-color: #cbd4d9;
-  background: #f6f8f9;
-  color: #0f433d;
-  font-size: 14px;
-}
-
-.casca .dashboard-tela button.dashboard-botao-discreto:hover:not(:disabled) {
-  background: #d3f3ec;
-  border-color: #158172;
-  color: #0f433d;
-}
-
-.casca .dashboard-tela button.dashboard-botao:focus-visible {
-  outline: 3px solid #0f433d;
+.casca .casca-miolo .dashboard-tela [data-slot="checkbox"]:focus-visible {
+  outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
 }
 
-/* Alerta (erro e sucesso recebem foco) */
-.casca .dashboard-tela .erro,
-.casca .dashboard-tela .sucesso {
+.casca .casca-miolo .dashboard-tela [data-slot="checkbox"][aria-invalid="true"] {
+  border-color: var(--paper-danger);
+}
+
+.casca .casca-miolo .dashboard-tela [data-slot="checkbox"]:disabled {
+  cursor: not-allowed;
+  border-color: var(--paper-borda);
+  background: var(--paper-disabled-fundo);
+  color: var(--paper-disabled-tinta);
+  box-shadow: none;
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"] {
+  width: fit-content;
+  height: 40px;
   margin: 0;
+  padding: 0 var(--paper-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-primary);
+  color: var(--primary-foreground);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--paper-sombra-sm);
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"]:hover:not(:disabled) {
+  background: var(--paper-primary-hover);
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"]:focus-visible {
+  outline: 3px solid var(--paper-secondary);
+  outline-offset: 2px;
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"]:disabled {
+  opacity: var(--paper-disabled-opacidade);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"][aria-invalid="true"] {
+  border-color: var(--paper-danger);
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-secundario {
+  border-color: var(--paper-borda);
+  background: var(--paper-surface);
+  color: var(--paper-text);
+  box-shadow: none;
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-secundario:hover:not(:disabled) {
+  border-color: var(--paper-campo-borda-hover);
+  background: var(--paper-fundo);
+  color: var(--paper-text);
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-secundario[aria-pressed="true"] {
+  border-color: var(--paper-primary);
+  background: var(--paper-primary);
+  color: var(--primary-foreground);
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-discreto {
+  height: 32px;
+  padding: 0 var(--paper-space-3);
+  border-color: transparent;
+  background: transparent;
+  color: var(--paper-text);
+  box-shadow: none;
+}
+
+.casca .casca-miolo .dashboard-tela button[data-slot="button"].dashboard-botao-discreto:hover:not(:disabled) {
+  background: var(--paper-fundo);
+  color: var(--paper-text);
+}
+
+.casca .dashboard-alertas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--paper-space-2);
+}
+
+.casca .dashboard-alertas li.dashboard-alerta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--paper-space-2);
+  margin: 0;
+  padding: var(--paper-space-2) var(--paper-space-3);
+  border: 1px solid var(--paper-danger);
+  border-radius: var(--paper-radius-sm);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .casca .dashboard-tela .erro:focus,
 .casca .dashboard-tela .sucesso:focus {
-  outline: 3px solid #0f433d;
+  outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
 }
 
@@ -323,18 +337,16 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--paper-space-3);
 }
 
 @media (max-width: 640px) {
-  .casca .dashboard-periodo,
-  .casca .dashboard-bloco,
-  .casca .dashboard-papel {
-    padding: 16px;
-  }
-
-  .casca .dashboard-tela form.dashboard-form-linha {
+  .casca .casca-miolo .dashboard-tela form.dashboard-form-linha {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .casca .dashboard-campo {
+    width: 100%;
   }
 }

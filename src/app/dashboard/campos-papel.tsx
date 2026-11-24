@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { CAMPOS_DASHBOARD, type CampoDashboard } from "../../domain/dashboard/tipos";
 import { salvarCamposDoPapel, type Papel, type RespostaDashboard } from "./actions";
 
@@ -33,31 +38,40 @@ export function CamposDoPapel({
 
   return (
     <section className="dashboard-papel" aria-labelledby="dashboard-titulo-papel">
-      <h2 id="dashboard-titulo-papel">Blocos por papel</h2>
-      <form className="dashboard-form" onSubmit={salvar} aria-busy={pendente}>
-        <label className="dashboard-campo">
-          Papel
-          <select value={papel} onChange={(evento) => setPapel(evento.target.value as Papel)}>
-            {PAPEIS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-        <fieldset className="dashboard-campos-papel" key={papel}>
-          <legend>Campos ocultos para o papel</legend>
-          {CAMPOS_DASHBOARD.map((campo) => (
-            <label key={campo} className="dashboard-marca">
-              <input type="checkbox" name={campo} />
-              {ROTULOS_CAMPO[campo]}
-            </label>
-          ))}
-        </fieldset>
-        <button type="submit" className="dashboard-botao" disabled={pendente}>
-          Salvar campos do papel
-        </button>
-      </form>
+      <Card>
+        <CardContent className="flex flex-col gap-4">
+          <h2 id="dashboard-titulo-papel">Blocos por papel</h2>
+          <form className="dashboard-form" onSubmit={salvar} aria-busy={pendente}>
+            <div className="dashboard-campo">
+              <Label htmlFor="dashboard-papel-select">Papel</Label>
+              <NativeSelect
+                id="dashboard-papel-select"
+                className="max-w-xs"
+                value={papel}
+                onChange={(evento) => setPapel(evento.target.value as Papel)}
+              >
+                {PAPEIS.map((item) => (
+                  <NativeSelectOption key={item} value={item}>
+                    {item}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+            </div>
+            <fieldset className="dashboard-campos-papel" key={papel}>
+              <legend>Campos ocultos para o papel</legend>
+              {CAMPOS_DASHBOARD.map((campo) => (
+                <Label key={campo} className="dashboard-marca">
+                  <Checkbox name={campo} />
+                  {ROTULOS_CAMPO[campo]}
+                </Label>
+              ))}
+            </fieldset>
+            <Button type="submit" className="dashboard-botao" disabled={pendente}>
+              Salvar campos do papel
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 }

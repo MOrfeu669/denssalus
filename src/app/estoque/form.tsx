@@ -2,6 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Aviso } from "../aviso";
 import { estadoVazio, type EstadoFormulario } from "../formulario";
 import { cadastrarMaterial, reabastecerMaterial } from "./actions";
@@ -25,8 +38,7 @@ export type MaterialTela = {
 
 export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
   const roteador = useRouter();
-  const botaoRef = useRef<HTMLButtonElement>(null);
-  const painelRef = useRef<HTMLElement>(null);
+  const nomeRef = useRef<HTMLInputElement>(null);
   const [aberto, setAberto] = useState(false);
   const [cadastro, acaoCadastrar, pendenteCadastrar] = useActionState(cadastrarMaterial, estadoVazio);
   const [reposicao, acaoReabastecer, pendenteReabastecer] = useActionState(
@@ -44,95 +56,65 @@ export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
     if ([cadastro, reposicao].some((item) => item.status === "sucesso")) roteador.refresh();
   }, [cadastro, reposicao, roteador]);
 
-  useEffect(() => {
-    if (aberto) painelRef.current?.focus();
-  }, [aberto]);
-
-  useEffect(() => {
-    if (!aberto) return;
-    function tecla(evento: KeyboardEvent) {
-      if (evento.key === "Escape" && !pendenteCadastrar) {
-        setAberto(false);
-        botaoRef.current?.focus();
-      }
+  function aoAbrir(proximo: boolean, detalhes: { cancel: () => void }) {
+    if (!proximo && pendenteCadastrar) {
+      detalhes.cancel();
+      return;
     }
-    document.addEventListener("keydown", tecla);
-    return () => document.removeEventListener("keydown", tecla);
-  }, [aberto, pendenteCadastrar]);
-
-  function fechar() {
-    if (pendenteCadastrar) return;
-    setAberto(false);
-    botaoRef.current?.focus();
+    setAberto(proximo);
   }
 
   return (
     <>
       <div className="estoque-cabeca">
         <h1>Estoque</h1>
-        <button
-          ref={botaoRef}
-          type="button"
-          className="estoque-botao"
-          aria-haspopup="dialog"
-          aria-expanded={aberto}
-          aria-controls={aberto ? "estoque-cadastro" : undefined}
-          onClick={() => setAberto(true)}
-        >
-          Novo material
-        </button>
-      </div>
-      {erroNoPainel ? null : <Aviso key={aviso.quando} tipo={aviso.status} mensagem={aviso.mensagem} />}
-      {aberto ? (
-        <div className="estoque-overlay">
-          <div className="estoque-overlay-fundo" onClick={fechar} />
-          <section
-            ref={painelRef}
-            id="estoque-cadastro"
-            className="estoque-painel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="estoque-titulo-novo"
-            tabIndex={-1}
+        <Dialog open={aberto} onOpenChange={aoAbrir}>
+          <DialogTrigger render={<Button type="button" className="estoque-botao h-10 px-4" />}>
+            Novo material
+          </DialogTrigger>
+          <DialogContent
+            className="max-h-[calc(100vh-3rem)] overflow-auto sm:max-w-xl"
+            initialFocus={nomeRef}
           >
-            <div className="estoque-painel-topo">
-              <h2 id="estoque-titulo-novo">Novo material</h2>
-              <button type="button" className="estoque-botao estoque-botao-secundario" onClick={fechar}>
-                Fechar
-              </button>
-            </div>
+            <DialogHeader>
+              <DialogTitle>Novo material</DialogTitle>
+              <DialogDescription>Informe o nome, a quantidade, o mínimo e a validade.</DialogDescription>
+            </DialogHeader>
             {erroNoPainel ? <Aviso key={aviso.quando} tipo={aviso.status} mensagem={aviso.mensagem} /> : null}
             <form
-              className="estoque-form"
+              className="flex flex-col gap-4"
               key={cadastro.status === "sucesso" ? cadastro.quando : 0}
               action={acaoCadastrar}
               aria-busy={pendenteCadastrar}
             >
-              <div className="estoque-campos">
-                <label className="estoque-campo">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Label className="flex-col items-start gap-1.5">
                   Nome
-                  <input name="nome" required />
-                </label>
-                <label className="estoque-campo">
+                  <Input ref={nomeRef} name="nome" required />
+                </Label>
+                <Label className="flex-col items-start gap-1.5">
                   Quantidade
-                  <input name="quantidade" type="number" min={1} step={1} required />
-                </label>
-                <label className="estoque-campo">
+                  <Input name="quantidade" type="number" min={1} step={1} required />
+                </Label>
+                <Label className="flex-col items-start gap-1.5">
                   Quantidade mínima
-                  <input name="quantidadeMinima" type="number" min={0} step={1} required />
-                </label>
-                <label className="estoque-campo">
+                  <Input name="quantidadeMinima" type="number" min={0} step={1} required />
+                </Label>
+                <Label className="flex-col items-start gap-1.5">
                   Validade
-                  <input name="validade" type="date" required />
-                </label>
+                  <Input name="validade" type="date" required />
+                </Label>
               </div>
-              <button type="submit" className="estoque-botao" disabled={pendenteCadastrar}>
-                {pendenteCadastrar ? "Salvando…" : "Cadastrar material"}
-              </button>
+              <DialogFooter>
+                <Button type="submit" className="h-10 px-4" disabled={pendenteCadastrar}>
+                  {pendenteCadastrar ? "Salvando…" : "Cadastrar material"}
+                </Button>
+              </DialogFooter>
             </form>
-          </section>
-        </div>
-      ) : null}
+          </DialogContent>
+        </Dialog>
+      </div>
+      {erroNoPainel ? null : <Aviso key={aviso.quando} tipo={aviso.status} mensagem={aviso.mensagem} />}
       <section className="estoque-secao" aria-labelledby="estoque-titulo-lista">
         <h2 id="estoque-titulo-lista">Materiais da clínica</h2>
         {materiais.length === 0 ? (
@@ -150,7 +132,11 @@ export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
                     <span className="estoque-nome">{material.nome}</span>
                     <span className="estoque-quantidade">{`Quantidade válida: ${material.quantidade}`}</span>
                     <span className="estoque-minimo">{`Quantidade mínima: ${material.quantidadeMinima}`}</span>
-                    {abaixo ? <strong className="estoque-selo">Abaixo do mínimo</strong> : null}
+                    {abaixo ? (
+                      <Badge variant="destructive" className="border-perigo bg-card text-perigo-tinta">
+                        Abaixo do mínimo
+                      </Badge>
+                    ) : null}
                   </div>
                   <form
                     className="estoque-form estoque-form-linha"
@@ -159,21 +145,22 @@ export function Estoque({ materiais }: { materiais: MaterialTela[] }) {
                   >
                     <input type="hidden" name="materialId" value={material.id} />
                     <input type="hidden" name="nomeMaterial" value={material.nome} />
-                    <label className="estoque-campo">
+                    <Label className="estoque-campo">
                       {`Quantidade a reabastecer de ${material.nome}`}
-                      <input name="quantidade" type="number" min={1} step={1} required />
-                    </label>
-                    <label className="estoque-campo">
+                      <Input name="quantidade" type="number" min={1} step={1} required />
+                    </Label>
+                    <Label className="estoque-campo">
                       {`Validade do lote de ${material.nome}`}
-                      <input name="validade" type="date" required />
-                    </label>
-                    <button
+                      <Input name="validade" type="date" required />
+                    </Label>
+                    <Button
                       type="submit"
-                      className="estoque-botao estoque-botao-secundario"
+                      variant="outline"
+                      className="estoque-botao-secundario"
                       disabled={pendenteReabastecer}
                     >
                       {pendenteReabastecer ? "Salvando…" : "Reabastecer"}
-                    </button>
+                    </Button>
                   </form>
                   <Historico material={material} />
                 </li>

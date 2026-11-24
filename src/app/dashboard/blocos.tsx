@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { CampoDashboard } from "../../domain/dashboard/tipos";
 
 export function moeda(valor: number): string {
@@ -29,19 +32,26 @@ export function Bloco({
   const id = `bloco-${campo}`;
   return (
     <section className={`dashboard-bloco dashboard-bloco-${campo}`} aria-labelledby={id}>
-      <div className="dashboard-bloco-topo">
-        <h2 id={id}>{titulo}</h2>
-        <button
-          type="button"
-          className="dashboard-botao dashboard-botao-discreto"
-          aria-describedby={id}
-          disabled={pendente}
-          onClick={() => ocultar(campo)}
-        >
-          Ocultar
-        </button>
-      </div>
-      {children}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2 id={id}>{titulo}</h2>
+          </CardTitle>
+          <CardAction>
+            <Button
+              type="button"
+              variant="ghost"
+              className="dashboard-botao-discreto"
+              aria-describedby={id}
+              disabled={pendente}
+              onClick={() => ocultar(campo)}
+            >
+              Ocultar
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">{children}</CardContent>
+      </Card>
     </section>
   );
 }
@@ -55,21 +65,23 @@ export function Valores({
   itens: { id: string; valor: number }[];
   vazio: string;
 }) {
+  if (itens.length === 0) return <p className="dashboard-vazio">{vazio}</p>;
   return (
-    <div className="dashboard-detalhe">
-      <h3>{titulo}</h3>
-      {itens.length === 0 ? (
-        <p className="dashboard-vazio">{vazio}</p>
-      ) : (
-        <ul className="dashboard-valores" aria-label={titulo}>
-          {itens.map((item) => (
-            <li key={item.id} className="dashboard-valor-linha">
-              <span>{item.id}</span>
-              <strong>{moeda(item.valor)}</strong>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <Table aria-label={titulo}>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{titulo}</TableHead>
+          <TableHead className="text-right">Valor</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {itens.map((item) => (
+          <TableRow key={item.id}>
+            <TableCell className="whitespace-normal">{item.id}</TableCell>
+            <TableCell className="text-right font-semibold whitespace-normal">{moeda(item.valor)}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

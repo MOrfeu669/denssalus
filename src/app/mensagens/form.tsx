@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { ModeloMensagem } from "../../domain/mensagem/tipos";
 import { Aviso } from "../aviso";
 import { estadoVazio } from "../formulario";
@@ -44,23 +48,27 @@ function Modelo({
 
   return (
     <section className="mensagens-modelo" aria-labelledby={titulo}>
-      <h2 id={titulo}>{ROTULO[tipo]}</h2>
-      <Aviso key={resultado.quando} tipo={resultado.status} mensagem={resultado.mensagem} />
-      <form className="mensagens-form" action={acao} aria-busy={pendente}>
-        <input type="hidden" name="tipo" value={tipo} />
-        <label className="mensagens-campo">
-          {`Texto do modelo de ${ROTULO[tipo]}`}
-          <textarea key={conteudo} name="conteudo" rows={5} defaultValue={conteudo} />
-        </label>
-        <button
-          type="submit"
-          className="mensagens-botao"
-          aria-label={`Salvar modelo de ${ROTULO[tipo]}`}
-          disabled={pendente}
-        >
-          {pendente ? "Salvando…" : "Salvar modelo"}
-        </button>
-      </form>
+      <Card>
+        <CardContent className="flex flex-col gap-4">
+          <h2 id={titulo}>{ROTULO[tipo]}</h2>
+          <Aviso key={resultado.quando} tipo={resultado.status} mensagem={resultado.mensagem} />
+          <form className="mensagens-form" action={acao} aria-busy={pendente}>
+            <input type="hidden" name="tipo" value={tipo} />
+            <Label className="mensagens-campo">
+              {`Texto do modelo de ${ROTULO[tipo]}`}
+              <Textarea key={conteudo} name="conteudo" rows={5} defaultValue={conteudo} />
+            </Label>
+            <Button
+              type="submit"
+              className="mensagens-botao"
+              aria-label={`Salvar modelo de ${ROTULO[tipo]}`}
+              disabled={pendente}
+            >
+              {pendente ? "Salvando…" : "Salvar modelo"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 }

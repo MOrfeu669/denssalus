@@ -1,52 +1,41 @@
-/* Mensagens. Tudo dentro de `.casca` para vencer o globals.css sem editá-lo. */
-
 .casca .mensagens-tela {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--paper-space-4);
   max-width: 720px;
 }
 
-.casca .mensagens-tela > h1 {
+.casca .casca-miolo .mensagens-tela > h1,
+.casca .casca-miolo .mensagens-tela h2 {
   margin: 0;
-  color: #0f433d;
+  color: var(--paper-text);
 }
 
-/* Nota de margem: explica quando a mensagem sai. Não é botão de envio. */
+.casca .casca-miolo .mensagens-tela h2 {
+  font-family: var(--font-heading), Montserrat, sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
 .casca .mensagens-nota {
   margin: 0;
-  padding: 12px 16px;
-  border-left: 4px solid #158172;
-  border-radius: 0 10px 10px 0;
-  background: #f6f8f9;
+  padding: var(--paper-space-3) var(--paper-space-4);
+  border: 1px solid var(--paper-borda);
+  border-left: 4px solid var(--paper-primary);
+  border-radius: var(--paper-radius-sm);
+  background: var(--paper-surface);
   font-size: 14px;
   line-height: 20px;
-  color: #0f1a20;
+  color: var(--paper-text);
+  box-shadow: var(--paper-sombra-sm);
 }
 
-.casca .mensagens-modelo {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 24px;
-  border: 1px solid #cbd4d9;
-  border-radius: 14px;
-  background: #fff;
-}
-
-.casca .mensagens-modelo h2 {
-  margin: 0;
-  font-size: 18px;
-  line-height: 26px;
-  font-weight: 700;
-  color: #0f433d;
-}
-
-.casca .mensagens-tela form.mensagens-form {
+.casca .casca-miolo .mensagens-tela form.mensagens-form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--paper-space-4);
   margin: 0;
   padding: 0;
   border: 0;
@@ -58,68 +47,94 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: var(--paper-space-1);
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #0f1a20;
+  color: var(--paper-text);
 }
 
-.casca .mensagens-campo textarea {
+.casca .casca-miolo .mensagens-tela textarea[data-slot="textarea"] {
   width: 100%;
+  min-height: 6rem;
   margin: 0;
-  padding: 10px 12px;
-  border: 1px solid #cbd4d9;
-  border-radius: 10px;
-  background: #fff;
-  color: #0f1a20;
-  font: inherit;
-  font-size: 15px;
-  line-height: 22px;
+  padding: var(--paper-space-2) var(--paper-space-3);
+  border: 1px solid var(--paper-campo-borda);
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-campo-fundo);
+  color: var(--paper-text);
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 400;
+  box-shadow: var(--paper-sombra-sm);
   resize: vertical;
 }
 
-.casca .mensagens-campo textarea:focus-visible {
-  outline: 2px solid #158172;
-  outline-offset: 1px;
+.casca .casca-miolo .mensagens-tela textarea[data-slot="textarea"]:hover {
+  border-color: var(--paper-campo-borda-hover);
 }
 
-.casca .mensagens-tela button.mensagens-botao {
-  width: fit-content;
-  height: 44px;
-  margin: 0;
-  padding: 0 20px;
-  border: 1px solid #158172;
-  border-radius: 10px;
-  background: #158172;
-  color: #fff;
-  font: inherit;
-  font-size: 15px;
-  line-height: 24px;
-  font-weight: 600;
-  cursor: pointer;
+.casca .casca-miolo .mensagens-tela textarea[data-slot="textarea"]:focus-visible {
+  border-color: var(--paper-campo-foco);
+  outline: 3px solid var(--paper-campo-foco);
+  outline-offset: 2px;
 }
 
-.casca .mensagens-tela button.mensagens-botao:hover:not(:disabled) {
-  background: #0f433d;
-  border-color: #0f433d;
-}
-
-.casca .mensagens-tela button.mensagens-botao:disabled {
-  opacity: 0.6;
+.casca .casca-miolo .mensagens-tela textarea[data-slot="textarea"]:disabled {
   cursor: not-allowed;
+  border-color: var(--paper-borda);
+  background: var(--paper-disabled-fundo);
+  color: var(--paper-disabled-tinta);
+  box-shadow: none;
 }
 
-/* Alerta (erro e sucesso recebem foco) */
-.casca .mensagens-tela .erro,
-.casca .mensagens-tela .sucesso {
+.casca .casca-miolo .mensagens-tela textarea[data-slot="textarea"][aria-invalid="true"] {
+  border: 2px solid var(--paper-danger);
+}
+
+.casca .casca-miolo .mensagens-tela textarea[data-slot="textarea"][aria-invalid="true"]:focus-visible {
+  outline-color: var(--paper-danger);
+}
+
+.casca .casca-miolo .mensagens-tela button.mensagens-botao {
+  width: fit-content;
+  height: 40px;
   margin: 0;
+  padding: 0 var(--paper-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--paper-radius-md);
+  background: var(--paper-primary);
+  color: var(--primary-foreground);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--paper-sombra-sm);
+}
+
+.casca .casca-miolo .mensagens-tela button.mensagens-botao:hover:not(:disabled) {
+  background: var(--paper-primary-hover);
+}
+
+.casca .casca-miolo .mensagens-tela button.mensagens-botao:focus-visible {
+  outline: 3px solid var(--paper-secondary);
+  outline-offset: 2px;
+}
+
+.casca .casca-miolo .mensagens-tela button.mensagens-botao:disabled {
+  opacity: var(--paper-disabled-opacidade);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.casca .casca-miolo .mensagens-tela button.mensagens-botao[aria-invalid="true"] {
+  border-color: var(--paper-danger);
 }
 
 .casca .mensagens-tela .erro:focus,
 .casca .mensagens-tela .sucesso:focus {
-  outline: 3px solid #0f433d;
+  outline: 3px solid var(--paper-secondary);
   outline-offset: 2px;
 }
 
@@ -128,11 +143,5 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-}
-
-@media (max-width: 640px) {
-  .casca .mensagens-modelo {
-    padding: 16px;
-  }
+  gap: var(--paper-space-3);
 }
