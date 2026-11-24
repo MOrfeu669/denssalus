@@ -42,6 +42,12 @@ function atual(caminho: string, href: string): boolean {
   return caminho === href || caminho.startsWith(`${href}/`);
 }
 
+/** Mensagens não leva selo: não há regra de qual estado da fila conta. */
+function seloDoItem(href: string, contadores: Record<string, number>) {
+  if (href === "/mensagens") return undefined;
+  return contadores[href];
+}
+
 function ItemNav({ item, contador }: { item: ItemMenu; contador?: number }) {
   const caminho = usePathname() ?? "";
   const ligado = atual(caminho, item.href);
@@ -87,7 +93,7 @@ export function MenuCasca({
             <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
               {grupo.itens.map((item) => (
                 <li key={item.href}>
-                  <ItemNav item={item} contador={contadores[item.href]} />
+                  <ItemNav item={item} contador={seloDoItem(item.href, contadores)} />
                 </li>
               ))}
             </ul>
@@ -102,7 +108,7 @@ export function MenuCasca({
       <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
         {(itens ?? []).map((item) => (
           <li key={item.href}>
-            <ItemNav item={item} contador={contadores[item.href]} />
+            <ItemNav item={item} contador={seloDoItem(item.href, contadores)} />
           </li>
         ))}
       </ul>
